@@ -1,0 +1,56 @@
+{
+    "routes": [
+        {
+            "path": "/admin/system/orm",
+            "controller": "pallo\\web\\orm\\controller\\OrmController",
+            "action": "indexAction",
+            "id": "system.orm"
+        },
+        {
+            "path": "/admin/system/orm/%model%",
+            "controller": "pallo\\web\\orm\\controller\\OrmController",
+            "action": "modelAction",
+            "id": "system.orm.model"
+        },
+        {
+            "path": "/admin/system/orm/scaffold",
+            "controller": "pallo\\web\\orm\\controller\\OrmController",
+            "action": "scaffoldAction",
+            "id": "system.orm.scaffold",
+            "dynamic": true
+        },
+        {
+            "path": "/admin/system/orm/scaffold/%model%/%locale%",
+            "controller": "pallo\\web\\orm\\controller\\OrmController",
+            "action": "scaffoldAction",
+            "id": "system.orm.scaffold.index"
+        },
+        {
+            "path": "/admin/system/orm/scaffold/%model%/%locale%/%action%",
+            "controller": "pallo\\web\\orm\\controller\\OrmController",
+            "action": "scaffoldAction",
+            "id": "system.orm.scaffold.action"
+        },
+        {
+            "path": "/admin/system/orm/scaffold/%model%/%locale%/%id%/%action%",
+            "controller": "pallo\\web\\orm\\controller\\OrmController",
+            "action": "scaffoldAction",
+            "id": "system.orm.scaffold.action.data"
+        },
+        {
+            "path": "/admin/system/orm/scaffold/%model%/%locale%/export/%format%",
+            "controller": "pallo\\web\\orm\\controller\\OrmController",
+            "action": "scaffoldAction",
+            "id": "system.orm.scaffold.export",
+            "arguments": [
+                {
+                    "name": "action",
+                    "type": "scalar",
+                    "properties": {
+                        "value": "export"
+                    }
+                }
+            ]
+        }
+    ]
+}
