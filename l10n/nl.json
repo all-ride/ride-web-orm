@@ -1,0 +1,11 @@
+{
+    "button.add": "Toevoegen",
+    "label.table.order": "Sorteren op",
+    "label.table.confirm.delete": "Ben je zeker dat je de geselecteerde items wenst te verwijderen?",
+    "label.table.export": "Exporen naar", 
+    "label.table.rows.page": "/ pagina",
+    "label.table.rows.total": "%rows% in totaal",
+    "label.table.search": "Zoeken",    
+    "success.data.saved": "%data% werd opgeslagen",    
+    "success.data.deleted": "%data% werd verwijderd"    
+}
