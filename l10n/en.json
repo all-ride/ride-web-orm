@@ -1,6 +1,7 @@
 {
     "button.add": "Add",
     "button.scaffold": "Scaffold",
+    "error.validation.version": "Your data is outdated. You are trying to save version %yourVersion% over version %currentVersion%. Try updating your data first.',
     "label.class.data": "Name of the data class",
     "label.class.model": "Name of the model class",
     "label.export": "Export: ",
