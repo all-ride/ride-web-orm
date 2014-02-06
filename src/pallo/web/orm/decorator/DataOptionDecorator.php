@@ -5,11 +5,18 @@ namespace pallo\web\orm\decorator;
 use pallo\library\decorator\Decorator;
 use pallo\library\html\table\FormTable;
 use pallo\library\orm\definition\ModelTable;
+use pallo\library\reflection\ReflectionHelper;
 
 /**
  * Decorator to create an option field for a data object, needed for the table actions
  */
 class DataOptionDecorator implements Decorator {
+
+    /**
+     * Instance of the reflection helper
+     * @var pallo\library\reflection\ReflectionHelper
+     */
+    protected $reflectionHelper;
 
     /**
      * Name of the value property
@@ -19,10 +26,14 @@ class DataOptionDecorator implements Decorator {
 
     /**
      * Constructs a new data option decorator
+     * @param pallo\library\reflection\ReflectionHelper $reflectionHelper
+     * Instance of the reflection helper
      * @param string $property Name of the value property
      * @return null
      */
-    public function __construct($property = null) {
+    public function __construct(ReflectionHelper $reflectionHelper, $property = null) {
+        $this->reflectionHelper = $reflectionHelper;
+
         if (!$property) {
             $this->property = ModelTable::PRIMARY_KEY;
         } else {
@@ -43,9 +54,7 @@ class DataOptionDecorator implements Decorator {
             return '';
         }
 
-        $property = $this->property;
-
-        return '<input type="checkbox" name="' . FormTable::FIELD_ID . '[]" value="' . $value->id . '" />';
+        return '<input type="checkbox" name="' . FormTable::FIELD_ID . '[]" value="' . $this->reflectionHelper->getProperty($value, $this->property) . '" />';
     }
 
 }

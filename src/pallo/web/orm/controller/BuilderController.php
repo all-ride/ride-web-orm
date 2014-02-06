@@ -6,11 +6,15 @@ use pallo\library\orm\OrmManager;
 use pallo\library\router\Route;
 
 use pallo\web\base\controller\AbstractController;
+use pallo\web\orm\table\builder\decorator\ModelActionDecorator;
+use pallo\web\orm\table\builder\ModelFieldTable;
+use pallo\web\orm\table\builder\ModelIndexTable;
+use pallo\web\orm\table\builder\ModelTable;
 
 /**
  * Controller of the ORM application
  */
-class OrmController extends AbstractController {
+class BuilderController extends AbstractController {
 
     /**
      * Action to show an index of the models
@@ -20,9 +24,21 @@ class OrmController extends AbstractController {
         $translator = $this->getTranslator();
 
         $models = $orm->getModels(true);
+        $modelAction = $this->getUrl('system.orm.model', array('model' => '%model%'));
+
+        $table = new ModelTable($orm, $translator, $models, $modelAction);
+        $tableForm = $this->buildForm($table);
+        $table->addDecorator(new ModelActionDecorator($translator->translate('button.scaffold'), $this->getUrl('system.orm.scaffold', array('model' => '%model%'))));
+        $table->processForm($tableForm);
+
+        if ($this->response->getView() || $this->response->willRedirect()) {
+            return;
+        }
 
         $this->setTemplateView('orm/models', array(
-        	'models' => $models,
+        	'tableModels' => $table,
+        	'tableModelsAction' => $this->request->getUrl(),
+        	'tableModelsForm' => $tableForm,
         ));
     }
 
@@ -36,12 +52,33 @@ class OrmController extends AbstractController {
 
         $model = $orm->getModel($model);
         $meta = $model->getMeta();
-        $table = $meta->getModelTable();
+        $modelTable = $meta->getModelTable();
+        $modelClass = get_class($model);
+        $dataClass = $meta->getDataClassName();
+
+        $tableAction = $this->request->getUrl();
+        $modelAction = $this->getUrl('system.orm.model', array('model' => '%model%'));
+
+        $tableFields = new ModelFieldTable($translator, $modelTable, $tableAction, $modelAction);
+        $tableFieldsForm = $this->buildForm($tableFields);
+        $tableFields->processForm($tableFieldsForm);
+
+        if ($this->response->getView() || $this->response->willRedirect()) {
+            return;
+        }
+
+        $tableIndexes = new ModelIndexTable($translator, $modelTable->getIndexes());
 
         $this->setTemplateView('orm/model', array(
         	'model' => $model,
-            'meta' => $meta,
-            'table' => $table,
+            'modelTable' => $modelTable,
+            'modelClass' => $modelClass,
+            'dataClass' => $dataClass,
+            'tableAction' => $tableAction,
+            'tableFields' => $tableFields,
+            'tableFieldsForm' => $tableFieldsForm,
+            'tableIndexes' => $tableIndexes,
+            'hasApi' => class_exists('pallo\\web\\api\\controller\\ApiController'),
         ));
     }
 

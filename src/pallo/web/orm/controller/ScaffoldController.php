@@ -17,9 +17,9 @@ use pallo\library\validation\exception\ValidationException;
 
 use pallo\web\base\controller\AbstractController;
 use pallo\web\orm\form\ScaffoldComponent;
-use pallo\web\orm\table\decorator\DataDecorator;
-use pallo\web\orm\table\decorator\LocalizeDecorator;
-use pallo\web\orm\table\ScaffoldTable;
+use pallo\web\orm\table\scaffold\decorator\DataDecorator;
+use pallo\web\orm\table\scaffold\decorator\LocalizeDecorator;
+use pallo\web\orm\table\scaffold\ScaffoldTable;
 
 /**
  * Controller to scaffold a model

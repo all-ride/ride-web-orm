@@ -1,6 +1,6 @@
 <?php
 
-namespace pallo\web\orm\table\decorator;
+namespace pallo\web\orm\table\scaffold\decorator;
 
 use pallo\library\html\table\decorator\ActionDecorator;
 use pallo\library\html\table\decorator\Decorator;

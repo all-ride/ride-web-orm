@@ -11,6 +11,8 @@ use pallo\library\orm\definition\field\ModelField;
 use pallo\library\orm\definition\field\RelationField;
 use pallo\library\orm\definition\ModelTable;
 use pallo\library\orm\model\Model;
+use pallo\web\orm\decorator\PropertyDecorator;
+
 use pallo\library\reflection\ReflectionHelper;
 
 /**
@@ -221,7 +223,7 @@ class ScaffoldComponent extends AbstractComponent {
 
 	/**
 	 * Prepares the form builder by adding row definitions
-	 * @param zibo\library\html\form\builder\Builder $builder
+	 * @param pallo\library\html\form\builder\Builder $builder
 	 * @param array $options Extra options from the controller
 	 * @return null
 	 */
@@ -280,8 +282,8 @@ class ScaffoldComponent extends AbstractComponent {
 
 	/**
 	 * Adds a row for a property field to the form
-	 * @param zibo\library\form\FormBuilder $builder Instance of the form builder
-	 * @param zibo\library\orm\definition\field\ModelField $field Field to add
+	 * @param pallo\library\form\FormBuilder $builder Instance of the form builder
+	 * @param pallo\library\orm\definition\field\ModelField $field Field to add
 	 * @param string $label Label for the field
 	 * @param string $description Description of the field
 	 * @param array $filters Array with the filters for the property
@@ -319,8 +321,8 @@ class ScaffoldComponent extends AbstractComponent {
 
 	/**
 	 * Adds a select row for a relation field to the form
-	 * @param zibo\library\form\FormBuilder $builder Instance of the form builder
-	 * @param zibo\library\orm\definition\field\ModelField $field Field to add
+	 * @param pallo\library\form\FormBuilder $builder Instance of the form builder
+	 * @param pallo\library\orm\definition\field\ModelField $field Field to add
 	 * @param string $label Label for the field
 	 * @param string $description Description of the field
 	 * @param array $filters Array with the filters for the property
@@ -374,7 +376,7 @@ class ScaffoldComponent extends AbstractComponent {
 	    }
 
 	    $builder->addRow($fieldName, 'select', array(
-// 	        'decorator' => new ValueDecorator('id'),
+ 	        'decorator' => new PropertyDecorator($this->model->getReflectionHelper(), ModelTable::PRIMARY_KEY),
 	        'options' => $selectOptions,
 	        'multiselect' => $isMultiSelect,
 	        'label' => $label,
@@ -386,8 +388,8 @@ class ScaffoldComponent extends AbstractComponent {
 
 	/**
 	 * Adds a select row for a relation field to the form
-	 * @param zibo\library\form\FormBuilder $builder Instance of the form builder
-	 * @param zibo\library\orm\definition\field\ModelField $field Field to add
+	 * @param pallo\library\form\FormBuilder $builder Instance of the form builder
+	 * @param pallo\library\orm\definition\field\ModelField $field Field to add
 	 * @param string $label Label for the field
 	 * @param string $description Description of the field
 	 * @param array $options Extra options from the controller
@@ -426,8 +428,8 @@ class ScaffoldComponent extends AbstractComponent {
 
 	/**
 	 * Gets the label and description from the field
-	 * @param zibo\library\i18n\translation\Translator $translator
-	 * @param zibo\library\orm\definition\field\ModelField $field
+	 * @param pallo\library\i18n\translation\Translator $translator
+	 * @param pallo\library\orm\definition\field\ModelField $field
 	 * @param string $label
 	 * @param string $description
 	 * @return null

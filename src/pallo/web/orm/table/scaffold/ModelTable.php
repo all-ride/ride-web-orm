@@ -1,6 +1,6 @@
 <?php
 
-namespace pallo\web\orm\table;
+namespace pallo\web\orm\table\scaffold;
 
 use pallo\library\decorator\BooleanDecorator;
 use pallo\library\decorator\DateFormatDecorator;
@@ -78,7 +78,7 @@ class ModelTable extends FormTable {
      */
     public function getHtml($part = Element::FULL) {
         if (!$this->isPopulated && $this->actions) {
-            $decorator = new ValueDecorator(null, new DataOptionDecorator($this->pkField));
+            $decorator = new ValueDecorator(null, new DataOptionDecorator($this->model->getReflectionHelper(), $this->pkField));
             $decorator->setCellClass('option');
 
             $this->addDecorator($decorator, null, true);

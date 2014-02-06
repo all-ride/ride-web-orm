@@ -1,6 +1,6 @@
 <?php
 
-namespace pallo\web\orm\table\decorator;
+namespace pallo\web\orm\table\scaffold\decorator;
 
 use pallo\library\html\table\decorator\Decorator;
 use pallo\library\html\table\Cell;
@@ -28,6 +28,12 @@ class DataDecorator implements Decorator {
      * @var string
      */
     const STYLE_IMAGE = 'data';
+
+    /**
+     * Instance of the reflection helper
+     * @var pallo\library\reflection\ReflectionHelper
+     */
+    private $reflectionHelper;
 
     /**
      * Generator for images
@@ -92,6 +98,7 @@ class DataDecorator implements Decorator {
             $defaultImage = self::DEFAULT_IMAGE;
         }
 
+        $this->reflectionHelper = $model->getReflectionHelper();
         $this->imageUrlGenerator = $imageUrlGenerator;
 
         $this->model = $model;
@@ -139,12 +146,14 @@ class DataDecorator implements Decorator {
                 $pkField = ModelTable::PRIMARY_KEY;
             }
 
+            $pkValue = $this->reflectionHelper->getProperty($data, $pkField);
+
             $url = $this->action;
-            $url = str_replace('%id%', $data->$pkField, $url);
-            $url = str_replace('%25id%25', $data->$pkField, $url);
+            $url = str_replace('%id%', $pkValue, $url);
+            $url = str_replace('%25id%25', $pkValue, $url);
 
             if (!$title) {
-                $title = $data->$pkField;
+                $title = $pkValue;
             }
 
             $anchor = new Anchor($title, $url);
@@ -155,7 +164,7 @@ class DataDecorator implements Decorator {
         }
 
         if ($teaser) {
-            $value .= '<div class="help-block">' . $teaser . '</div>';
+            $value .= '<div class="info">' . $teaser . '</div>';
         }
 
         $cell->setValue($value);
