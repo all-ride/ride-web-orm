@@ -1,6 +1,6 @@
 <?php
 
-namespace pallo\web\orm\table;
+namespace pallo\web\orm\table\scaffold;
 
 use pallo\library\i18n\translator\Translator;
 use pallo\library\orm\definition\field\RelationField;
