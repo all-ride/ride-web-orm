@@ -674,6 +674,10 @@ class ScaffoldController extends AbstractController {
                             $row = $row->getRow($token);
                         }
 
+                        if ($row->getType() == 'hidden') {
+                            throw new FormException();
+                        }
+
                         continue;
                     } catch (FormException $e) {
                         // field not in the form, add error as general error

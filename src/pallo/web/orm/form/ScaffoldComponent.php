@@ -241,7 +241,7 @@ class ScaffoldComponent extends AbstractComponent {
 	            continue;
 	        }
 
-	        if (isset($this->hiddenFields[$fieldName])) {
+	        if (isset($this->hiddenFields[$fieldName]) || $field->getOption('scaffold.form.hide')) {
 	            $builder->addRow($fieldName, 'hidden');
 
 	            continue;
@@ -378,7 +378,7 @@ class ScaffoldComponent extends AbstractComponent {
 	    $builder->addRow($fieldName, 'select', array(
  	        'decorator' => new PropertyDecorator($this->model->getReflectionHelper(), ModelTable::PRIMARY_KEY),
 	        'options' => $selectOptions,
-	        'multiselect' => $isMultiSelect,
+	        'multiple' => $isMultiSelect,
 	        'label' => $label,
 	        'description' => $description,
 	        'filters' => $filters,
@@ -408,7 +408,6 @@ class ScaffoldComponent extends AbstractComponent {
                 'component' => $formComponent,
                 'label' => $label,
                 'description' => $description,
-                'embed' => true,
                 'filters' => $filters,
                 'validators' => $validators,
             ));
