@@ -232,8 +232,7 @@ class ScaffoldComponent extends AbstractComponent {
 	    $data = $options['data'];
 
 	    $meta = $this->model->getMeta();
-	    $modelTable = $meta->getModelTable();
-	    $validationConstraint = $modelTable->getValidationConstraint();
+	    $validationConstraint = $this->model->getValidationConstraint();
 
 	    $fields = $meta->getFields();
 	    foreach ($fields as $fieldName => $field) {
