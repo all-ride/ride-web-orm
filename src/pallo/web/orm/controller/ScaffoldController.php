@@ -667,6 +667,10 @@ class ScaffoldController extends AbstractController {
                     try {
                         $row = $form;
 
+                        if (isset($this->component)) {
+                            $fieldName = str_replace($this->component->getName() . '[', '', $fieldName);
+                        }
+
                         $tokens = explode('[', $fieldName);
                         foreach ($tokens as $token) {
                             $token = trim($token, ']');
@@ -922,18 +926,18 @@ class ScaffoldController extends AbstractController {
     protected function getForm($data = null) {
         $component = $this->model->getMeta()->getOption('scaffold.component');
         if ($component) {
-            $component = $this->dependencyInjector->get($component);
-            $component->setModel($this->model);
+            $this->component = $this->dependencyInjector->get($component);
+            $this->component->setModel($this->model);
         } else {
             $reflectionHelper = $this->dependencyInjector->get('pallo\\library\\reflection\\ReflectionHelper');
 
-            $component = new ScaffoldComponent($reflectionHelper, $this->model);
+            $this->component = new ScaffoldComponent($reflectionHelper, $this->model);
         }
 
-        $component->setLocale($this->locale);
+        $this->component->setLocale($this->locale);
 
         $formBuilder = $this->createFormBuilder($data);
-        $formBuilder->setComponent($component);
+        $formBuilder->setComponent($this->component);
         $formBuilder->setRequest($this->request);
 
         return $formBuilder->build();
