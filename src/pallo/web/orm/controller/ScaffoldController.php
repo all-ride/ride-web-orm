@@ -667,10 +667,6 @@ class ScaffoldController extends AbstractController {
                     try {
                         $row = $form;
 
-                        if (isset($this->component)) {
-                            $fieldName = str_replace($this->component->getName() . '[', '', $fieldName);
-                        }
-
                         $tokens = explode('[', $fieldName);
                         foreach ($tokens as $token) {
                             $token = trim($token, ']');
