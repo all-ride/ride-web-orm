@@ -849,6 +849,7 @@ class ScaffoldController extends AbstractController {
             'actions' => $viewActions,
             'exports' => $exportActions,
             'title' => $title,
+            'localizeUrl' => null,
         );
 
         if ($this->model->getMeta()->isLocalized()) {
@@ -881,27 +882,21 @@ class ScaffoldController extends AbstractController {
 
         $pkField = $this->pkField;
 
-        $localizeAction = null;
-        if ($data && $data->$pkField) {
-            // old code, needs to be updated with a localized model
-            $localizeAction = $this->request->getBasePath() . '/' . self::ACTION_EDIT . '/' . $data->$pkField;
-        }
-
         $variables = array(
         	'meta' => $meta,
             'form' => $form->getView(),
             'action' => $action,
             'referer' => $referer,
             'data' => $data,
-            'localizeAction' => $localizeAction,
             'title' => $title,
             'subtitle' => $subtitle,
+            'localizeUrl' => null,
         );
 
         if ($this->model->getMeta()->isLocalized()) {
             $variables['locales'] = $locales;
             $variables['locale'] = $locale;
-            if ($data) {
+            if ($data && $data->$pkField) {
                 $variables['localizeUrl'] = $this->getAction(self::ACTION_EDIT, array('locale' => '%locale%', 'id' => $data->$pkField)) . $referer;
             } else {
                 $variables['localizeUrl'] = $this->getAction(self::ACTION_ADD, array('locale' => '%locale%'));
