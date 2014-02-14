@@ -872,13 +872,15 @@ class ScaffoldController extends AbstractController {
      */
     protected function setFormView(Form $form, $referer, array $locales, $locale, $data = null) {
         if ($referer) {
-            $referer = '?' . self::PARAMETER_REFERER . '=' . urlencode($referer);
+            $urlReferer = '?' . self::PARAMETER_REFERER . '=' . urlencode($referer);
+        } else {
+            $urlReferer = null;
         }
 
         $meta = $this->model->getMeta();
         $title = $this->getViewTitle($data);
         $subtitle = $this->getViewSubtitle($data);
-        $action = $this->request->getUrl() . $referer;
+        $action = $this->request->getUrl() . $urlReferer;
 
         $pkField = $this->pkField;
 
@@ -897,7 +899,7 @@ class ScaffoldController extends AbstractController {
             $variables['locales'] = $locales;
             $variables['locale'] = $locale;
             if ($data && $data->$pkField) {
-                $variables['localizeUrl'] = $this->getAction(self::ACTION_EDIT, array('locale' => '%locale%', 'id' => $data->$pkField)) . $referer;
+                $variables['localizeUrl'] = $this->getAction(self::ACTION_EDIT, array('locale' => '%locale%', 'id' => $data->$pkField)) . $urlReferer;
             } else {
                 $variables['localizeUrl'] = $this->getAction(self::ACTION_ADD, array('locale' => '%locale%'));
             }
