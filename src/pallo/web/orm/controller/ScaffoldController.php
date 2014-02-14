@@ -365,7 +365,7 @@ class ScaffoldController extends AbstractController {
             $table->setOrderDirectionUrl(str_replace(self::PARAMETER_ORDER_DIRECTION. '=' . strtolower($orderDirection), self::PARAMETER_ORDER_DIRECTION . '=%direction%', $url));
         }
 
-        $this->setIndexView($table, $form, $url);
+        $this->setIndexView($table, $form, $i18n->getLocaleCodeList(), $locale, $url);
     }
 
     /**
@@ -694,7 +694,7 @@ class ScaffoldController extends AbstractController {
         // handle display
         $referer = $this->request->getQueryParameter(self::PARAMETER_REFERER);
 
-        $this->setFormView($form, $referer, $data);
+        $this->setFormView($form, $referer, $i18n->getLocaleCodeList(), $locale, $data);
     }
 
     /**
@@ -807,10 +807,14 @@ class ScaffoldController extends AbstractController {
     /**
      * Sets the index view for the scaffolding to the response
      * @param pallo\library\html\table\FormTable $table Table with the model data
+     * @param pallo\library\form\Form $form Form of the table
+     * @param array $locales Available locale codes
+     * @param string $locale Code of the current locale
+     * @param string $action URL for the table form
      * @param array $actions Array with the URL of the action as key and the label for the action as value
      * @return null
      */
-    protected function setIndexView(FormTable $table, Form $form, $action, array $actions = null) {
+    protected function setIndexView(FormTable $table, Form $form, array $locales, $locale, $action, array $actions = null) {
         $meta = $this->model->getMeta();
         $title = $this->getViewTitle();
 
@@ -837,7 +841,7 @@ class ScaffoldController extends AbstractController {
             $exportActions[$extension] = $this->getAction(self::ACTION_EXPORT, array('format' => $extension));
         }
 
-        $this->setTemplateView('orm/scaffold/index', array(
+        $variables = array(
         	'meta' => $meta,
             'form' => $form->getView(),
             'table' => $table,
@@ -845,24 +849,35 @@ class ScaffoldController extends AbstractController {
             'actions' => $viewActions,
             'exports' => $exportActions,
             'title' => $title,
-        ));
+        );
+
+        if ($this->model->getMeta()->isLocalized()) {
+            $variables['locales'] = $locales;
+            $variables['locale'] = $locale;
+            $variables['localizeUrl'] = $this->getAction(self::ACTION_INDEX, array('locale' => '%locale%'));
+        }
+
+        $this->setTemplateView('orm/scaffold/index', $variables);
     }
 
     /**
      * Sets the form view for the scaffolding to the response
      * @param pallo\library\html\form\Form $form Form of the data
      * @param string $referer URL of the referer of the form action
+     * @param array $locales Available locale codes
+     * @param string $locale Code of the current locale
      * @param mixed $data Data object
      * @return null
      */
-    protected function setFormView(Form $form, $referer, $data = null) {
+    protected function setFormView(Form $form, $referer, array $locales, $locale, $data = null) {
+        if ($referer) {
+            $referer = '?' . self::PARAMETER_REFERER . '=' . urlencode($referer);
+        }
+
         $meta = $this->model->getMeta();
         $title = $this->getViewTitle($data);
         $subtitle = $this->getViewSubtitle($data);
-        $action = $this->request->getUrl();
-        if ($referer) {
-            $action .= '?' . self::PARAMETER_REFERER . '=' . urlencode($referer);
-        }
+        $action = $this->request->getUrl() . $referer;
 
         $pkField = $this->pkField;
 
@@ -872,7 +887,7 @@ class ScaffoldController extends AbstractController {
             $localizeAction = $this->request->getBasePath() . '/' . self::ACTION_EDIT . '/' . $data->$pkField;
         }
 
-        $this->setTemplateView('orm/scaffold/form', array(
+        $variables = array(
         	'meta' => $meta,
             'form' => $form->getView(),
             'action' => $action,
@@ -881,7 +896,19 @@ class ScaffoldController extends AbstractController {
             'localizeAction' => $localizeAction,
             'title' => $title,
             'subtitle' => $subtitle,
-        ));
+        );
+
+        if ($this->model->getMeta()->isLocalized()) {
+            $variables['locales'] = $locales;
+            $variables['locale'] = $locale;
+            if ($data) {
+                $variables['localizeUrl'] = $this->getAction(self::ACTION_EDIT, array('locale' => '%locale%', 'id' => $data->$pkField)) . $referer;
+            } else {
+                $variables['localizeUrl'] = $this->getAction(self::ACTION_ADD, array('locale' => '%locale%'));
+            }
+        }
+
+        return $this->setTemplateView('orm/scaffold/form', $variables);
     }
 
     /**
@@ -920,13 +947,12 @@ class ScaffoldController extends AbstractController {
      * @return pallo\library\html\form\Form
      */
     protected function getForm($data = null) {
+        $reflectionHelper = $this->model->getReflectionHelper();
+
         $component = $this->model->getMeta()->getOption('scaffold.component');
         if ($component) {
-            $this->component = $this->dependencyInjector->get($component);
-            $this->component->setModel($this->model);
+            $this->component = new $component($reflectionHelper, $this->model);
         } else {
-            $reflectionHelper = $this->dependencyInjector->get('pallo\\library\\reflection\\ReflectionHelper');
-
             $this->component = new ScaffoldComponent($reflectionHelper, $this->model);
         }
 
