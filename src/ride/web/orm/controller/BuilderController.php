@@ -1,15 +1,15 @@
 <?php
 
-namespace pallo\web\orm\controller;
+namespace ride\web\orm\controller;
 
-use pallo\library\orm\OrmManager;
-use pallo\library\router\Route;
+use ride\library\orm\OrmManager;
+use ride\library\router\Route;
 
-use pallo\web\base\controller\AbstractController;
-use pallo\web\orm\table\builder\decorator\ModelActionDecorator;
-use pallo\web\orm\table\builder\ModelFieldTable;
-use pallo\web\orm\table\builder\ModelIndexTable;
-use pallo\web\orm\table\builder\ModelTable;
+use ride\web\base\controller\AbstractController;
+use ride\web\orm\table\builder\decorator\ModelActionDecorator;
+use ride\web\orm\table\builder\ModelFieldTable;
+use ride\web\orm\table\builder\ModelIndexTable;
+use ride\web\orm\table\builder\ModelTable;
 
 /**
  * Controller of the ORM application
@@ -78,7 +78,7 @@ class BuilderController extends AbstractController {
             'tableFields' => $tableFields,
             'tableFieldsForm' => $tableFieldsForm,
             'tableIndexes' => $tableIndexes,
-            'hasApi' => class_exists('pallo\\web\\api\\controller\\ApiController'),
+            'hasApi' => class_exists('ride\\web\\api\\controller\\ApiController'),
         ));
     }
 
@@ -111,7 +111,7 @@ class BuilderController extends AbstractController {
     /**
      * Action to scaffold a model
      * @param string $modelName Name of the model to scaffold
-     * @return pallo\core\mvc\Request The request for the scaffolding
+     * @return ride\core\mvc\Request The request for the scaffolding
      */
     public function scaffoldAction(OrmManager $orm, $model = null, $locale = null, $id = null, $action = null, $format = null) {
         if (!$model) {
@@ -172,7 +172,7 @@ class BuilderController extends AbstractController {
 
         $model = $orm->getModel($modelName);
 
-        $className = $model->getMeta()->getOption('scaffold.controller', 'pallo\\web\\orm\\controller\\ScaffoldController');
+        $className = $model->getMeta()->getOption('scaffold.controller', 'ride\\web\\orm\\controller\\ScaffoldController');
         $controller = new $className($model);
 
         $route = $this->request->getRoute();

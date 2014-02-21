@@ -1,13 +1,13 @@
 <?php
 
-namespace pallo\web\orm\table\builder\decorator;
+namespace ride\web\orm\table\builder\decorator;
 
-use pallo\library\database\definition\Index;
-use pallo\library\html\table\decorator\Decorator;
-use pallo\library\html\table\Cell;
-use pallo\library\html\table\Row;
-use pallo\library\html\Anchor;
-use pallo\library\i18n\translator\Translator;
+use ride\library\database\definition\Index;
+use ride\library\html\table\decorator\Decorator;
+use ride\library\html\table\Cell;
+use ride\library\html\table\Row;
+use ride\library\html\Anchor;
+use ride\library\i18n\translator\Translator;
 
 /**
  * Decorator for a index
@@ -22,13 +22,13 @@ class IndexDecorator implements Decorator {
 
     /**
      * Instance of the translator
-     * @var pallo\library\i18n\translation\Translator
+     * @var ride\library\i18n\translation\Translator
      */
     private $translator;
 
     /**
      * Constructs a new index decorator
-     * @param pallo\library\i18n\translator\Translator $translator
+     * @param ride\library\i18n\translator\Translator $translator
      * @param string $action URL to the action for the index name
      * @return null
      */
@@ -39,8 +39,8 @@ class IndexDecorator implements Decorator {
 
     /**
      * Decorates the cell
-     * @param pallo\library\html\table\Cell $cell Cell of the value to decorate
-     * @param pallo\library\html\table\Row $row Row containing the cell
+     * @param ride\library\html\table\Cell $cell Cell of the value to decorate
+     * @param ride\library\html\table\Row $row Row containing the cell
      * @param int $rowNumber Number of the current row
      * @param array $remainingValues Array containing the values of the remaining rows of the table
      * @return null
@@ -69,7 +69,7 @@ class IndexDecorator implements Decorator {
 
     /**
      * Gets the information about the fields of the index
-     * @param pallo\library\orm\definition\Index $index
+     * @param ride\library\orm\definition\Index $index
      * @return string
      */
     private function getFieldsInfo(Index $index) {

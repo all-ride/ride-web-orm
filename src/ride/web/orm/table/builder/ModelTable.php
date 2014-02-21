@@ -1,14 +1,14 @@
 <?php
 
-namespace pallo\web\orm\table\builder;
+namespace ride\web\orm\table\builder;
 
-use pallo\library\html\table\decorator\StaticDecorator;
-use pallo\library\html\table\FormTable;
-use pallo\library\i18n\translator\Translator;
-use pallo\library\orm\OrmManager;
+use ride\library\html\table\decorator\StaticDecorator;
+use ride\library\html\table\FormTable;
+use ride\library\i18n\translator\Translator;
+use ride\library\orm\OrmManager;
 
-use pallo\web\orm\table\builder\decorator\ModelDecorator;
-use pallo\web\orm\table\builder\decorator\ModelOptionDecorator;
+use ride\web\orm\table\builder\decorator\ModelDecorator;
+use ride\web\orm\table\builder\decorator\ModelOptionDecorator;
 
 /**
  * Table to display an overview of model definitions
@@ -17,8 +17,8 @@ class ModelTable extends FormTable {
 
     /**
      * Constructs a new models table
-     * @param pallo\library\orm\OrmManager $orm Instance of the ORM manager
-     * @param pallo\library\i18n\translator\Translator $translator
+     * @param ride\library\orm\OrmManager $orm Instance of the ORM manager
+     * @param ride\library\i18n\translator\Translator $translator
      * @param array $models
      * @param string $tableAction
      * @param string $modelAction

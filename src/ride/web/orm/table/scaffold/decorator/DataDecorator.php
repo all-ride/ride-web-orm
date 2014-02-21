@@ -1,16 +1,16 @@
 <?php
 
-namespace pallo\web\orm\table\scaffold\decorator;
+namespace ride\web\orm\table\scaffold\decorator;
 
-use pallo\library\html\table\decorator\Decorator;
-use pallo\library\html\table\Cell;
-use pallo\library\html\table\Row;
-use pallo\library\html\Anchor;
-use pallo\library\html\Image;
-use pallo\library\image\exception\ImageException;
-use pallo\library\image\ImageUrlGenerator;
-use pallo\library\orm\model\data\format\DataFormatter;
-use pallo\library\orm\model\Model;
+use ride\library\html\table\decorator\Decorator;
+use ride\library\html\table\Cell;
+use ride\library\html\table\Row;
+use ride\library\html\Anchor;
+use ride\library\html\Image;
+use ride\library\image\exception\ImageException;
+use ride\library\image\ImageUrlGenerator;
+use ride\library\orm\model\data\format\DataFormatter;
+use ride\library\orm\model\Model;
 
 /**
  * Decorator for a orm data object based on the data formats
@@ -31,19 +31,19 @@ class DataDecorator implements Decorator {
 
     /**
      * Instance of the reflection helper
-     * @var pallo\library\reflection\ReflectionHelper
+     * @var ride\library\reflection\ReflectionHelper
      */
     private $reflectionHelper;
 
     /**
      * Generator for images
-     * @var pallo\image\ImageUrlGenerator
+     * @var ride\image\ImageUrlGenerator
      */
     private $imageUrlGenerator;
 
     /**
      * Meta of the data model
-     * @var pallo\library\orm\model\Model
+     * @var ride\library\orm\model\Model
      */
     private $model;
 
@@ -61,7 +61,7 @@ class DataDecorator implements Decorator {
 
     /**
      * The formatter of the data
-     * @var pallo\library\orm\model\data\format\DataFormatter
+     * @var ride\library\orm\model\data\format\DataFormatter
      */
     private $formatter;
 
@@ -85,8 +85,8 @@ class DataDecorator implements Decorator {
 
     /**
      * Constructs a new data decorator
-     * @param pallo\image\ImageUrlGenerator $imageUrlGenerator URL generator for images
-     * @param pallo\library\orm\model\Model $model Model The model to format
+     * @param ride\image\ImageUrlGenerator $imageUrlGenerator URL generator for images
+     * @param ride\library\orm\model\Model $model Model The model to format
      * @param string $action URL where the title of the data will point to. Use
      * %id% as placeholder for the primary key of the data
      * @param string $pkField Name of the primary key field
@@ -116,8 +116,8 @@ class DataDecorator implements Decorator {
 
     /**
      * Decorates the data in the cell
-     * @param pallo\library\html\table\Cell $cell Cell to decorate
-     * @param pallo\library\html\table\Row $row Row containing the cell
+     * @param ride\library\html\table\Cell $cell Cell to decorate
+     * @param ride\library\html\table\Row $row Row containing the cell
      * @param int $rowNumber Number of the current row
      * @param array $remainingValues Array with the values of the remaining rows of the table
      * @return null

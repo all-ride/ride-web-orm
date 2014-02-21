@@ -1,21 +1,21 @@
 <?php
 
-namespace pallo\web\orm\table\scaffold;
+namespace ride\web\orm\table\scaffold;
 
-use pallo\library\decorator\BooleanDecorator;
-use pallo\library\decorator\DateFormatDecorator;
-use pallo\library\form\Form;
-use pallo\library\html\table\decorator\StaticDecorator;
-use pallo\library\html\table\decorator\ValueDecorator;
-use pallo\library\html\table\FormTable;
-use pallo\library\html\Element;
-use pallo\library\orm\definition\field\BelongsToField;
-use pallo\library\orm\definition\field\PropertyField;
-use pallo\library\orm\model\data\format\DataFormatter;
-use pallo\library\orm\model\Model;
+use ride\library\decorator\BooleanDecorator;
+use ride\library\decorator\DateFormatDecorator;
+use ride\library\form\Form;
+use ride\library\html\table\decorator\StaticDecorator;
+use ride\library\html\table\decorator\ValueDecorator;
+use ride\library\html\table\FormTable;
+use ride\library\html\Element;
+use ride\library\orm\definition\field\BelongsToField;
+use ride\library\orm\definition\field\PropertyField;
+use ride\library\orm\model\data\format\DataFormatter;
+use ride\library\orm\model\Model;
 
-use pallo\web\orm\decorator\DataFormatDecorator;
-use pallo\web\orm\decorator\DataOptionDecorator;
+use ride\web\orm\decorator\DataFormatDecorator;
+use ride\web\orm\decorator\DataOptionDecorator;
 
 /**
  * Base data model table
@@ -24,13 +24,13 @@ class ModelTable extends FormTable {
 
     /**
      * Model used for the data of this table
-     * @var pallo\library\orm\model\Model
+     * @var ride\library\orm\model\Model
      */
     protected $model;
 
     /**
      * Model query used to populate the rows of this table
-     * @var pallo\library\orm\query\ModelQuery
+     * @var ride\library\orm\query\ModelQuery
      */
     protected $query;
 
@@ -42,7 +42,7 @@ class ModelTable extends FormTable {
 
     /**
      * Constructs a new model table
-     * @param pallo\library\orm\model\Model $model
+     * @param ride\library\orm\model\Model $model
      * @param string $locale Code of the locale for the data
      * @return null
      */
@@ -56,7 +56,7 @@ class ModelTable extends FormTable {
 
     /**
      * Gets the model query of this table
-     * @return pallo\library\orm\query\ModelQuery
+     * @return ride\library\orm\query\ModelQuery
      */
     public function getModelQuery() {
         return $this->query;
@@ -157,7 +157,7 @@ class ModelTable extends FormTable {
     /**
      * Processes and applies the actions, search, order and pagination of this
      * table
-     * @param pallo\library\form\Form $form
+     * @param ride\library\form\Form $form
      * @return null
      */
     public function processForm(Form $form) {

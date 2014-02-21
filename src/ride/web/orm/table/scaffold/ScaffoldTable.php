@@ -1,11 +1,11 @@
 <?php
 
-namespace pallo\web\orm\table\scaffold;
+namespace ride\web\orm\table\scaffold;
 
-use pallo\library\i18n\translator\Translator;
-use pallo\library\orm\definition\field\RelationField;
-use pallo\library\orm\definition\ModelTable as OrmModelTable;
-use pallo\library\orm\model\Model;
+use ride\library\i18n\translator\Translator;
+use ride\library\orm\definition\field\RelationField;
+use ride\library\orm\definition\ModelTable as OrmModelTable;
+use ride\library\orm\model\Model;
 
 /**
  * Table for a scaffolded model
@@ -26,9 +26,9 @@ class ScaffoldTable extends ModelTable {
 
     /**
      * Constructs a new scaffold table
-     * @param pallo\library\orm\model\Model $model Model for the data of the
+     * @param ride\library\orm\model\Model $model Model for the data of the
      * table
-     * @param pallo\library\i18n\translator\Translator $translator Instance of
+     * @param ride\library\i18n\translator\Translator $translator Instance of
      * the translator
      * @param string $locale Code of the data locale
      * @param boolean|array $search False to disable search, True to search all

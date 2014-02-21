@@ -1,13 +1,13 @@
 <?php
 
-namespace pallo\web\orm\table\scaffold\decorator;
+namespace ride\web\orm\table\scaffold\decorator;
 
-use pallo\library\html\table\decorator\ActionDecorator;
-use pallo\library\html\table\decorator\Decorator;
-use pallo\library\html\table\Cell;
-use pallo\library\html\table\Row;
-use pallo\library\html\Anchor;
-use pallo\library\orm\model\Model;
+use ride\library\html\table\decorator\ActionDecorator;
+use ride\library\html\table\decorator\Decorator;
+use ride\library\html\table\Cell;
+use ride\library\html\table\Row;
+use ride\library\html\Anchor;
+use ride\library\orm\model\Model;
 
 /**
  * Decorator to view the localized state of data
@@ -28,7 +28,7 @@ class LocalizeDecorator implements Decorator {
 
     /**
      * The localized model of the data
-     * @var pallo\library\orm\model\LocalizedModel
+     * @var ride\library\orm\model\LocalizedModel
      */
     private $localizedModel;
 
@@ -46,7 +46,7 @@ class LocalizeDecorator implements Decorator {
 
     /**
      * Constructs a new localize decorator
-     * @param pallo\library\orm\model\Model $model Model of the data
+     * @param ride\library\orm\model\Model $model Model of the data
      * @param string $action URL where the locale code should point to
      * @return null
      */
@@ -71,8 +71,8 @@ class LocalizeDecorator implements Decorator {
 
     /**
      * Decorates the data into a locale overview
-     * @param pallo\library\html\table\Cell $cell Cell to decorate
-     * @param pallo\library\html\table\Row $row Row containing the cell
+     * @param ride\library\html\table\Cell $cell Cell to decorate
+     * @param ride\library\html\table\Row $row Row containing the cell
      * @param int $rowNumber Number of the current row
      * @param array $remainingValues Array with all the values of the remaining rows of the table
      * @return null

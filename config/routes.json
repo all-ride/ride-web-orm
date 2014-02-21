@@ -2,43 +2,43 @@
     "routes": [
         {
             "path": "/admin/system/orm",
-            "controller": "pallo\\web\\orm\\controller\\BuilderController",
+            "controller": "ride\\web\\orm\\controller\\BuilderController",
             "action": "indexAction",
             "id": "system.orm"
         },
         {
             "path": "/admin/system/orm/model/%model%",
-            "controller": "pallo\\web\\orm\\controller\\BuilderController",
+            "controller": "ride\\web\\orm\\controller\\BuilderController",
             "action": "modelAction",
             "id": "system.orm.model"
         },
         {
             "path": "/admin/system/orm/model/%model%/scaffold",
-            "controller": "pallo\\web\\orm\\controller\\BuilderController",
+            "controller": "ride\\web\\orm\\controller\\BuilderController",
             "action": "scaffoldAction",
             "id": "system.orm.scaffold"
         },
         {
             "path": "/admin/system/orm/model/%model%/scaffold/%locale%",
-            "controller": "pallo\\web\\orm\\controller\\BuilderController",
+            "controller": "ride\\web\\orm\\controller\\BuilderController",
             "action": "scaffoldAction",
             "id": "system.orm.scaffold.index"
         },
         {
             "path": "/admin/system/orm/model/%model%/scaffold/%locale%/%action%",
-            "controller": "pallo\\web\\orm\\controller\\BuilderController",
+            "controller": "ride\\web\\orm\\controller\\BuilderController",
             "action": "scaffoldAction",
             "id": "system.orm.scaffold.action"
         },
         {
             "path": "/admin/system/orm/model/%model%/scaffold/%locale%/%id%/%action%",
-            "controller": "pallo\\web\\orm\\controller\\BuilderController",
+            "controller": "ride\\web\\orm\\controller\\BuilderController",
             "action": "scaffoldAction",
             "id": "system.orm.scaffold.action.data"
         },
         {
             "path": "/admin/system/orm/model/%model%/scaffold/%locale%/export/%format%",
-            "controller": "pallo\\web\\orm\\controller\\BuilderController",
+            "controller": "ride\\web\\orm\\controller\\BuilderController",
             "action": "scaffoldAction",
             "id": "system.orm.scaffold.export",
             "arguments": [

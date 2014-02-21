@@ -1,19 +1,19 @@
 <?php
 
-namespace pallo\web\orm\form;
+namespace ride\web\orm\form;
 
-use pallo\library\form\component\AbstractComponent;
-use pallo\library\form\FormBuilder;
-use pallo\library\i18n\translator\Translator;
-use pallo\library\orm\definition\field\BelongsToField;
-use pallo\library\orm\definition\field\HasManyField;
-use pallo\library\orm\definition\field\ModelField;
-use pallo\library\orm\definition\field\RelationField;
-use pallo\library\orm\definition\ModelTable;
-use pallo\library\orm\model\Model;
-use pallo\web\orm\decorator\PropertyDecorator;
+use ride\library\form\component\AbstractComponent;
+use ride\library\form\FormBuilder;
+use ride\library\i18n\translator\Translator;
+use ride\library\orm\definition\field\BelongsToField;
+use ride\library\orm\definition\field\HasManyField;
+use ride\library\orm\definition\field\ModelField;
+use ride\library\orm\definition\field\RelationField;
+use ride\library\orm\definition\ModelTable;
+use ride\library\orm\model\Model;
+use ride\web\orm\decorator\PropertyDecorator;
 
-use pallo\library\reflection\ReflectionHelper;
+use ride\library\reflection\ReflectionHelper;
 
 /**
  * Form to edit ORM data
@@ -22,7 +22,7 @@ class ScaffoldComponent extends AbstractComponent {
 
     /**
      * Model of this form component
-     * @var pallo\library\orm\model\Model
+     * @var ride\library\orm\model\Model
      */
     protected $model;
 
@@ -64,7 +64,7 @@ class ScaffoldComponent extends AbstractComponent {
 
     /**
      * Constructs a new scaffold form component
-     * @param pallo\library\orm\model\Model $model
+     * @param ride\library\orm\model\Model $model
      * @return null
      */
     public function __construct(ReflectionHelper $reflectionHelper, Model $model) {
@@ -223,7 +223,7 @@ class ScaffoldComponent extends AbstractComponent {
 
 	/**
 	 * Prepares the form builder by adding row definitions
-	 * @param pallo\library\html\form\builder\Builder $builder
+	 * @param ride\library\html\form\builder\Builder $builder
 	 * @param array $options Extra options from the controller
 	 * @return null
 	 */
@@ -281,8 +281,8 @@ class ScaffoldComponent extends AbstractComponent {
 
 	/**
 	 * Adds a row for a property field to the form
-	 * @param pallo\library\form\FormBuilder $builder Instance of the form builder
-	 * @param pallo\library\orm\definition\field\ModelField $field Field to add
+	 * @param ride\library\form\FormBuilder $builder Instance of the form builder
+	 * @param ride\library\orm\definition\field\ModelField $field Field to add
 	 * @param string $label Label for the field
 	 * @param string $description Description of the field
 	 * @param array $filters Array with the filters for the property
@@ -320,8 +320,8 @@ class ScaffoldComponent extends AbstractComponent {
 
 	/**
 	 * Adds a select row for a relation field to the form
-	 * @param pallo\library\form\FormBuilder $builder Instance of the form builder
-	 * @param pallo\library\orm\definition\field\ModelField $field Field to add
+	 * @param ride\library\form\FormBuilder $builder Instance of the form builder
+	 * @param ride\library\orm\definition\field\ModelField $field Field to add
 	 * @param string $label Label for the field
 	 * @param string $description Description of the field
 	 * @param array $filters Array with the filters for the property
@@ -387,8 +387,8 @@ class ScaffoldComponent extends AbstractComponent {
 
 	/**
 	 * Adds a select row for a relation field to the form
-	 * @param pallo\library\form\FormBuilder $builder Instance of the form builder
-	 * @param pallo\library\orm\definition\field\ModelField $field Field to add
+	 * @param ride\library\form\FormBuilder $builder Instance of the form builder
+	 * @param ride\library\orm\definition\field\ModelField $field Field to add
 	 * @param string $label Label for the field
 	 * @param string $description Description of the field
 	 * @param array $options Extra options from the controller
@@ -426,8 +426,8 @@ class ScaffoldComponent extends AbstractComponent {
 
 	/**
 	 * Gets the label and description from the field
-	 * @param pallo\library\i18n\translation\Translator $translator
-	 * @param pallo\library\orm\definition\field\ModelField $field
+	 * @param ride\library\i18n\translation\Translator $translator
+	 * @param ride\library\orm\definition\field\ModelField $field
 	 * @param string $label
 	 * @param string $description
 	 * @return null

@@ -1,9 +1,9 @@
 <?php
 
-namespace pallo\web\orm\decorator;
+namespace ride\web\orm\decorator;
 
-use pallo\library\decorator\Decorator;
-use pallo\library\reflection\ReflectionHelper;
+use ride\library\decorator\Decorator;
+use ride\library\reflection\ReflectionHelper;
 
 /**
  * Decorator for property of a data object
@@ -12,7 +12,7 @@ class PropertyDecorator implements Decorator {
 
     /**
      * Instance of the reflection helper
-     * @var pallo\library\reflection\ReflectionHelper
+     * @var ride\library\reflection\ReflectionHelper
      */
     protected $reflectionHelper;
 
@@ -24,7 +24,7 @@ class PropertyDecorator implements Decorator {
 
     /**
      * Constructs a new data decorator
-     * @param pallo\library\reflection\ReflectionHelper $reflectionHelper
+     * @param ride\library\reflection\ReflectionHelper $reflectionHelper
      * @param string $property
      * @return null
      */
