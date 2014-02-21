@@ -1,25 +1,25 @@
 <?php
 
-namespace pallo\web\orm\controller;
+namespace ride\web\orm\controller;
 
-use pallo\library\form\exception\FormException;
-use pallo\library\form\Form;
-use pallo\library\html\table\FormTable;
-use pallo\library\http\Header;
-use pallo\library\http\Response;
-use pallo\library\i18n\I18n;
-use pallo\library\orm\definition\ModelTable;
-use pallo\library\orm\model\data\format\DataFormatter;
-use pallo\library\orm\model\meta\ModelMeta;
-use pallo\library\orm\model\Model;
-use pallo\library\security\exception\UnauthorizedException;
-use pallo\library\validation\exception\ValidationException;
+use ride\library\form\exception\FormException;
+use ride\library\form\Form;
+use ride\library\html\table\FormTable;
+use ride\library\http\Header;
+use ride\library\http\Response;
+use ride\library\i18n\I18n;
+use ride\library\orm\definition\ModelTable;
+use ride\library\orm\model\data\format\DataFormatter;
+use ride\library\orm\model\meta\ModelMeta;
+use ride\library\orm\model\Model;
+use ride\library\security\exception\UnauthorizedException;
+use ride\library\validation\exception\ValidationException;
 
-use pallo\web\base\controller\AbstractController;
-use pallo\web\orm\form\ScaffoldComponent;
-use pallo\web\orm\table\scaffold\decorator\DataDecorator;
-use pallo\web\orm\table\scaffold\decorator\LocalizeDecorator;
-use pallo\web\orm\table\scaffold\ScaffoldTable;
+use ride\web\base\controller\AbstractController;
+use ride\web\orm\form\ScaffoldComponent;
+use ride\web\orm\table\scaffold\decorator\DataDecorator;
+use ride\web\orm\table\scaffold\decorator\LocalizeDecorator;
+use ride\web\orm\table\scaffold\ScaffoldTable;
 
 /**
  * Controller to scaffold a model
@@ -160,7 +160,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * The model for scaffolding
-     * @var pallo\library\orm\model\Model
+     * @var ride\library\orm\model\Model
      */
     protected $model;
 
@@ -287,7 +287,7 @@ class ScaffoldController extends AbstractController {
      * @return boolean True to perform the action, false otherwise
      */
     public function preAction() {
-        $this->orm = $this->dependencyInjector->get('pallo\\library\\orm\\OrmManager');
+        $this->orm = $this->dependencyInjector->get('ride\\library\\orm\\OrmManager');
 
         return true;
     }
@@ -370,7 +370,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Processes the index action
-     * @param pallo\library\html\table\FormTable $table Table of the index view
+     * @param ride\library\html\table\FormTable $table Table of the index view
      * @return null
      */
     protected function processIndex(FormTable $table, Form $form) {
@@ -379,7 +379,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Performs an export of the provided table and sets the view of the export to the response
-     * @param pallo\library\html\table\FormTable $table Table to get the export of
+     * @param ride\library\html\table\FormTable $table Table to get the export of
      * @param string $extension The extension for the export
      * @return null
      */
@@ -394,7 +394,7 @@ class ScaffoldController extends AbstractController {
             $this->locale = $i18n->getLocale($locale)->getCode();
         }
 
-        $export = $this->dependencyInjector->get('pallo\\library\\html\\table\\export\\ExportFormat', $format);
+        $export = $this->dependencyInjector->get('ride\\library\\html\\table\\export\\ExportFormat', $format);
         if (!$export) {
             $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
 
@@ -422,7 +422,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Processes the export action
-     * @param pallo\library\html\table\FormTable $table Table of the index view
+     * @param ride\library\html\table\FormTable $table Table of the index view
      * @return null
      */
     protected function processExport(FormTable $table) {
@@ -432,7 +432,7 @@ class ScaffoldController extends AbstractController {
     /**
      * Gets the URL for the table
      * @param string $baseUrl
-     * @param pallo\library\html\table\FormTable $table
+     * @param ride\library\html\table\FormTable $table
      * @param int $page The current page
      * @param int $rowsPerPage Number or rows to display on each page
      * @param string $orderMethod Name of the order method to use
@@ -498,7 +498,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Checks if the table arguments have changed
-     * @param pallo\library\html\table\FormTable $table
+     * @param ride\library\html\table\FormTable $table
      * @param int $page The current page
      * @param int $rowsPerPage Number or rows to display on each page
      * @param string $orderMethod Name of the order method to use
@@ -545,7 +545,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Initialize the pagination, search and order of the table
-     * @param pallo\library\html\table\FormTable $table
+     * @param ride\library\html\table\FormTable $table
      * @param int $page The current page
      * @param int $rowsPerPage Number or rows to display on each page
      * @param string $orderMethod Name of the order method to use
@@ -745,7 +745,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Gets the data object from the provided form
-     * @param pallo\library\html\form\Form $form
+     * @param ride\library\html\form\Form $form
      * @return mixed Data object
      */
     protected function getFormData(Form $form) {
@@ -806,8 +806,8 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Sets the index view for the scaffolding to the response
-     * @param pallo\library\html\table\FormTable $table Table with the model data
-     * @param pallo\library\form\Form $form Form of the table
+     * @param ride\library\html\table\FormTable $table Table with the model data
+     * @param ride\library\form\Form $form Form of the table
      * @param array $locales Available locale codes
      * @param string $locale Code of the current locale
      * @param string $action URL for the table form
@@ -836,7 +836,7 @@ class ScaffoldController extends AbstractController {
             $viewActions += $actions;
         }
 
-        $exportActions = $this->dependencyInjector->getAll('pallo\\library\\html\\table\\export\\ExportFormat');
+        $exportActions = $this->dependencyInjector->getAll('ride\\library\\html\\table\\export\\ExportFormat');
         foreach ($exportActions as $extension => $exportFormat) {
             $exportActions[$extension] = $this->getAction(self::ACTION_EXPORT, array('format' => $extension));
         }
@@ -863,7 +863,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Sets the form view for the scaffolding to the response
-     * @param pallo\library\html\form\Form $form Form of the data
+     * @param ride\library\html\form\Form $form Form of the data
      * @param string $referer URL of the referer of the form action
      * @param array $locales Available locale codes
      * @param string $locale Code of the current locale
@@ -941,7 +941,7 @@ class ScaffoldController extends AbstractController {
     /**
      * Gets the form for the data of the model
      * @param mixed $data Data object to preset the form
-     * @return pallo\library\html\form\Form
+     * @return ride\library\html\form\Form
      */
     protected function getForm($data = null) {
         $reflectionHelper = $this->model->getReflectionHelper();
@@ -965,7 +965,7 @@ class ScaffoldController extends AbstractController {
     /**
      * Gets a data table for the model
      * @param string $formAction URL where the table form will point to
-     * @return pallo\library\html\table\FormTable
+     * @return ride\library\html\table\FormTable
      */
     protected function getTable($formAction, $detailAction = null) {
         if (!$detailAction) {
@@ -974,7 +974,7 @@ class ScaffoldController extends AbstractController {
 
         $detailAction .= '?referer=' . urlencode($this->request->getUrl());
 
-        $imageUrlGenerator = $this->dependencyInjector->get('pallo\\library\\image\\ImageUrlGenerator');
+        $imageUrlGenerator = $this->dependencyInjector->get('ride\\library\\image\\ImageUrlGenerator');
 
         $dataDecorator = new DataDecorator($imageUrlGenerator, $this->model, $detailAction, $this->pkField);
 
@@ -1038,7 +1038,7 @@ class ScaffoldController extends AbstractController {
      * @param string $routeId The id of the route
      * @param array $arguments Path arguments for the route
      * @return string
-     * @throws pallo\library\router\exception\RouterException If the route is
+     * @throws ride\library\router\exception\RouterException If the route is
      * not found
      */
     protected function getUrl($routeId, array $arguments = null) {

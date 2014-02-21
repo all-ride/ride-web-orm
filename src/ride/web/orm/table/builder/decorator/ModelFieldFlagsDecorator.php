@@ -1,13 +1,13 @@
 <?php
 
-namespace pallo\web\orm\table\builder\decorator;
+namespace ride\web\orm\table\builder\decorator;
 
-use pallo\library\html\table\decorator\Decorator;
-use pallo\library\html\table\Cell;
-use pallo\library\html\table\Row;
-use pallo\library\html\Image;
-use pallo\library\i18n\translator\Translator;
-use pallo\library\orm\definition\field\ModelField;
+use ride\library\html\table\decorator\Decorator;
+use ride\library\html\table\Cell;
+use ride\library\html\table\Row;
+use ride\library\html\Image;
+use ride\library\i18n\translator\Translator;
+use ride\library\orm\definition\field\ModelField;
 
 /**
  * Decorator for the flags of a model field
@@ -34,7 +34,7 @@ class ModelFieldFlagsDecorator implements Decorator {
 
     /**
      * Constructs a new model field label decorator
-     * @param pallo\library\i18n\translation\Translator $translator
+     * @param ride\library\i18n\translation\Translator $translator
      * @return null
      */
     public function __construct(Translator $translator) {
@@ -43,8 +43,8 @@ class ModelFieldFlagsDecorator implements Decorator {
 
     /**
      * Decorates the cell
-     * @param pallo\library\html\table\Cell $cell Cell of the value to decorate
-     * @param pallo\library\html\table\Row $row Row containing the cell
+     * @param ride\library\html\table\Cell $cell Cell of the value to decorate
+     * @param ride\library\html\table\Row $row Row containing the cell
      * @param int $rowNumber Number of the current row
      * @param array $remainingValues Array containing the values of the remaining rows of the table
      * @return null

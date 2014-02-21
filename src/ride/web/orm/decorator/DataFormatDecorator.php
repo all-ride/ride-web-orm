@@ -1,9 +1,9 @@
 <?php
 
-namespace pallo\web\orm\decorator;
+namespace ride\web\orm\decorator;
 
-use pallo\library\decorator\Decorator;
-use pallo\library\orm\model\data\format\DataFormatter;
+use ride\library\decorator\Decorator;
+use ride\library\orm\model\data\format\DataFormatter;
 
 /**
  * Decorator for a orm data object based on the data formats
@@ -12,7 +12,7 @@ class DataFormatDecorator implements Decorator {
 
     /**
      * Instance of the data formatter
-     * @var pallo\library\orm\model\data\format\DataFormatter
+     * @var ride\library\orm\model\data\format\DataFormatter
      */
     protected $dataFormatter;
 
@@ -24,7 +24,7 @@ class DataFormatDecorator implements Decorator {
 
     /**
      * Constructs a new data decorator
-     * @param pallo\library\orm\model\data\format\DataFormatter $dataFormatter
+     * @param ride\library\orm\model\data\format\DataFormatter $dataFormatter
      * @param string $format
      * @param string $property
      * @return null

@@ -1,9 +1,9 @@
 <?php
 
-namespace pallo\web\orm\table\builder\decorator;
+namespace ride\web\orm\table\builder\decorator;
 
-use pallo\library\html\table\decorator\ActionDecorator;
-use pallo\library\orm\model\Model;
+use ride\library\html\table\decorator\ActionDecorator;
+use ride\library\orm\model\Model;
 
 /**
  * Action decorator for a model

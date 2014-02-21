@@ -1,11 +1,11 @@
 <?php
 
-namespace pallo\web\orm\table\builder;
+namespace ride\web\orm\table\builder;
 
-use pallo\web\orm\table\builder\decorator\IndexDecorator;
+use ride\web\orm\table\builder\decorator\IndexDecorator;
 
-use pallo\library\html\table\ArrayTable;
-use pallo\library\i18n\translator\Translator;
+use ride\library\html\table\ArrayTable;
+use ride\library\i18n\translator\Translator;
 
 /**
  * Table for model indexes
@@ -14,7 +14,7 @@ class ModelIndexTable extends ArrayTable {
 
     /**
      * Constructs a new model index table
-     * @param pallo\library\i18n\translator\Translator $translator
+     * @param ride\library\i18n\translator\Translator $translator
      * @param array $indexes
      * @param string $indexAction URL to the action for the index
      * @return null

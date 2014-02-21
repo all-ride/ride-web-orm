@@ -1,14 +1,14 @@
 <?php
 
-namespace pallo\web\orm\table\builder;
+namespace ride\web\orm\table\builder;
 
-use pallo\library\html\table\FormTable;
-use pallo\library\i18n\translator\Translator;
-use pallo\library\orm\definition\ModelTable;
+use ride\library\html\table\FormTable;
+use ride\library\i18n\translator\Translator;
+use ride\library\orm\definition\ModelTable;
 
-use pallo\web\orm\table\builder\decorator\ModelFieldDecorator;
-use pallo\web\orm\table\builder\decorator\ModelFieldFlagsDecorator;
-use pallo\web\orm\table\builder\decorator\ModelFieldLabelDecorator;
+use ride\web\orm\table\builder\decorator\ModelFieldDecorator;
+use ride\web\orm\table\builder\decorator\ModelFieldFlagsDecorator;
+use ride\web\orm\table\builder\decorator\ModelFieldLabelDecorator;
 
 /**
  * Extended table for model fields
@@ -23,8 +23,8 @@ class ModelFieldTable extends FormTable {
 
     /**
      * Constructs a new model field table
-     * @param pallo\library\i18n\translation\Translator $translator
-     * @param pallo\library\orm\definition\ModelTable $table Table containing the fields
+     * @param ride\library\i18n\translation\Translator $translator
+     * @param ride\library\orm\definition\ModelTable $table Table containing the fields
      * @param string $modelAction URL to the action of a model
      * @param string $fieldAction URL to the action of a field
      * @return null

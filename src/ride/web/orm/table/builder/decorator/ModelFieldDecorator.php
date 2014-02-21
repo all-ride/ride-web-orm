@@ -1,17 +1,17 @@
 <?php
 
-namespace pallo\web\orm\table\builder\decorator;
+namespace ride\web\orm\table\builder\decorator;
 
-use pallo\library\html\table\decorator\Decorator;
-use pallo\library\html\table\Cell;
-use pallo\library\html\table\Row;
-use pallo\library\html\Anchor;
-use pallo\library\i18n\translator\Translator;
-use pallo\library\orm\definition\field\BelongsToField;
-use pallo\library\orm\definition\field\HasOneField;
-use pallo\library\orm\definition\field\HasManyField;
-use pallo\library\orm\definition\field\ModelField;
-use pallo\library\orm\definition\field\RelationField;
+use ride\library\html\table\decorator\Decorator;
+use ride\library\html\table\Cell;
+use ride\library\html\table\Row;
+use ride\library\html\Anchor;
+use ride\library\i18n\translator\Translator;
+use ride\library\orm\definition\field\BelongsToField;
+use ride\library\orm\definition\field\HasOneField;
+use ride\library\orm\definition\field\HasManyField;
+use ride\library\orm\definition\field\ModelField;
+use ride\library\orm\definition\field\RelationField;
 
 /**
  * Decorator for a model field
@@ -20,7 +20,7 @@ class ModelFieldDecorator implements Decorator {
 
     /**
      * Instance of the translator
-     * @var pallo\library\i18n\translation\Translator
+     * @var ride\library\i18n\translation\Translator
      */
     private $translator;
 
@@ -38,7 +38,7 @@ class ModelFieldDecorator implements Decorator {
 
     /**
      * Constructs a new field decorator
-     * @param pallo\library\i18n\translation\Translator $translator
+     * @param ride\library\i18n\translation\Translator $translator
      * @param string $modelAction URL to the action for a model
      * @param string $fieldAction URL to the action for a field
      * @return null
@@ -51,8 +51,8 @@ class ModelFieldDecorator implements Decorator {
 
     /**
      * Decorates the cell
-     * @param pallo\library\html\table\Cell $cell Cell of the value to decorate
-     * @param pallo\library\html\table\Row $row Row containing the cell
+     * @param ride\library\html\table\Cell $cell Cell of the value to decorate
+     * @param ride\library\html\table\Row $row Row containing the cell
      * @param int $rowNumber Number of the current row
      * @param array $remainingValues Array containing the values of the remaining rows of the table
      * @return null

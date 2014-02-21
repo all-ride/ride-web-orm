@@ -1,15 +1,15 @@
 <?php
 
-namespace pallo\web\orm\table\builder\decorator;
+namespace ride\web\orm\table\builder\decorator;
 
-use pallo\library\html\table\decorator\Decorator;
-use pallo\library\html\table\Cell;
-use pallo\library\html\table\Row;
-use pallo\library\html\Anchor;
-use pallo\library\i18n\translator\Translator;
-use pallo\library\orm\definition\field\PropertyField;
-use pallo\library\orm\model\Model;
-use pallo\library\orm\OrmManager;
+use ride\library\html\table\decorator\Decorator;
+use ride\library\html\table\Cell;
+use ride\library\html\table\Row;
+use ride\library\html\Anchor;
+use ride\library\i18n\translator\Translator;
+use ride\library\orm\definition\field\PropertyField;
+use ride\library\orm\model\Model;
+use ride\library\orm\OrmManager;
 
 /**
  * Decorator for a model
@@ -18,13 +18,13 @@ class ModelDecorator implements Decorator {
 
     /**
      * Instance of the ORM manager
-     * @var pallo\library\orm\OrmManager
+     * @var ride\library\orm\OrmManager
      */
     private $orm;
 
     /**
      * Translator needed for the model information
-     * @var pallo\library\i18n\translator\Translator
+     * @var ride\library\i18n\translator\Translator
      */
     private $translator;
 
@@ -37,8 +37,8 @@ class ModelDecorator implements Decorator {
     /**
      * Constructs a new model decorator
      * @param string $action URL for the anchor behind the model name
-     * @param pallo\library\orm\OrmManager $orm
-     * @param pallo\library\i18n\translator\Translator $translator
+     * @param ride\library\orm\OrmManager $orm
+     * @param ride\library\i18n\translator\Translator $translator
      * @return null
      */
     public function __construct(OrmManager $orm, Translator $translator, $action = null) {
@@ -49,8 +49,8 @@ class ModelDecorator implements Decorator {
 
     /**
      * Decorates the cell
-     * @param pallo\library\html\table\Cell $cell Cell of the value to decorate
-     * @param pallo\library\html\table\Row $row Row containing the cell
+     * @param ride\library\html\table\Cell $cell Cell of the value to decorate
+     * @param ride\library\html\table\Row $row Row containing the cell
      * @param int $rowNumber Number of the current row
      * @param array $remainingValues Array containing the values of the remaining rows of the table
      * @return null
@@ -81,7 +81,7 @@ class ModelDecorator implements Decorator {
 
     /**
      * Gets the general relation information of the provided model
-     * @param pallo\library\orm\model\Model $model The model to get the information from
+     * @param ride\library\orm\model\Model $model The model to get the information from
      * @return string The general relation information of the provided model
      */
     private function getRelationInfo(Model $model) {
