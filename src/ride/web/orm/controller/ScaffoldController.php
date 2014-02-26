@@ -10,7 +10,6 @@ use ride\library\http\Response;
 use ride\library\i18n\I18n;
 use ride\library\orm\definition\ModelTable;
 use ride\library\orm\model\data\format\DataFormatter;
-use ride\library\orm\model\meta\ModelMeta;
 use ride\library\orm\model\Model;
 use ride\library\security\exception\UnauthorizedException;
 use ride\library\validation\exception\ValidationException;
@@ -325,7 +324,7 @@ class ScaffoldController extends AbstractController {
 
         $this->getTableArguments($parameters, $page, $rowsPerPage, $orderMethod, $orderDirection, $searchQuery);
 
-        $table = $this->getTable($baseUrl, $this->getAction(self::ACTION_DETAIL));
+        $table = $this->getTable($this->getAction(self::ACTION_DETAIL));
         $this->initializeTable($table, $page, $rowsPerPage, $orderMethod, $orderDirection, $searchQuery);
 
         $form = $this->buildForm($table);
@@ -409,7 +408,7 @@ class ScaffoldController extends AbstractController {
 
         $export->initExport($title);
 
-        $table = $this->getTable($this->request->getRouteUrl());
+        $table = $this->getTable();
 
         $this->processExport($table);
 
@@ -967,20 +966,16 @@ class ScaffoldController extends AbstractController {
      * @param string $formAction URL where the table form will point to
      * @return ride\library\html\table\FormTable
      */
-    protected function getTable($formAction, $detailAction = null) {
+    protected function getTable($detailAction = null) {
         if (!$detailAction) {
             $detailAction = $this->getAction(self::ACTION_EDIT, array('id' => '%id%'));
         }
-
         $detailAction .= '?referer=' . urlencode($this->request->getUrl());
-
-        $imageUrlGenerator = $this->dependencyInjector->get('ride\\library\\image\\ImageUrlGenerator');
-
-        $dataDecorator = new DataDecorator($imageUrlGenerator, $this->model, $detailAction, $this->pkField);
 
         $table = new ScaffoldTable($this->model, $this->getTranslator(), $this->locale, $this->search, $this->order);
         $table->setPrimaryKeyField($this->pkField);
-        $table->addDecorator($dataDecorator);
+
+        $this->addTableDecorators($table, $detailAction);
 
         if ($this->model->getMeta()->isLocalized()) {
             $i18n = $this->getI18n();
@@ -997,6 +992,18 @@ class ScaffoldController extends AbstractController {
         }
 
         return $table;
+    }
+
+    /**
+     * Adds the table decorators
+     * @param ride\web\orm\table\scaffold\ScaffoldTable $table
+     * @param string $detailAction URL to the detail of the
+     * @return null
+     */
+    protected function addTableDecorators(ScaffoldTable $table, $detailAction) {
+        $imageUrlGenerator = $this->dependencyInjector->get('ride\\library\\image\\ImageUrlGenerator');
+
+        $table->addDecorator(new DataDecorator($imageUrlGenerator, $this->model, $detailAction, $this->pkField));
     }
 
     /**
