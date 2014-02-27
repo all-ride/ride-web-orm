@@ -248,11 +248,13 @@ class ScaffoldController extends AbstractController {
             $pagination = array(5, 10, 25, 50, 100, 250, 500);
         }
 
+        $meta = $model->getMeta();
+
         $this->model = $model;
         $this->pkField = ModelTable::PRIMARY_KEY;
 
-        $this->recursiveDepth = $this->model->getMeta()->getOption('scaffold.recursive.depth', 1);
-        $this->isLocalized = $this->model->getMeta()->isLocalized();
+        $this->recursiveDepth = $meta->getOption('scaffold.recursive.depth', 1);
+        $this->isLocalized = $meta->isLocalized();
 
         $this->pagination = $pagination;
         $this->search = $search;
@@ -267,8 +269,8 @@ class ScaffoldController extends AbstractController {
             self::ACTION_EXPORT => self::ROUTE_EXPORT,
         );
 
-        $this->translationTitle = $this->model->getMeta()->getOption(self::OPTION_TITLE);
-        $this->translationAdd = $this->model->getMeta()->getOption(self::OPTION_TITLE_ADD);
+        $this->translationTitle = $meta->getOption(self::OPTION_TITLE);
+        $this->translationAdd = $meta->getOption(self::OPTION_TITLE_ADD);
     }
 
     /**

@@ -147,6 +147,40 @@ class ScaffoldTable extends ModelTable {
 
             $this->addOrderMethod($label, $callback, $callback, $label);
         }
+
+        // set initial order
+        $order = $meta->getOption('scaffold.query.order');
+        if (!$order) {
+            return;
+        }
+
+        if (strpos($order, ' ') !== false) {
+            list($orderFieldName, $orderDirection) = explode(' ', $order, 2);
+            $orderDirection = strtoupper($orderDirection);
+        } else {
+            $orderFieldName = $order;
+            $orderDirection = 'ASC';
+        }
+
+        $trimmedOrderFieldName = substr($orderFieldName, 1, -1);
+        if ($orderFieldName == '{' . $trimmedOrderFieldName . '}') {
+            $orderFieldName = $trimmedOrderFieldName;
+        }
+
+        if ($orderDirection != 'ASC' && $orderDirection != 'DESC') {
+            $orderDirection = 'ASC';
+        }
+
+        $field = $meta->getField($orderFieldName);
+        $label = $field->getOption('label');
+        if ($this->translator && $label) {
+            $orderMethod = $this->translator->translate($label);
+        } else {
+            $orderMethod = ucfirst($orderFieldName);
+        }
+
+        $this->setOrderMethod($orderMethod);
+        $this->setOrderDirection($orderDirection);
     }
 
     /**
