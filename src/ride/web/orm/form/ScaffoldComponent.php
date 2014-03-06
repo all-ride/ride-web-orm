@@ -221,46 +221,48 @@ class ScaffoldComponent extends AbstractComponent {
         return $this->data;
     }
 
-	/**
-	 * Prepares the form builder by adding row definitions
-	 * @param ride\library\html\form\builder\Builder $builder
-	 * @param array $options Extra options from the controller
-	 * @return null
-	 */
-	public function prepareForm(FormBuilder $builder, array $options) {
-	    $translator = $options['translator'];
-	    $data = $options['data'];
+    /**
+     * Prepares the form builder by adding row definitions
+     * @param ride\library\html\form\builder\Builder $builder
+     * @param array $options Extra options from the controller
+     * @return null
+     */
+    public function prepareForm(FormBuilder $builder, array $options) {
+        $translator = $options['translator'];
 
-	    $meta = $this->model->getMeta();
-	    $validationConstraint = $this->model->getValidationConstraint();
+        $meta = $this->model->getMeta();
+        $validationConstraint = $this->model->getValidationConstraint();
 
-	    $fields = $meta->getFields();
-	    foreach ($fields as $fieldName => $field) {
-	        if (isset($this->omittedFields[$fieldName]) || $field->getOption('scaffold.form.omit')) {
-	            continue;
-	        }
+        $fields = $meta->getFields();
+        foreach ($fields as $fieldName => $field) {
+            if (isset($this->omittedFields[$fieldName]) || $field->getOption('scaffold.form.omit')) {
+                continue;
+            }
 
-	        if (isset($this->hiddenFields[$fieldName]) || $field->getOption('scaffold.form.hide')) {
-	            $builder->addRow($fieldName, 'hidden');
+            if (isset($this->hiddenFields[$fieldName]) || $field->getOption('scaffold.form.hide')) {
+                $builder->addRow($fieldName, 'hidden');
 
-	            continue;
-	        }
+                continue;
+            }
 
-	        if ($validationConstraint) {
+            $label = null;
+            $description = null;
+
+            $this->getLabel($translator, $field, $label, $description);
+
+            if ($validationConstraint) {
                 $filters = $validationConstraint->getFilters($fieldName);
                 $validators = $validationConstraint->getValidators($fieldName);
-	        } else {
+            } else {
                 $filters = array();
                 $validators = array();
-	        }
+            }
 
-	        $this->getLabel($translator, $field, $label, $description);
+            if (!$field instanceof RelationField) {
+                $this->addPropertyRow($builder, $field, $label, $description, $filters, $validators, $options);
 
-	        if (!$field instanceof RelationField) {
-	            $this->addPropertyRow($builder, $field, $label, $description, $filters, $validators, $options);
-
-	            continue;
-	        }
+                continue;
+            }
 
             $recursiveDepth = $this->recursiveDepth;
             if (isset($this->recursiveFields[$fieldName])) {
@@ -270,77 +272,77 @@ class ScaffoldComponent extends AbstractComponent {
             $control = $field->getOption('scaffold.form.control');
 
             if ($control == 'select' || (!$control && ($recursiveDepth == 0 || $field instanceof BelongsToField))) {
-	            $this->addSelectRow($builder, $field, $label, $description, $filters, $validators, $options);
+                $this->addSelectRow($builder, $field, $label, $description, $filters, $validators, $options);
 
-	            continue;
+                continue;
             }
 
-	        $this->addComponentRow($builder, $field, $label, $description, $filters, $validators, $options, $recursiveDepth);
-	    }
-	}
+            $this->addComponentRow($builder, $field, $label, $description, $filters, $validators, $options, $recursiveDepth);
+        }
+    }
 
-	/**
-	 * Adds a row for a property field to the form
-	 * @param ride\library\form\FormBuilder $builder Instance of the form builder
-	 * @param ride\library\orm\definition\field\ModelField $field Field to add
-	 * @param string $label Label for the field
-	 * @param string $description Description of the field
-	 * @param array $filters Array with the filters for the property
-	 * @param array $validators Array with the validators for the property
-	 * @param array $options Extra options from the controller
-	 * @return null
-	 */
-	protected function addPropertyRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options) {
-	    $type = $field->getType();
-	    $rowOptions = array(
-	        'label' => $label,
-	        'description' => $description,
-	        'filters' => $filters,
-	        'validators' => $validators,
-	    );
+    /**
+     * Adds a row for a property field to the form
+     * @param ride\library\form\FormBuilder $builder Instance of the form builder
+     * @param ride\library\orm\definition\field\ModelField $field Field to add
+     * @param string $label Label for the field
+     * @param string $description Description of the field
+     * @param array $filters Array with the filters for the property
+     * @param array $validators Array with the validators for the property
+     * @param array $options Extra options from the controller
+     * @return null
+     */
+    protected function addPropertyRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options) {
+        $type = $field->getType();
+        $rowOptions = array(
+            'label' => $label,
+            'description' => $description,
+            'filters' => $filters,
+            'validators' => $validators,
+        );
 
-	    if ($type == 'float') {
-	        $type = 'number';
-	    }
+        if ($type == 'float') {
+            $type = 'number';
+        }
 
-	    if ($type == 'file' || $type == 'image') {
-	        $path = $field->getOption('upload.path');
-	        if ($path) {
-	            $path = str_replace('%application%', $options['fileBrowser']->getApplicationDirectory()->getAbsolutePath(), $path);
-	            $path = str_replace('%public%', $options['fileBrowser']->getPublicDirectory()->getAbsolutePath(), $path);
+        if ($type == 'file' || $type == 'image') {
+            $path = $field->getOption('upload.path');
+            if ($path) {
+                $path = str_replace('%application%', $options['fileBrowser']->getApplicationDirectory()->getAbsolutePath(), $path);
+                $path = str_replace('%public%', $options['fileBrowser']->getPublicDirectory()->getAbsolutePath(), $path);
 
-	            $rowOptions['path'] = $options['fileBrowser']->getFileSystem()->getFile($path);
-	        } else {
-	            $rowOptions['path'] = $options['fileBrowser']->getApplicationDirectory()->getChild('data');
-	        }
-	    }
+                $rowOptions['path'] = $options['fileBrowser']->getFileSystem()->getFile($path);
+            } else {
+                $rowOptions['path'] = $options['fileBrowser']->getApplicationDirectory()->getChild('data');
+            }
+        }
 
-	    $builder->addRow($field->getName(), $type, $rowOptions);
-	}
+        $builder->addRow($field->getName(), $type, $rowOptions);
+    }
 
-	/**
-	 * Adds a select row for a relation field to the form
-	 * @param ride\library\form\FormBuilder $builder Instance of the form builder
-	 * @param ride\library\orm\definition\field\ModelField $field Field to add
-	 * @param string $label Label for the field
-	 * @param string $description Description of the field
-	 * @param array $filters Array with the filters for the property
-	 * @param array $validators Array with the validators for the property
-	 * @param array $options Extra options from the controller
-	 * @return null
-	 */
-	protected function addSelectRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options) {
-	    $fieldName = $field->getName();
-	    $relationModel = $this->model->getRelationModel($fieldName);
-	    $data = $options['data'];
+    /**
+     * Adds a select row for a relation field to the form
+     * @param ride\library\form\FormBuilder $builder Instance of the form builder
+     * @param ride\library\orm\definition\field\ModelField $field Field to add
+     * @param string $label Label for the field
+     * @param string $description Description of the field
+     * @param array $filters Array with the filters for the property
+     * @param array $validators Array with the validators for the property
+     * @param array $options Extra options from the controller
+     * @return null
+     */
+    protected function addSelectRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options) {
+        $fieldName = $field->getName();
+        $relationModel = $this->model->getRelationModel($fieldName);
+        $data = $options['data'];
 
-	    $condition = $field->getOption('scaffold.select.condition');
-	    if ($condition) {
-	        if (!$data) {
-	            $data = $relationModel->createData();
-	        }
+        $condition = $field->getOption('scaffold.select.condition');
+        if ($condition) {
+            if (!$data) {
+                $data = $relationModel->createData();
+            }
 
-	        $dataArray = array();
+            $dataArray = array();
 
             $meta = $this->model->getMeta();
             $properties = $meta->getProperties();
@@ -358,46 +360,46 @@ class ScaffoldComponent extends AbstractComponent {
                 }
             }
 
-	        $query = $relationModel->getDataListQuery();
-	        $query->addConditionWithVariables($condition, $dataArray);
+            $query = $relationModel->getDataListQuery();
+            $query->addConditionWithVariables($condition, $dataArray);
 
-	        $result = $query->query();
+            $result = $query->query();
 
-	        $selectOptions = $relationModel->getDataListResult($result);
-	    } else {
-	        $selectOptions = $relationModel->getDataList();
-	    }
+            $selectOptions = $relationModel->getDataListResult($result);
+        } else {
+            $selectOptions = $relationModel->getDataList();
+        }
 
-	    $isMultiSelect = $field instanceof HasManyField;
+        $isMultiSelect = $field instanceof HasManyField;
 
-	    if (!$isMultiSelect) {
-	        $selectOptions = array('' => '---') + $selectOptions;
-	    }
+        if (!$isMultiSelect) {
+            $selectOptions = array('' => '---') + $selectOptions;
+        }
 
-	    $builder->addRow($fieldName, 'select', array(
- 	        'decorator' => new PropertyDecorator($this->model->getReflectionHelper(), ModelTable::PRIMARY_KEY),
-	        'options' => $selectOptions,
-	        'multiple' => $isMultiSelect,
-	        'label' => $label,
-	        'description' => $description,
-	        'filters' => $filters,
-	        'validators' => $validators,
-	    ));
-	}
+        $builder->addRow($fieldName, 'select', array(
+            'decorator' => new PropertyDecorator($this->model->getReflectionHelper(), ModelTable::PRIMARY_KEY),
+            'options' => $selectOptions,
+            'multiple' => $isMultiSelect,
+            'label' => $label,
+            'description' => $description,
+            'filters' => $filters,
+            'validators' => $validators,
+        ));
+    }
 
-	/**
-	 * Adds a select row for a relation field to the form
-	 * @param ride\library\form\FormBuilder $builder Instance of the form builder
-	 * @param ride\library\orm\definition\field\ModelField $field Field to add
-	 * @param string $label Label for the field
-	 * @param string $description Description of the field
-	 * @param array $options Extra options from the controller
-	 * @param integer $recursiveDepth Number of model to recurse
-	 * @return null
-	 */
-	protected function addComponentRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options, $recursiveDepth) {
-	    $fieldName = $field->getName();
-	    $relationModel = $this->model->getRelationModel($fieldName);
+    /**
+     * Adds a select row for a relation field to the form
+     * @param ride\library\form\FormBuilder $builder Instance of the form builder
+     * @param ride\library\orm\definition\field\ModelField $field Field to add
+     * @param string $label Label for the field
+     * @param string $description Description of the field
+     * @param array $options Extra options from the controller
+     * @param integer $recursiveDepth Number of model to recurse
+     * @return null
+     */
+    protected function addComponentRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options, $recursiveDepth) {
+        $fieldName = $field->getName();
+        $relationModel = $this->model->getRelationModel($fieldName);
 
         $formComponent = new self($this->helper, $relationModel);
         $formComponent->setDefaultRecursiveDepth($recursiveDepth - 1);
@@ -422,30 +424,30 @@ class ScaffoldComponent extends AbstractComponent {
                 'validators' => $validators,
             ));
         }
-	}
+    }
 
-	/**
-	 * Gets the label and description from the field
-	 * @param ride\library\i18n\translation\Translator $translator
-	 * @param ride\library\orm\definition\field\ModelField $field
-	 * @param string $label
-	 * @param string $description
-	 * @return null
-	 */
-	protected function getLabel(Translator $translator, ModelField $field, &$label, &$description) {
-	    $label = $field->getOption('label');
-	    if ($label) {
-	        $descriptionLabel = $label . '.description';
-	        $description = $translator->translate($descriptionLabel);
-	        if ($description == '[' . $descriptionLabel . ']') {
-	            $description = null;
-	        }
+    /**
+     * Gets the label and description from the field
+     * @param ride\library\i18n\translation\Translator $translator
+     * @param ride\library\orm\definition\field\ModelField $field
+     * @param string $label
+     * @param string $description
+     * @return null
+     */
+    protected function getLabel(Translator $translator, ModelField $field, &$label, &$description) {
+        $label = $field->getOption('label');
+        if ($label) {
+            $descriptionLabel = $label . '.description';
+            $description = $translator->translate($descriptionLabel);
+            if ($description == '[' . $descriptionLabel . ']') {
+                $description = null;
+            }
 
-	        $label = $translator->translate($label);
-	    } else {
-	        $label = ucfirst($field->getName());
-	        $description = null;
-	    }
-	}
+            $label = $translator->translate($label);
+        } else {
+            $label = ucfirst($field->getName());
+            $description = null;
+        }
+    }
 
 }

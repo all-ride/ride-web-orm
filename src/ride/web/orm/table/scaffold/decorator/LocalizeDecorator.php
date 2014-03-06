@@ -2,7 +2,6 @@
 
 namespace ride\web\orm\table\scaffold\decorator;
 
-use ride\library\html\table\decorator\ActionDecorator;
 use ride\library\html\table\decorator\Decorator;
 use ride\library\html\table\Cell;
 use ride\library\html\table\Row;
@@ -101,7 +100,8 @@ class LocalizeDecorator implements Decorator {
             }
 
             if ($this->action !== null) {
-                $action = str_replace('%id%', $data->id, $this->action);
+                $action = str_replace('%25id%25', $data->id, $this->action);
+                $action = str_replace('%25locale%25', $locale, $action);
                 $action = str_replace('%locale%', $locale, $action);
 
                 $anchor = new Anchor($localeString, $action);

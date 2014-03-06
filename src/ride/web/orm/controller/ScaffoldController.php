@@ -299,7 +299,7 @@ class ScaffoldController extends AbstractController {
      */
     public function indexAction(I18n $i18n, $locale = null) {
     	if (!$this->isReadable()) {
-    		throw new UnauthorizedException();
+            throw new UnauthorizedException();
     	}
 
     	// resolve locale
@@ -307,9 +307,9 @@ class ScaffoldController extends AbstractController {
     	    $this->locale = $i18n->getLocale()->getCode();
 
     	    if ($this->model->getMeta()->isLocalized()) {
-        	    $this->response->setRedirect($this->getAction(self::ACTION_INDEX, array('locale' => $this->locale)));
+                $this->response->setRedirect($this->getAction(self::ACTION_INDEX, array('locale' => $this->locale)));
 
-        	    return;
+                return;
     	    }
     	} else {
     	    $this->locale = $i18n->getLocale($locale)->getCode();
@@ -972,18 +972,19 @@ class ScaffoldController extends AbstractController {
         if (!$detailAction) {
             $detailAction = $this->getAction(self::ACTION_EDIT, array('id' => '%id%'));
         }
-        $detailAction .= '?referer=' . urlencode($this->request->getUrl());
 
         $table = new ScaffoldTable($this->model, $this->getTranslator(), $this->locale, $this->search, $this->order);
         $table->setPrimaryKeyField($this->pkField);
 
-        $this->addTableDecorators($table, $detailAction);
+        $this->addTableDecorators($table, $detailAction . '?referer=' . urlencode($this->request->getUrl()));
 
         if ($this->model->getMeta()->isLocalized()) {
             $i18n = $this->getI18n();
             $locales = $i18n->getLocaleCodeList();
 
-            $localizeDecorator = new LocalizeDecorator($this->model, $detailAction, $this->locale, $locales);
+            $referer = '?referer=' . urlencode(str_replace('/' . $this->locale . '/', '/%locale%/', $this->request->getUrl()));
+
+            $localizeDecorator = new LocalizeDecorator($this->model, $detailAction . $referer, $this->locale, $locales);
 
             $table->addDecorator($localizeDecorator);
         }
