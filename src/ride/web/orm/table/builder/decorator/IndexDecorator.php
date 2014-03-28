@@ -22,13 +22,13 @@ class IndexDecorator implements Decorator {
 
     /**
      * Instance of the translator
-     * @var ride\library\i18n\translation\Translator
+     * @var \ride\library\i18n\translator\Translator
      */
     private $translator;
 
     /**
      * Constructs a new index decorator
-     * @param ride\library\i18n\translator\Translator $translator
+     * @param \ride\library\i18n\translator\Translator $translator
      * @param string $action URL to the action for the index name
      * @return null
      */
@@ -39,8 +39,8 @@ class IndexDecorator implements Decorator {
 
     /**
      * Decorates the cell
-     * @param ride\library\html\table\Cell $cell Cell of the value to decorate
-     * @param ride\library\html\table\Row $row Row containing the cell
+     * @param \ride\library\html\table\Cell $cell Cell of the value to decorate
+     * @param \ride\library\html\table\Row $row Row containing the cell
      * @param int $rowNumber Number of the current row
      * @param array $remainingValues Array containing the values of the remaining rows of the table
      * @return null
@@ -69,7 +69,7 @@ class IndexDecorator implements Decorator {
 
     /**
      * Gets the information about the fields of the index
-     * @param ride\library\orm\definition\Index $index
+     * @param \ride\library\database\definition\Index $index
      * @return string
      */
     private function getFieldsInfo(Index $index) {

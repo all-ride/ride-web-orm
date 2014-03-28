@@ -24,13 +24,13 @@ class ModelTable extends FormTable {
 
     /**
      * Model used for the data of this table
-     * @var ride\library\orm\model\Model
+     * @var \ride\library\orm\model\Model
      */
     protected $model;
 
     /**
      * Model query used to populate the rows of this table
-     * @var ride\library\orm\query\ModelQuery
+     * @var \ride\library\orm\query\ModelQuery
      */
     protected $query;
 
@@ -42,7 +42,7 @@ class ModelTable extends FormTable {
 
     /**
      * Constructs a new model table
-     * @param ride\library\orm\model\Model $model
+     * @param \ride\library\orm\model\Model $model
      * @param string $locale Code of the locale for the data
      * @return null
      */
@@ -56,7 +56,7 @@ class ModelTable extends FormTable {
 
     /**
      * Gets the model query of this table
-     * @return ride\library\orm\query\ModelQuery
+     * @return \ride\library\orm\query\ModelQuery
      */
     public function getModelQuery() {
         return $this->query;
@@ -157,7 +157,7 @@ class ModelTable extends FormTable {
     /**
      * Processes and applies the actions, search, order and pagination of this
      * table
-     * @param ride\library\form\Form $form
+     * @param \ride\library\form\Form $form
      * @return null
      */
     public function processForm(Form $form) {

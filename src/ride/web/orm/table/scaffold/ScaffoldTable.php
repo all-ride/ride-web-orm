@@ -26,9 +26,9 @@ class ScaffoldTable extends ModelTable {
 
     /**
      * Constructs a new scaffold table
-     * @param ride\library\orm\model\Model $model Model for the data of the
+     * @param \ride\library\orm\model\Model $model Model for the data of the
      * table
-     * @param ride\library\i18n\translator\Translator $translator Instance of
+     * @param \ride\library\i18n\translator\Translator $translator Instance of
      * the translator
      * @param string $locale Code of the data locale
      * @param boolean|array $search False to disable search, True to search all
