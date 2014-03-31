@@ -821,7 +821,7 @@ class ScaffoldController extends AbstractController {
 
         $viewActions = array();
 
-        $addAction = $this->getAction(self::ACTION_ADD);
+        $addAction = $this->getAction(self::ACTION_ADD) . '?referer=' . urlencode($this->request->getUrl());
         if ($this->isWritable(null, false) && $addAction) {
             $translator = $this->getTranslator();
 
