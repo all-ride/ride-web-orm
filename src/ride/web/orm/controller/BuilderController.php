@@ -111,7 +111,7 @@ class BuilderController extends AbstractController {
     /**
      * Action to scaffold a model
      * @param string $modelName Name of the model to scaffold
-     * @return ride\core\mvc\Request The request for the scaffolding
+     * @return \ride\library\http\Request The request for the scaffolding
      */
     public function scaffoldAction(OrmManager $orm, $model = null, $locale = null, $id = null, $action = null, $format = null) {
         if (!$model) {

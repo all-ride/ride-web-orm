@@ -22,7 +22,7 @@ class ScaffoldComponent extends AbstractComponent {
 
     /**
      * Model of this form component
-     * @var ride\library\orm\model\Model
+     * @var \ride\library\orm\model\Model
      */
     protected $model;
 
@@ -64,7 +64,7 @@ class ScaffoldComponent extends AbstractComponent {
 
     /**
      * Constructs a new scaffold form component
-     * @param ride\library\orm\model\Model $model
+     * @param \ride\library\orm\model\Model $model
      * @return null
      */
     public function __construct(ReflectionHelper $reflectionHelper, Model $model) {
@@ -223,7 +223,7 @@ class ScaffoldComponent extends AbstractComponent {
 
     /**
      * Prepares the form builder by adding row definitions
-     * @param ride\library\html\form\builder\Builder $builder
+     * @param \ride\library\form\FormBuilder $builder
      * @param array $options Extra options from the controller
      * @return null
      */
@@ -283,8 +283,8 @@ class ScaffoldComponent extends AbstractComponent {
 
     /**
      * Adds a row for a property field to the form
-     * @param ride\library\form\FormBuilder $builder Instance of the form builder
-     * @param ride\library\orm\definition\field\ModelField $field Field to add
+     * @param \ride\library\form\FormBuilder $builder Instance of the form builder
+     * @param \ride\library\orm\definition\field\ModelField $field Field to add
      * @param string $label Label for the field
      * @param string $description Description of the field
      * @param array $filters Array with the filters for the property
@@ -322,8 +322,8 @@ class ScaffoldComponent extends AbstractComponent {
 
     /**
      * Adds a select row for a relation field to the form
-     * @param ride\library\form\FormBuilder $builder Instance of the form builder
-     * @param ride\library\orm\definition\field\ModelField $field Field to add
+     * @param \ride\library\form\FormBuilder $builder Instance of the form builder
+     * @param \ride\library\orm\definition\field\ModelField $field Field to add
      * @param string $label Label for the field
      * @param string $description Description of the field
      * @param array $filters Array with the filters for the property
@@ -389,8 +389,8 @@ class ScaffoldComponent extends AbstractComponent {
 
     /**
      * Adds a select row for a relation field to the form
-     * @param ride\library\form\FormBuilder $builder Instance of the form builder
-     * @param ride\library\orm\definition\field\ModelField $field Field to add
+     * @param \ride\library\form\FormBuilder $builder Instance of the form builder
+     * @param \ride\library\orm\definition\field\ModelField $field Field to add
      * @param string $label Label for the field
      * @param string $description Description of the field
      * @param array $options Extra options from the controller
@@ -428,8 +428,8 @@ class ScaffoldComponent extends AbstractComponent {
 
     /**
      * Gets the label and description from the field
-     * @param ride\library\i18n\translation\Translator $translator
-     * @param ride\library\orm\definition\field\ModelField $field
+     * @param \ride\library\i18n\translator\Translator $translator
+     * @param \ride\library\orm\definition\field\ModelField $field
      * @param string $label
      * @param string $description
      * @return null

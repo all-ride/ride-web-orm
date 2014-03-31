@@ -12,7 +12,7 @@ class DataFormatDecorator implements Decorator {
 
     /**
      * Instance of the data formatter
-     * @var ride\library\orm\model\data\format\DataFormatter
+     * @var \ride\library\orm\model\data\format\DataFormatter
      */
     protected $dataFormatter;
 
@@ -24,7 +24,7 @@ class DataFormatDecorator implements Decorator {
 
     /**
      * Constructs a new data decorator
-     * @param ride\library\orm\model\data\format\DataFormatter $dataFormatter
+     * @param \ride\library\orm\model\data\format\DataFormatter $dataFormatter
      * @param string $format
      * @param string $property
      * @return null

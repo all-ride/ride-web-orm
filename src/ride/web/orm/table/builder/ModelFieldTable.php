@@ -23,8 +23,8 @@ class ModelFieldTable extends FormTable {
 
     /**
      * Constructs a new model field table
-     * @param ride\library\i18n\translation\Translator $translator
-     * @param ride\library\orm\definition\ModelTable $table Table containing the fields
+     * @param \ride\library\i18n\translator\Translator $translator
+     * @param \ride\library\orm\definition\ModelTable $table Table containing the fields
      * @param string $modelAction URL to the action of a model
      * @param string $fieldAction URL to the action of a field
      * @return null

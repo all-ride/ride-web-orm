@@ -27,7 +27,7 @@ class LocalizeDecorator implements Decorator {
 
     /**
      * The localized model of the data
-     * @var ride\library\orm\model\LocalizedModel
+     * @var \ride\library\orm\model\LocalizedModel
      */
     private $localizedModel;
 
@@ -45,7 +45,7 @@ class LocalizeDecorator implements Decorator {
 
     /**
      * Constructs a new localize decorator
-     * @param ride\library\orm\model\Model $model Model of the data
+     * @param \ride\library\orm\model\Model $model Model of the data
      * @param string $action URL where the locale code should point to
      * @return null
      */
@@ -70,8 +70,8 @@ class LocalizeDecorator implements Decorator {
 
     /**
      * Decorates the data into a locale overview
-     * @param ride\library\html\table\Cell $cell Cell to decorate
-     * @param ride\library\html\table\Row $row Row containing the cell
+     * @param \ride\library\html\table\Cell $cell Cell to decorate
+     * @param \ride\library\html\table\Row $row Row containing the cell
      * @param int $rowNumber Number of the current row
      * @param array $remainingValues Array with all the values of the remaining rows of the table
      * @return null

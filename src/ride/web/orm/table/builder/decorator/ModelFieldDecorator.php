@@ -20,7 +20,7 @@ class ModelFieldDecorator implements Decorator {
 
     /**
      * Instance of the translator
-     * @var ride\library\i18n\translation\Translator
+     * @var \ride\library\i18n\translator\Translator
      */
     private $translator;
 
@@ -38,7 +38,7 @@ class ModelFieldDecorator implements Decorator {
 
     /**
      * Constructs a new field decorator
-     * @param ride\library\i18n\translation\Translator $translator
+     * @param \ride\library\i18n\translator\Translator $translator
      * @param string $modelAction URL to the action for a model
      * @param string $fieldAction URL to the action for a field
      * @return null
@@ -51,8 +51,8 @@ class ModelFieldDecorator implements Decorator {
 
     /**
      * Decorates the cell
-     * @param ride\library\html\table\Cell $cell Cell of the value to decorate
-     * @param ride\library\html\table\Row $row Row containing the cell
+     * @param \ride\library\html\table\Cell $cell Cell of the value to decorate
+     * @param \ride\library\html\table\Row $row Row containing the cell
      * @param int $rowNumber Number of the current row
      * @param array $remainingValues Array containing the values of the remaining rows of the table
      * @return null

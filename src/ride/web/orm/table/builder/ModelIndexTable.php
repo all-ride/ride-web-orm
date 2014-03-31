@@ -14,7 +14,7 @@ class ModelIndexTable extends ArrayTable {
 
     /**
      * Constructs a new model index table
-     * @param ride\library\i18n\translator\Translator $translator
+     * @param \ride\library\i18n\translator\Translator $translator
      * @param array $indexes
      * @param string $indexAction URL to the action for the index
      * @return null

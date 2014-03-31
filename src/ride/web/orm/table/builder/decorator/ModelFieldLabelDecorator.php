@@ -15,13 +15,13 @@ class ModelFieldLabelDecorator implements Decorator {
 
     /**
      * Translator for the labels
-     * @var ride\library\i18n\translation\Translator
+     * @var \ride\library\i18n\translator\Translator
      */
     private $translator;
 
     /**
      * Constructs a new model field label decorator
-     * @param ride\library\i18n\translation\Translator $translator
+     * @param \ride\library\i18n\translator\Translator $translator
      * @return null
      */
     public function __construct(Translator $translator) {
@@ -30,8 +30,8 @@ class ModelFieldLabelDecorator implements Decorator {
 
     /**
      * Decorates the cell
-     * @param ride\library\html\table\Cell $cell Cell of the value to decorate
-     * @param ride\library\html\table\Row $row Row containing the cell
+     * @param \ride\library\html\table\Cell $cell Cell of the value to decorate
+     * @param \ride\library\html\table\Row $row Row containing the cell
      * @param int $rowNumber Number of the current row
      * @param array $remainingValues Array containing the values of the remaining rows of the table
      * @return null

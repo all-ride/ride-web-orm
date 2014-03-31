@@ -31,19 +31,19 @@ class DataDecorator implements Decorator {
 
     /**
      * Instance of the reflection helper
-     * @var ride\library\reflection\ReflectionHelper
+     * @var \ride\library\reflection\ReflectionHelper
      */
     private $reflectionHelper;
 
     /**
      * Generator for images
-     * @var ride\image\ImageUrlGenerator
+     * @var \ride\library\image\ImageUrlGenerator
      */
     private $imageUrlGenerator;
 
     /**
      * Meta of the data model
-     * @var ride\library\orm\model\Model
+     * @var \ride\library\orm\model\Model
      */
     private $model;
 
@@ -61,7 +61,7 @@ class DataDecorator implements Decorator {
 
     /**
      * The formatter of the data
-     * @var ride\library\orm\model\data\format\DataFormatter
+     * @var \ride\library\orm\model\data\format\DataFormatter
      */
     private $formatter;
 
@@ -85,8 +85,8 @@ class DataDecorator implements Decorator {
 
     /**
      * Constructs a new data decorator
-     * @param ride\image\ImageUrlGenerator $imageUrlGenerator URL generator for images
-     * @param ride\library\orm\model\Model $model Model The model to format
+     * @param \ride\\libraryimage\ImageUrlGenerator $imageUrlGenerator URL generator for images
+     * @param \ride\library\orm\model\Model $model Model The model to format
      * @param string $action URL where the title of the data will point to. Use
      * %id% as placeholder for the primary key of the data
      * @param string $pkField Name of the primary key field
@@ -116,8 +116,8 @@ class DataDecorator implements Decorator {
 
     /**
      * Decorates the data in the cell
-     * @param ride\library\html\table\Cell $cell Cell to decorate
-     * @param ride\library\html\table\Row $row Row containing the cell
+     * @param \ride\library\html\table\Cell $cell Cell to decorate
+     * @param \ride\library\html\table\Row $row Row containing the cell
      * @param int $rowNumber Number of the current row
      * @param array $remainingValues Array with the values of the remaining rows of the table
      * @return null
