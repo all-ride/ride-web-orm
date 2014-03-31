@@ -17,8 +17,8 @@ class ModelTable extends FormTable {
 
     /**
      * Constructs a new models table
-     * @param ride\library\orm\OrmManager $orm Instance of the ORM manager
-     * @param ride\library\i18n\translator\Translator $translator
+     * @param \ride\library\orm\OrmManager $orm Instance of the ORM manager
+     * @param \ride\library\i18n\translator\Translator $translator
      * @param array $models
      * @param string $tableAction
      * @param string $modelAction

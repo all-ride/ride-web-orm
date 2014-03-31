@@ -14,7 +14,7 @@ class DataOptionDecorator implements Decorator {
 
     /**
      * Instance of the reflection helper
-     * @var ride\library\reflection\ReflectionHelper
+     * @var \ride\library\reflection\ReflectionHelper
      */
     protected $reflectionHelper;
 
@@ -26,7 +26,7 @@ class DataOptionDecorator implements Decorator {
 
     /**
      * Constructs a new data option decorator
-     * @param ride\library\reflection\ReflectionHelper $reflectionHelper
+     * @param \ride\library\reflection\ReflectionHelper $reflectionHelper
      * Instance of the reflection helper
      * @param string $property Name of the value property
      * @return null
@@ -43,8 +43,8 @@ class DataOptionDecorator implements Decorator {
 
     /**
      * Decorates the cell with an option field for the table actions
-     * @param ride\library\html\table\Cell $cell Cell which holds the data object
-     * @param ride\library\html\table\Row $row Row of the cell
+     * @param \ride\library\html\table\Cell $cell Cell which holds the data object
+     * @param \ride\library\html\table\Row $row Row of the cell
      * @param integer $rowNumber Current row number
      * @param array $remainingValues Array with the values of the remaining rows of the table
      * @return null

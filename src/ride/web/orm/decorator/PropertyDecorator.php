@@ -12,7 +12,7 @@ class PropertyDecorator implements Decorator {
 
     /**
      * Instance of the reflection helper
-     * @var ride\library\reflection\ReflectionHelper
+     * @var \ride\library\reflection\ReflectionHelper
      */
     protected $reflectionHelper;
 
@@ -24,7 +24,7 @@ class PropertyDecorator implements Decorator {
 
     /**
      * Constructs a new data decorator
-     * @param ride\library\reflection\ReflectionHelper $reflectionHelper
+     * @param \ride\library\reflection\ReflectionHelper $reflectionHelper
      * @param string $property
      * @return null
      */

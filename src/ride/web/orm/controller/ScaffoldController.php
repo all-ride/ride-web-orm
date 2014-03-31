@@ -159,7 +159,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * The model for scaffolding
-     * @var ride\library\orm\model\Model
+     * @var \ride\library\orm\model\Model
      */
     protected $model;
 
@@ -371,7 +371,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Processes the index action
-     * @param ride\library\html\table\FormTable $table Table of the index view
+     * @param \ride\library\html\table\FormTable $table Table of the index view
      * @return null
      */
     protected function processIndex(FormTable $table, Form $form) {
@@ -380,7 +380,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Performs an export of the provided table and sets the view of the export to the response
-     * @param ride\library\html\table\FormTable $table Table to get the export of
+     * @param \ride\library\html\table\FormTable $table Table to get the export of
      * @param string $extension The extension for the export
      * @return null
      */
@@ -423,7 +423,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Processes the export action
-     * @param ride\library\html\table\FormTable $table Table of the index view
+     * @param \ride\library\html\table\FormTable $table Table of the index view
      * @return null
      */
     protected function processExport(FormTable $table) {
@@ -433,7 +433,7 @@ class ScaffoldController extends AbstractController {
     /**
      * Gets the URL for the table
      * @param string $baseUrl
-     * @param ride\library\html\table\FormTable $table
+     * @param \ride\library\html\table\FormTable $table
      * @param int $page The current page
      * @param int $rowsPerPage Number or rows to display on each page
      * @param string $orderMethod Name of the order method to use
@@ -499,7 +499,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Checks if the table arguments have changed
-     * @param ride\library\html\table\FormTable $table
+     * @param \ride\library\html\table\FormTable $table
      * @param int $page The current page
      * @param int $rowsPerPage Number or rows to display on each page
      * @param string $orderMethod Name of the order method to use
@@ -546,7 +546,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Initialize the pagination, search and order of the table
-     * @param ride\library\html\table\FormTable $table
+     * @param \ride\library\html\table\FormTable $table
      * @param int $page The current page
      * @param int $rowsPerPage Number or rows to display on each page
      * @param string $orderMethod Name of the order method to use
@@ -746,7 +746,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Gets the data object from the provided form
-     * @param ride\library\html\form\Form $form
+     * @param \ride\library\html\form\Form $form
      * @return mixed Data object
      */
     protected function getFormData(Form $form) {
@@ -807,8 +807,8 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Sets the index view for the scaffolding to the response
-     * @param ride\library\html\table\FormTable $table Table with the model data
-     * @param ride\library\form\Form $form Form of the table
+     * @param \ride\library\html\table\FormTable $table Table with the model data
+     * @param \ride\library\form\Form $form Form of the table
      * @param array $locales Available locale codes
      * @param string $locale Code of the current locale
      * @param string $action URL for the table form
@@ -821,7 +821,7 @@ class ScaffoldController extends AbstractController {
 
         $viewActions = array();
 
-        $addAction = $this->getAction(self::ACTION_ADD);
+        $addAction = $this->getAction(self::ACTION_ADD) . '?referer=' . urlencode($this->request->getUrl());
         if ($this->isWritable(null, false) && $addAction) {
             $translator = $this->getTranslator();
 
@@ -864,7 +864,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Sets the form view for the scaffolding to the response
-     * @param ride\library\html\form\Form $form Form of the data
+     * @param \ride\library\form\Form $form Form of the data
      * @param string $referer URL of the referer of the form action
      * @param array $locales Available locale codes
      * @param string $locale Code of the current locale
@@ -942,7 +942,7 @@ class ScaffoldController extends AbstractController {
     /**
      * Gets the form for the data of the model
      * @param mixed $data Data object to preset the form
-     * @return ride\library\html\form\Form
+     * @return \ride\library\form\Form
      */
     protected function getForm($data = null) {
         $reflectionHelper = $this->model->getReflectionHelper();
@@ -966,7 +966,7 @@ class ScaffoldController extends AbstractController {
     /**
      * Gets a data table for the model
      * @param string $formAction URL where the table form will point to
-     * @return ride\library\html\table\FormTable
+     * @return \ride\library\html\table\FormTable
      */
     protected function getTable($detailAction = null) {
         if (!$detailAction) {
@@ -998,7 +998,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Adds the table decorators
-     * @param ride\web\orm\table\scaffold\ScaffoldTable $table
+     * @param \ride\web\orm\table\scaffold\ScaffoldTable $table
      * @param string $detailAction URL to the detail of the
      * @return null
      */
@@ -1047,7 +1047,7 @@ class ScaffoldController extends AbstractController {
      * @param string $routeId The id of the route
      * @param array $arguments Path arguments for the route
      * @return string
-     * @throws ride\library\router\exception\RouterException If the route is
+     * @throws \ride\library\router\exception\RouterException If the route is
      * not found
      */
     protected function getUrl($routeId, array $arguments = null) {
