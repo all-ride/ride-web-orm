@@ -200,7 +200,7 @@ class ScaffoldComponent extends AbstractComponent {
 
         $fields = $this->model->getMeta()->getFields();
         foreach ($fields as $fieldName => $field) {
-            if ($field->getOption('scaffold.form.omit')) {
+            if (isset($this->omittedFields[$fieldName]) || $field->getOption('scaffold.form.omit')) {
                 continue;
             }
 
@@ -399,10 +399,14 @@ class ScaffoldComponent extends AbstractComponent {
      */
     protected function addComponentRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options, $recursiveDepth) {
         $fieldName = $field->getName();
+        $relationField = $this->model->getMeta()->getRelationForeignKey($fieldName);
         $relationModel = $this->model->getRelationModel($fieldName);
 
         $formComponent = new self($this->helper, $relationModel);
         $formComponent->setDefaultRecursiveDepth($recursiveDepth - 1);
+        if ($relationField) {
+            $formComponent->omitField($relationField);
+        }
 
         if ($field instanceof BelongsToField) {
             $builder->addRow($fieldName, 'component', array(
