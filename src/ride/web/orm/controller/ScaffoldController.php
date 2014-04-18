@@ -906,7 +906,11 @@ class ScaffoldController extends AbstractController {
             }
         }
 
-        return $this->setTemplateView('orm/scaffold/form', $variables);
+        $view = $this->setTemplateView('orm/scaffold/form', $variables);
+
+        $form->processView($view);
+
+        return $view;
     }
 
     /**
