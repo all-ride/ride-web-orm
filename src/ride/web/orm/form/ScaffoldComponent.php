@@ -11,14 +11,22 @@ use ride\library\orm\definition\field\ModelField;
 use ride\library\orm\definition\field\RelationField;
 use ride\library\orm\definition\ModelTable;
 use ride\library\orm\model\Model;
-use ride\web\orm\decorator\PropertyDecorator;
-
 use ride\library\reflection\ReflectionHelper;
+
+use ride\web\orm\decorator\PropertyDecorator;
+use ride\web\orm\taxonomy\OrmTagHandler;
+use ride\web\WebApplication;
 
 /**
  * Form to edit ORM data
  */
 class ScaffoldComponent extends AbstractComponent {
+
+    /**
+     * Instance of the web application
+     * @var \ride\web\WebApplication
+     */
+    protected $web;
 
     /**
      * Model of this form component
@@ -64,10 +72,13 @@ class ScaffoldComponent extends AbstractComponent {
 
     /**
      * Constructs a new scaffold form component
+     * @param \ride\web\WebApplication $web Instance of the web application
+     * @param \ride\library\reflection\ReflectionHelper $reflectionHelper
      * @param \ride\library\orm\model\Model $model
      * @return null
      */
-    public function __construct(ReflectionHelper $reflectionHelper, Model $model) {
+    public function __construct(WebApplication $web, ReflectionHelper $reflectionHelper, Model $model) {
+        $this->web = $web;
         $this->helper = $reflectionHelper;
         $this->model = $model;
         $this->locale = null;
@@ -245,6 +256,8 @@ class ScaffoldComponent extends AbstractComponent {
                 continue;
             }
 
+            $control = $field->getOption('scaffold.form.control');
+
             $label = null;
             $description = null;
 
@@ -258,8 +271,8 @@ class ScaffoldComponent extends AbstractComponent {
                 $validators = array();
             }
 
-            if (!$field instanceof RelationField) {
-                $this->addPropertyRow($builder, $field, $label, $description, $filters, $validators, $options);
+            if (!$field instanceof RelationField || $control == 'tags') {
+                $this->addPropertyRow($builder, $field, $label, $description, $filters, $validators, $options, $control);
 
                 continue;
             }
@@ -268,8 +281,6 @@ class ScaffoldComponent extends AbstractComponent {
             if (isset($this->recursiveFields[$fieldName])) {
                 $recursiveDepth = $this->recursiveFields[$fieldName];
             }
-
-            $control = $field->getOption('scaffold.form.control');
 
             if ($control == 'select' || (!$control && ($recursiveDepth == 0 || $field instanceof BelongsToField))) {
                 $this->addSelectRow($builder, $field, $label, $description, $filters, $validators, $options);
@@ -290,16 +301,36 @@ class ScaffoldComponent extends AbstractComponent {
      * @param array $filters Array with the filters for the property
      * @param array $validators Array with the validators for the property
      * @param array $options Extra options from the controller
+     * @param string $type Type of the row, defaults to the field type
      * @return null
      */
-    protected function addPropertyRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options) {
-        $type = $field->getType();
+    protected function addPropertyRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options, $type = null) {
+        if (!$type) {
+            $type = $field->getType();
+        }
+
         $rowOptions = array(
             'label' => $label,
             'description' => $description,
             'filters' => $filters,
             'validators' => $validators,
         );
+
+        if ($type == 'tags') {
+            $urlSuffix = '?filter[name]=%term%';
+
+            $vocabulary = $field->getOption('taxonomy.vocabulary');
+            if ($vocabulary) {
+                if (is_numeric($vocabulary)) {
+                    $urlSuffix = '&filter[vocabulary]=' . $vocabulary;
+                } else {
+                    $urlSuffix = '&filter[vocabulary.slug]=' . $vocabulary;
+                }
+            }
+
+            $rowOptions['handler'] = new OrmTagHandler($this->model->getOrmManager(), $vocabulary);
+            $rowOptions['autocomplete.url'] = $this->web->getUrl('api.orm.list', array('model' => 'TaxonomyTerm')) . $urlSuffix;
+        }
 
         if ($type == 'float') {
             $type = 'number';
@@ -402,7 +433,7 @@ class ScaffoldComponent extends AbstractComponent {
         $relationField = $this->model->getMeta()->getRelationForeignKey($fieldName);
         $relationModel = $this->model->getRelationModel($fieldName);
 
-        $formComponent = new self($this->helper, $relationModel);
+        $formComponent = new self($this->web, $this->helper, $relationModel);
         $formComponent->setDefaultRecursiveDepth($recursiveDepth - 1);
         if ($relationField) {
             $formComponent->omitField($relationField);

@@ -949,13 +949,14 @@ class ScaffoldController extends AbstractController {
      * @return \ride\library\form\Form
      */
     protected function getForm($data = null) {
+        $web = $this->dependencyInjector->get('ride\\web\\WebApplication');
         $reflectionHelper = $this->model->getReflectionHelper();
 
         $component = $this->model->getMeta()->getOption('scaffold.component');
         if ($component) {
-            $this->component = new $component($reflectionHelper, $this->model);
+            $this->component = new $component($web, $reflectionHelper, $this->model);
         } else {
-            $this->component = new ScaffoldComponent($reflectionHelper, $this->model);
+            $this->component = new ScaffoldComponent($web, $reflectionHelper, $this->model);
         }
 
         $this->component->setLocale($this->locale);
