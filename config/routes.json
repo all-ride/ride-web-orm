@@ -56,6 +56,12 @@
             "controller": "ride\\web\\orm\\controller\\RestController",
             "action": "listAction",
             "id": "api.orm.list"
+        },
+        {
+            "path": "/api/v1/data/%model%/detail/%id%",
+            "controller": "ride\\web\\orm\\controller\\RestController",
+            "action": "detailAction",
+            "id": "api.orm.detail"
         }
     ]
 }
