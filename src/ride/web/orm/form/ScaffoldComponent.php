@@ -313,8 +313,11 @@ class ScaffoldComponent extends AbstractComponent {
             'label' => $label,
             'description' => $description,
             'filters' => $filters,
-            'validators' => $validators,
         );
+
+        if ($type != 'label') {
+            $rowOptions['validators'] = $validators;
+        }
 
         if ($type == 'tags') {
             $urlSuffix = '?filter[name]=%term%';
@@ -375,19 +378,25 @@ class ScaffoldComponent extends AbstractComponent {
 
             $dataArray = array();
 
+            $reflectionHelper = $this->model->getReflectionHelper();
             $meta = $this->model->getMeta();
             $properties = $meta->getProperties();
             $belongsTo = $meta->getBelongsTo();
 
             foreach ($properties as $name => $propertyField) {
-                $dataArray[$name] = $data->$name;
+                $dataArray[$name] = $reflectionHelper->getProperty($data, $name);
             }
 
             foreach ($belongsTo as $name => $belongsToField) {
-                if (is_object($data->$name)) {
-                    $dataArray[$name] = $data->$name->id;
+                $dataValue = $reflectionHelper->getProperty($data, $name);
+                if (!$dataValue) {
+                    continue;
+                }
+
+                if (is_object($dataValue)) {
+                    $dataArray[$name] = $dataValue->id;
                 } else {
-                    $dataArray[$name] = $data->$name;
+                    $dataArray[$name] = $dataValue;
                 }
             }
 
