@@ -34,6 +34,30 @@ class RestController extends AbstractController {
     }
 
     /**
+     * Sets a json response of a entry detail
+     * @param \ride\library\orm\OrmManager $orm Instance of the ORM manager
+     * @param string $model Name of the model
+     * @return null
+     */
+    public function detailAction(OrmManager $orm, $model, $id) {
+        $model = $this->getModel($orm, $model);
+        if (!$model) {
+            return;
+        }
+
+        $data = $model->getById($id);
+        if (!$data) {
+            $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
+
+            return;
+        }
+
+        $data = $model->convertDataToArray($data);
+
+        $this->setJsonView($data);
+    }
+
+    /**
      * Gets a model from the ORM manager with the REST expose flag ensured to
      * true
      * @return \ride\library\orm\model\Model|null
@@ -41,14 +65,12 @@ class RestController extends AbstractController {
     protected function getModel(OrmManager $orm, $model) {
         try {
             $model = $orm->getModel($model);
+
+            $expose = $model->getMeta()->getOption('rest.expose');
+            if (!$expose || !Boolean::getBoolean($expose)) {
+                throw new OrmException();
+            }
         } catch (OrmException $exception) {
-            $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
-
-            return;
-        }
-
-        $expose = $model->getMeta()->getOption('rest.expose');
-        if (!$expose || !Boolean::getBoolean($expose)) {
             $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
 
             return;
