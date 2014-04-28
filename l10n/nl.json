@@ -1,5 +1,4 @@
 {
-    "button.add": "Toevoegen",
     "button.scaffold": "Scaffold",
     "error.validation.version": "Your data is outdated. You are trying to save version %yourVersion% over version %currentVersion%. Try updating your data first.",
     "label.class.data": "Naam van de data klasse",
@@ -17,22 +16,13 @@
     "label.model": "Model",
     "label.model.delete.block": "Blokkeer het verwijderen wanneer een record wordt gebruikt door een ander model",
     "label.model.log": "Log het model",
-    "label.name": "Naam",
     "label.relation.type": "%type% relatie met %model%",
     "label.relation.type.fk": "%type% relatie met  %model%(%foreignKey%)",
     "label.relation.type.link": "%type% relatie met %model% via link model %link%",
     "label.relation.type.link.fk": "%type% relatie met %model%(%foreignKey%) via link model %link%",
     "label.relation.with": "Relatie met %model%",
     "label.relations.with": "Relatie met %first% en %last%",
-    "label.table.order": "Sorteren op",
-    "label.table.confirm.delete": "Ben je zeker dat je de geselecteerde items wenst te verwijderen?",
-    "label.table.export": "Exporen naar", 
-    "label.table.rows.page": "/ pagina",
-    "label.table.rows.total": "%rows% in totaal",
-    "label.table.search": "Zoeken",    
     "label.unlinked.model": "Ongelinkte modellen: %model%",
     "label.unlinked.models": "Ongelinkte modellen: %first% en %last%",
-    "success.data.saved": "%data% werd opgeslagen",    
-    "success.data.deleted": "%data% werd verwijderd",
-    "title.orm": "ORM"        
+    "title.orm": "ORM"
 }

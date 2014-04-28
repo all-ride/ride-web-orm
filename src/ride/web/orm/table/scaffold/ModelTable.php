@@ -4,6 +4,7 @@ namespace ride\web\orm\table\scaffold;
 
 use ride\library\decorator\BooleanDecorator;
 use ride\library\decorator\DateFormatDecorator;
+use ride\library\decorator\TableOptionDecorator;
 use ride\library\form\Form;
 use ride\library\html\table\decorator\StaticDecorator;
 use ride\library\html\table\decorator\ValueDecorator;
@@ -15,7 +16,6 @@ use ride\library\orm\model\data\format\DataFormatter;
 use ride\library\orm\model\Model;
 
 use ride\web\orm\decorator\DataFormatDecorator;
-use ride\web\orm\decorator\DataOptionDecorator;
 
 /**
  * Base data model table
@@ -78,7 +78,7 @@ class ModelTable extends FormTable {
      */
     public function getHtml($part = Element::FULL) {
         if (!$this->isPopulated && $this->actions) {
-            $decorator = new ValueDecorator(null, new DataOptionDecorator($this->model->getReflectionHelper(), $this->pkField));
+            $decorator = new ValueDecorator(null, new TableOptionDecorator($this->model->getReflectionHelper(), $this->pkField));
             $decorator->setCellClass('option');
 
             $this->addDecorator($decorator, null, true);

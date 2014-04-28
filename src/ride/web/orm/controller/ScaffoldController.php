@@ -315,67 +315,74 @@ class ScaffoldController extends AbstractController {
     	    $this->locale = $i18n->getLocale($locale)->getCode();
     	}
 
-        $parameters = $this->request->getQueryParameters();
+        // handle table
         $baseUrl = $this->getAction(self::ACTION_INDEX);
-
-        $page = 1;
-        $rowsPerPage = 10;
-        $orderMethod = $this->orderMethod;
-        $orderDirection = $this->orderDirection;
-        $searchQuery = null;
-
-        $this->getTableArguments($parameters, $page, $rowsPerPage, $orderMethod, $orderDirection, $searchQuery);
-
         $table = $this->getTable($this->getAction(self::ACTION_DETAIL));
-        $this->initializeTable($table, $page, $rowsPerPage, $orderMethod, $orderDirection, $searchQuery);
 
-        $form = $this->buildForm($table);
-
-        if (!$parameters && ($this->pagination || $this->search || $this->order)) {
-            $page = $table->getPage();
-            $rowsPerPage = $table->getRowsPerPage();
-            $orderMethod = $table->getOrderMethod();
-            $orderDirection = $table->getOrderDirection();
-
-            $url = $this->getTableUrl($baseUrl, $table, $page, $rowsPerPage, $orderMethod, $orderDirection, $searchQuery);
-
-            $this->response->setRedirect($url);
-
-            return;
-        }
-
-        $this->processIndex($table, $form);
-
-        $isTableChanged = $this->isTableChanged($table, $page, $rowsPerPage, $orderMethod, $orderDirection, $searchQuery);
-
-        $url = $this->getTableUrl($baseUrl, $table, $page, $rowsPerPage, $orderMethod, $orderDirection, $searchQuery);
-
-        if ($isTableChanged || (($this->pagination || $this->order) && count($parameters) == 0)) {
-            $this->response->setRedirect($url);
-        }
-
+        $form = $this->processTable($table, $baseUrl, 10, $this->orderMethod, $this->orderDirection);
         if ($this->response->willRedirect() || $this->response->getView()) {
             return;
         }
 
-//         $table->setExportUrl($url . '/' . self::PARAMETER_EXPORT . '/%extension%');
-        if ($this->pagination) {
-            $table->setPaginationUrl(str_replace(self::PARAMETER_PAGE . '=' . $page, self::PARAMETER_PAGE . '=%page%', $url));
-        }
-        if ($this->order) {
-            $table->setOrderDirectionUrl(str_replace(self::PARAMETER_ORDER_DIRECTION. '=' . strtolower($orderDirection), self::PARAMETER_ORDER_DIRECTION . '=%direction%', $url));
-        }
-
-        $this->setIndexView($table, $form, $i18n->getLocaleCodeList(), $locale, $url);
+        // set view
+        $this->setIndexView($table, $form, $i18n->getLocaleCodeList(), $locale);
     }
 
     /**
-     * Processes the index action
-     * @param \ride\library\html\table\FormTable $table Table of the index view
+     * Sets the index view for the scaffolding to the response
+     * @param \ride\library\html\table\FormTable $table Table with the model data
+     * @param \ride\library\form\Form $form Form of the table
+     * @param array $locales Available locale codes
+     * @param string $locale Code of the current locale
+     * @param array $actions Array with the URL of the action as key and the label for the action as value
      * @return null
      */
-    protected function processIndex(FormTable $table, Form $form) {
-        $table->processForm($form);
+    protected function setIndexView(FormTable $table, Form $form, array $locales, $locale, array $actions = null) {
+        $meta = $this->model->getMeta();
+        $title = $this->getViewTitle();
+
+        $viewActions = array();
+
+        $addAction = $this->getAction(self::ACTION_ADD);
+        if ($this->isWritable(null, false) && $addAction) {
+            $translator = $this->getTranslator();
+
+            $addAction .=  '?referer=' . urlencode($this->request->getUrl());
+
+            $addTranslation = $this->translationAdd;
+            if (!$addTranslation) {
+                $addTranslation = 'button.add';
+            }
+
+            $viewActions[$addAction] = $translator->translate($addTranslation);
+        }
+
+        if ($actions) {
+            $viewActions += $actions;
+        }
+
+        $exportActions = $this->dependencyInjector->getAll('ride\\library\\html\\table\\export\\ExportFormat');
+        foreach ($exportActions as $extension => $exportFormat) {
+            $exportActions[$extension] = $this->getAction(self::ACTION_EXPORT, array('format' => $extension));
+        }
+
+        $variables = array(
+            'meta' => $meta,
+            'form' => $form->getView(),
+            'table' => $table,
+            'actions' => $viewActions,
+            'exports' => $exportActions,
+            'title' => $title,
+            'localizeUrl' => null,
+        );
+
+        if ($this->model->getMeta()->isLocalized()) {
+            $variables['locales'] = $locales;
+            $variables['locale'] = $locale;
+            $variables['localizeUrl'] = $this->getAction(self::ACTION_INDEX, array('locale' => '%locale%'));
+        }
+
+        $this->setTemplateView('orm/scaffold/index', $variables);
     }
 
     /**
@@ -395,8 +402,9 @@ class ScaffoldController extends AbstractController {
             $this->locale = $i18n->getLocale($locale)->getCode();
         }
 
-        $export = $this->dependencyInjector->get('ride\\library\\html\\table\\export\\ExportFormat', $format);
-        if (!$export) {
+        try {
+            $export = $this->dependencyInjector->get('ride\\library\\html\\table\\export\\ExportFormat', $format);
+        } catch (DependencyException $exception) {
             $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
 
             return;
@@ -431,130 +439,59 @@ class ScaffoldController extends AbstractController {
     }
 
     /**
-     * Gets the URL for the table
-     * @param string $baseUrl
-     * @param \ride\library\html\table\FormTable $table
-     * @param int $page The current page
-     * @param int $rowsPerPage Number or rows to display on each page
-     * @param string $orderMethod Name of the order method to use
-     * @param string $orderDirection Name of the order direction
-     * @param string $searchQuery Value for the search query
-     * @return null
+     * Gets a data table for the model
+     * @param string $formAction URL where the table form will point to
+     * @return \ride\library\html\table\FormTable
      */
-    protected function getTableUrl($baseUrl, FormTable $table, $page, $rowsPerPage, $orderMethod, $orderDirection, $searchQuery) {
-        $parameters = array();
+    protected function getTable($detailAction = null) {
+        if (!$detailAction) {
+            $detailAction = $this->getAction(self::ACTION_EDIT, array('id' => '%id%'));
+        }
+        $detailAction .= '?referer=' . urlencode($this->request->getUrl());
 
-        if ($this->pagination) {
-            $parameters[] = self::PARAMETER_PAGE . '=' . $page;
-            $parameters[] = self::PARAMETER_ROWS . '=' . $rowsPerPage;
+        $table = new ScaffoldTable($this->model, $this->getTranslator(), $this->locale, $this->search, $this->order);
+        $table->setPaginationOptions($this->pagination);
+        $table->setPrimaryKeyField($this->pkField);
+
+        $this->addTableDecorators($table, $detailAction);
+
+        if ($this->model->getMeta()->isLocalized()) {
+            $i18n = $this->getI18n();
+            $locales = $i18n->getLocaleCodeList();
+
+            $localizeDecorator = new LocalizeDecorator($this->model, $detailAction, $this->locale, $locales);
+
+            $table->addDecorator($localizeDecorator);
         }
 
-        if ($table->hasOrderMethods() && ($orderMethod || $orderDirection)) {
-            $parameters[] = self::PARAMETER_ORDER_METHOD . '=' . urlencode($orderMethod);
-            $parameters[] = self::PARAMETER_ORDER_DIRECTION . '=' . strtolower($orderDirection);
+        $condition = $this->model->getMeta()->getOption(self::OPTION_CONDITION);
+        if ($condition) {
+            $table->getModelQuery()->addCondition($condition);
         }
 
-        if ($table->hasSearch() && $searchQuery) {
-            $parameters[] = self::PARAMETER_SEARCH_QUERY . '=' . urlencode($searchQuery);
-        }
+        $this->addTableActions($table);
 
-        if ($parameters) {
-            $baseUrl .= '?' . implode('&', $parameters);
-        }
-
-        return $baseUrl;
+        return $table;
     }
 
     /**
-     * Gets the table arguments from the argument array
-     * @param array $parameters Arguments array with the name as key and the argument as value
-     * @param int $page The current page
-     * @param int $rowsPerPage Number or rows to display on each page
-     * @param string $orderMethod Name of the order method to use
-     * @param string $orderDirection Name of the order direction
-     * @param string $searchQuery Value for the search query
+     * Adds the table decorators
+     * @param \ride\library\html\table\FormTable $table
+     * @param string $detailAction URL to the detail of the
      * @return null
      */
-    protected function getTableArguments($parameters, &$page, &$rowsPerPage, &$orderMethod, &$orderDirection, &$searchQuery) {
-        if (isset($parameters[self::PARAMETER_PAGE])) {
-            $page = $parameters[self::PARAMETER_PAGE];
-        }
+    protected function addTableDecorators(FormTable $table, $detailAction) {
+        $imageUrlGenerator = $this->dependencyInjector->get('ride\\library\\image\\ImageUrlGenerator');
 
-        if (isset($parameters[self::PARAMETER_ROWS])) {
-            $rowsPerPage = $parameters[self::PARAMETER_ROWS];
-        }
-
-        if (isset($parameters[self::PARAMETER_ORDER_METHOD])) {
-            $orderMethod = urldecode($parameters[self::PARAMETER_ORDER_METHOD]);
-        }
-
-        if (isset($parameters[self::PARAMETER_ORDER_DIRECTION])) {
-            $orderDirection = $parameters[self::PARAMETER_ORDER_DIRECTION];
-        }
-
-        if (isset($parameters[self::PARAMETER_SEARCH_QUERY])) {
-            $searchQuery = urldecode($parameters[self::PARAMETER_SEARCH_QUERY]);
-        }
+        $table->addDecorator(new DataDecorator($imageUrlGenerator, $this->model, $detailAction, $this->pkField));
     }
 
     /**
-     * Checks if the table arguments have changed
+     * Hook to add actions to the table
      * @param \ride\library\html\table\FormTable $table
-     * @param int $page The current page
-     * @param int $rowsPerPage Number or rows to display on each page
-     * @param string $orderMethod Name of the order method to use
-     * @param string $orderDirection Name of the order direction
-     * @param string $searchQuery Value for the search query
-     * @return boolean
-     */
-    protected function isTableChanged(FormTable $table, &$page, &$rowsPerPage, &$orderMethod, &$orderDirection, &$searchQuery) {
-        $isTableChanged = false;
-
-        if ($table->getPaginationOptions()) {
-            if ($table->getPage() != $page) {
-                $isTableChanged = true;
-                $page = $table->getPage();
-            }
-
-            if ($table->getRowsPerPage() != $rowsPerPage) {
-                $isTableChanged = true;
-                $rowsPerPage = $table->getRowsPerPage();
-                $page = 1;
-            }
-        }
-
-        if ($table->hasOrderMethods()) {
-            if ($table->getOrdermethod() != $orderMethod) {
-                $isTableChanged = true;
-                $orderMethod = $table->getOrderMethod();
-            }
-
-            if ($table->getOrderDirection() != $orderDirection) {
-                $isTableChanged = true;
-                $orderDirection = strtolower($table->getOrderDirection());
-            }
-        }
-
-        if ($table->hasSearch() && $table->getSearchQuery() != $searchQuery) {
-            $isTableChanged = true;
-            $searchQuery = $table->getSearchQuery();
-            $page = 1;
-        }
-
-        return $isTableChanged;
-    }
-
-    /**
-     * Initialize the pagination, search and order of the table
-     * @param \ride\library\html\table\FormTable $table
-     * @param int $page The current page
-     * @param int $rowsPerPage Number or rows to display on each page
-     * @param string $orderMethod Name of the order method to use
-     * @param string $orderDirection Name of the order direction
-     * @param string $searchQuery Value for the search query
      * @return null
      */
-    protected function initializeTable(FormTable $table, $page, $rowsPerPage, $orderMethod, $orderDirection, $searchQuery) {
+    protected function addTableActions(FormTable $table) {
         if ($this->isDeletable(null, false)) {
             $translator = $this->getTranslator();
 
@@ -563,25 +500,6 @@ class ScaffoldController extends AbstractController {
                 array($this, 'delete'),
                 $translator->translate('label.table.confirm.delete')
             );
-        }
-
-        if ($this->pagination) {
-            $table->setPaginationOptions($this->pagination);
-            $table->setRowsPerPage($rowsPerPage);
-            $table->setPage($page);
-        }
-
-        if ($table->hasOrderMethods()) {
-            if ($orderMethod) {
-                $table->setOrderMethod($orderMethod);
-            }
-            if ($orderDirection) {
-                $table->setOrderDirection($orderDirection);
-            }
-        }
-
-        if ($table->hasSearch()) {
-            $table->setSearchQuery($searchQuery);
         }
     }
 
@@ -806,63 +724,6 @@ class ScaffoldController extends AbstractController {
     }
 
     /**
-     * Sets the index view for the scaffolding to the response
-     * @param \ride\library\html\table\FormTable $table Table with the model data
-     * @param \ride\library\form\Form $form Form of the table
-     * @param array $locales Available locale codes
-     * @param string $locale Code of the current locale
-     * @param string $action URL for the table form
-     * @param array $actions Array with the URL of the action as key and the label for the action as value
-     * @return null
-     */
-    protected function setIndexView(FormTable $table, Form $form, array $locales, $locale, $action, array $actions = null) {
-        $meta = $this->model->getMeta();
-        $title = $this->getViewTitle();
-
-        $viewActions = array();
-
-        $addAction = $this->getAction(self::ACTION_ADD) . '?referer=' . urlencode($this->request->getUrl());
-        if ($this->isWritable(null, false) && $addAction) {
-            $translator = $this->getTranslator();
-
-            $translationAdd = $this->translationAdd;
-            if (!$translationAdd) {
-                $translationAdd = 'button.add';
-            }
-
-            $viewActions[$addAction] = $translator->translate($translationAdd);
-        }
-
-        if ($actions) {
-            $viewActions += $actions;
-        }
-
-        $exportActions = $this->dependencyInjector->getAll('ride\\library\\html\\table\\export\\ExportFormat');
-        foreach ($exportActions as $extension => $exportFormat) {
-            $exportActions[$extension] = $this->getAction(self::ACTION_EXPORT, array('format' => $extension));
-        }
-
-        $variables = array(
-        	'meta' => $meta,
-            'form' => $form->getView(),
-            'table' => $table,
-            'action' => $action,
-            'actions' => $viewActions,
-            'exports' => $exportActions,
-            'title' => $title,
-            'localizeUrl' => null,
-        );
-
-        if ($this->model->getMeta()->isLocalized()) {
-            $variables['locales'] = $locales;
-            $variables['locale'] = $locale;
-            $variables['localizeUrl'] = $this->getAction(self::ACTION_INDEX, array('locale' => '%locale%'));
-        }
-
-        $this->setTemplateView('orm/scaffold/index', $variables);
-    }
-
-    /**
      * Sets the form view for the scaffolding to the response
      * @param \ride\library\form\Form $form Form of the data
      * @param string $referer URL of the referer of the form action
@@ -966,51 +827,6 @@ class ScaffoldController extends AbstractController {
         $formBuilder->setRequest($this->request);
 
         return $formBuilder->build();
-    }
-
-    /**
-     * Gets a data table for the model
-     * @param string $formAction URL where the table form will point to
-     * @return \ride\library\html\table\FormTable
-     */
-    protected function getTable($detailAction = null) {
-        if (!$detailAction) {
-            $detailAction = $this->getAction(self::ACTION_EDIT, array('id' => '%id%'));
-        }
-        $detailAction .= '?referer=' . urlencode($this->request->getUrl());
-
-        $table = new ScaffoldTable($this->model, $this->getTranslator(), $this->locale, $this->search, $this->order);
-        $table->setPrimaryKeyField($this->pkField);
-
-        $this->addTableDecorators($table, $detailAction);
-
-        if ($this->model->getMeta()->isLocalized()) {
-            $i18n = $this->getI18n();
-            $locales = $i18n->getLocaleCodeList();
-
-            $localizeDecorator = new LocalizeDecorator($this->model, $detailAction, $this->locale, $locales);
-
-            $table->addDecorator($localizeDecorator);
-        }
-
-        $condition = $this->model->getMeta()->getOption(self::OPTION_CONDITION);
-        if ($condition) {
-            $table->getModelQuery()->addCondition($condition);
-        }
-
-        return $table;
-    }
-
-    /**
-     * Adds the table decorators
-     * @param \ride\web\orm\table\scaffold\ScaffoldTable $table
-     * @param string $detailAction URL to the detail of the
-     * @return null
-     */
-    protected function addTableDecorators(ScaffoldTable $table, $detailAction) {
-        $imageUrlGenerator = $this->dependencyInjector->get('ride\\library\\image\\ImageUrlGenerator');
-
-        $table->addDecorator(new DataDecorator($imageUrlGenerator, $this->model, $detailAction, $this->pkField));
     }
 
     /**

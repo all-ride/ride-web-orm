@@ -100,7 +100,7 @@ class ModelDecorator implements Decorator {
 
             $relationModelValue = $relationModelName;
             if ($this->action) {
-                $anchor = new Anchor($relationModelName, str_replace('%model%', $relationModelName, $this->action));
+                $anchor = new Anchor($relationModelName, str_replace('%25model%25', $relationModelName, $this->action));
                 $relationModelValue = $anchor->getHtml();
             }
 
