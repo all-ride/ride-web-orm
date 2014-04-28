@@ -23,22 +23,26 @@ class BuilderController extends AbstractController {
     public function indexAction(OrmManager $orm) {
         $translator = $this->getTranslator();
 
+        $scaffoldLabel = $translator->translate('button.scaffold');
+
+        $baseUrl = $this->getUrl('system.orm');
+        $modelUrl = $this->getUrl('system.orm.model', array('model' => '%model%'));
+        $scaffoldUrl = $this->getUrl('system.orm.scaffold', array('model' => '%model%'));
+
         $models = $orm->getModels(true);
-        $modelAction = $this->getUrl('system.orm.model', array('model' => '%model%'));
 
-        $table = new ModelTable($orm, $translator, $models, $modelAction);
-        $tableForm = $this->buildForm($table);
-        $table->addDecorator(new ModelActionDecorator($translator->translate('button.scaffold'), $this->getUrl('system.orm.scaffold', array('model' => '%model%'))));
-        $table->processForm($tableForm);
+        $table = new ModelTable($orm, $translator, $models, $modelUrl);
+        $table->setPaginationOptions(array(5, 10, 25, 50, 100, 250, 500));
+        $table->addDecorator(new ModelActionDecorator($scaffoldLabel, $scaffoldUrl));
 
+        $form = $this->processTable($table, $baseUrl, 10);
         if ($this->response->getView() || $this->response->willRedirect()) {
             return;
         }
 
         $this->setTemplateView('orm/models', array(
-        	'tableModels' => $table,
-        	'tableModelsAction' => $this->request->getUrl(),
-        	'tableModelsForm' => $tableForm,
+        	'table' => $table,
+        	'form' => $form,
         ));
     }
 
