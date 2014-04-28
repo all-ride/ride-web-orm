@@ -1,8 +1,0 @@
-{
-    "app.taskbar": [
-        {
-            "interface": "ride\\web\\orm\\ApplicationListener",
-            "method": "prepareTaskbar"
-        }
-    ]
-}
