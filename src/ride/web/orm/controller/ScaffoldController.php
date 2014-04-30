@@ -820,6 +820,10 @@ class ScaffoldController extends AbstractController {
             $this->component = new ScaffoldComponent($web, $reflectionHelper, $this->model);
         }
 
+        if ($this->component instanceof ScaffoldComponent) {
+            $this->component->setDefaultRecursiveDepth($this->recursiveDepth);
+        }
+
         $this->component->setLocale($this->locale);
 
         $formBuilder = $this->createFormBuilder($data);

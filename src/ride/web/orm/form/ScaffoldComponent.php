@@ -370,6 +370,10 @@ class ScaffoldComponent extends AbstractComponent {
         $relationModel = $this->model->getRelationModel($fieldName);
         $data = $options['data'];
 
+        $dataListOptions = array(
+            'locale' => $locale,
+        );
+
         $condition = $field->getOption('scaffold.select.condition');
         if ($condition) {
             if (!$data) {
@@ -400,14 +404,14 @@ class ScaffoldComponent extends AbstractComponent {
                 }
             }
 
-            $query = $relationModel->getDataListQuery();
+            $query = $relationModel->getDataListQuery($dataListOptions);
             $query->addConditionWithVariables($condition, $dataArray);
 
             $result = $query->query();
 
             $selectOptions = $relationModel->getDataListResult($result);
         } else {
-            $selectOptions = $relationModel->getDataList();
+            $selectOptions = $relationModel->getDataList($dataListOptions);
         }
 
         $isMultiSelect = $field instanceof HasManyField;
