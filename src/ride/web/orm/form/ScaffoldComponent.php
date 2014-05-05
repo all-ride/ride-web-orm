@@ -371,7 +371,7 @@ class ScaffoldComponent extends AbstractComponent {
         $data = $options['data'];
 
         $dataListOptions = array(
-            'locale' => $locale,
+            'locale' => $this->locale,
         );
 
         $condition = $field->getOption('scaffold.select.condition');
