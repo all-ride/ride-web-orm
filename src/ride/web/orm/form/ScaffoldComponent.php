@@ -325,9 +325,9 @@ class ScaffoldComponent extends AbstractComponent {
             $vocabulary = $field->getOption('taxonomy.vocabulary');
             if ($vocabulary) {
                 if (is_numeric($vocabulary)) {
-                    $urlSuffix = '&filter[vocabulary]=' . $vocabulary;
+                    $urlSuffix .= '&filter[vocabulary]=' . $vocabulary;
                 } else {
-                    $urlSuffix = '&filter[vocabulary.slug]=' . $vocabulary;
+                    $urlSuffix .= '&filter[vocabulary.slug]=' . $vocabulary;
                 }
             }
 
@@ -371,7 +371,7 @@ class ScaffoldComponent extends AbstractComponent {
         $data = $options['data'];
 
         $dataListOptions = array(
-            'locale' => $locale,
+            'locale' => $this->locale,
         );
 
         $condition = $field->getOption('scaffold.select.condition');

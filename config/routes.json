@@ -52,6 +52,12 @@
             ]
         },
         {
+            "path": "/api/v1/data/%model%",
+            "controller": "ride\\web\\orm\\controller\\RestController",
+            "action": "searchAction",
+            "id": "api.orm.search"
+        },
+        {
             "path": "/api/v1/data/%model%/list",
             "controller": "ride\\web\\orm\\controller\\RestController",
             "action": "listAction",
