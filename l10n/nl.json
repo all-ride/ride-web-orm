@@ -22,7 +22,9 @@
     "label.relation.type.link.fk": "%type% relatie met %model%(%foreignKey%) via link model %link%",
     "label.relation.with": "Relatie met %model%",
     "label.relations.with": "Relatie met %first% en %last%",
+    "label.slug": "Slug",
     "label.unlinked.model": "Ongelinkte modellen: %model%",
     "label.unlinked.models": "Ongelinkte modellen: %first% en %last%",
+    "label.weight": "Gewicht",
     "title.orm": "ORM"
 }

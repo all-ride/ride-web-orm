@@ -2,7 +2,7 @@
     "name": "ride/web-orm",
     "description": "ORM application of the Ride framework",
     "license": "MIT",
-    "version": "0.3.3",
+    "version": "0.3.4",
     "authors": [
         {
             "name": "Joris Vandeweerd",
@@ -13,7 +13,7 @@
         "ride/app-orm": ">=0.1.3",
         "ride/lib-common": ">=0.1.0",
         "ride/lib-form": ">=0.5.5",
-        "ride/lib-html": ">=0.1.1",
+        "ride/lib-html": ">=0.2.3",
         "ride/lib-http": ">=0.2.1",
         "ride/lib-i18n": ">=0.1.0",
         "ride/lib-image": ">=0.2.0",
