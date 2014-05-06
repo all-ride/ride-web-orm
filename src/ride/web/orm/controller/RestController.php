@@ -20,6 +20,35 @@ class RestController extends AbstractController {
      * @param string $model Name of the model
      * @return null
      */
+    public function searchAction(OrmManager $orm, $model) {
+        $model = $this->getModel($orm, $model);
+        if (!$model) {
+            return;
+        }
+
+        $result = array();
+        $options = $this->request->getQueryParameters();
+
+        $page = $this->request->getQueryParameter('page', 1);
+        $limit = $this->request->getQueryParameter('limit', 20);
+
+        $query = $model->createQuery();
+        $query->setLimit($limit, ($page - 1) * $limit);
+
+        $entries = $query->query();
+        foreach ($entries as $entry) {
+            $result[$entry->id] = $model->convertDataToArray($entry);
+        }
+
+        $this->setJsonView($result);
+    }
+
+    /**
+     * Sets a json response of the model data list
+     * @param \ride\library\orm\OrmManager $orm Instance of the ORM manager
+     * @param string $model Name of the model
+     * @return null
+     */
     public function listAction(OrmManager $orm, $model) {
         $model = $this->getModel($orm, $model);
         if (!$model) {
