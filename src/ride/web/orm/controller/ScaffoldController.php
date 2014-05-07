@@ -316,6 +316,24 @@ class ScaffoldController extends AbstractController {
     	}
 
         // handle table
+        if ($this->orderMethod === null && $this->orderDirection === null) {
+            $meta = $this->model->getMeta();
+
+            $this->orderMethod = $meta->getOption('scaffold.order.field');
+            $this->orderDirection = $meta->getOption('scaffold.order.direction');
+
+            if ($this->orderMethod) {
+                $field = $meta->getField($this->orderMethod);
+
+                $label = $field->getOption('label');
+                if ($label) {
+                    $this->orderMethod = $this->getTranslator()->translate($label);
+                } else {
+                    $this->orderMethod = ucfirst($field->getName());
+                }
+            }
+        }
+
         $baseUrl = $this->getAction(self::ACTION_INDEX);
         $table = $this->getTable($this->getAction(self::ACTION_DETAIL));
 
