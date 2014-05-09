@@ -5,6 +5,7 @@ namespace ride\web\orm\form;
 use ride\library\form\component\AbstractComponent;
 use ride\library\form\FormBuilder;
 use ride\library\i18n\translator\Translator;
+use ride\library\orm\definition\field\PropertyField;
 use ride\library\orm\definition\field\BelongsToField;
 use ride\library\orm\definition\field\HasManyField;
 use ride\library\orm\definition\field\ModelField;
@@ -271,7 +272,7 @@ class ScaffoldComponent extends AbstractComponent {
                 $validators = array();
             }
 
-            if (!$field instanceof RelationField || $control == 'tags') {
+            if (($control != 'select' && !$field instanceof RelationField) || $control == 'tags') {
                 $this->addPropertyRow($builder, $field, $label, $description, $filters, $validators, $options, $control);
 
                 continue;
@@ -367,57 +368,69 @@ class ScaffoldComponent extends AbstractComponent {
      */
     protected function addSelectRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options) {
         $fieldName = $field->getName();
-        $relationModel = $this->model->getRelationModel($fieldName);
-        $data = $options['data'];
 
-        $dataListOptions = array(
-            'locale' => $this->locale,
-        );
+        if (!$field instanceof PropertyField) {
+            $relationModel = $this->model->getRelationModel($fieldName);
 
-        $condition = $field->getOption('scaffold.select.condition');
-        if ($condition) {
-            if (!$data) {
-                $data = $relationModel->createData();
-            }
+            $data = $options['data'];
+            $dataListOptions = array(
+                'locale' => $this->locale,
+            );
 
-            $dataArray = array();
-
-            $reflectionHelper = $this->model->getReflectionHelper();
-            $meta = $this->model->getMeta();
-            $properties = $meta->getProperties();
-            $belongsTo = $meta->getBelongsTo();
-
-            foreach ($properties as $name => $propertyField) {
-                $dataArray[$name] = $reflectionHelper->getProperty($data, $name);
-            }
-
-            foreach ($belongsTo as $name => $belongsToField) {
-                $dataValue = $reflectionHelper->getProperty($data, $name);
-                if (!$dataValue) {
-                    continue;
+            $condition = $field->getOption('scaffold.select.condition');
+            if ($condition) {
+                if (!$data) {
+                    $data = $relationModel->createData();
                 }
 
-                if (is_object($dataValue)) {
-                    $dataArray[$name] = $dataValue->id;
-                } else {
-                    $dataArray[$name] = $dataValue;
+                $dataArray = array();
+
+                $reflectionHelper = $this->model->getReflectionHelper();
+                $meta = $this->model->getMeta();
+                $properties = $meta->getProperties();
+                $belongsTo = $meta->getBelongsTo();
+
+                foreach ($properties as $name => $propertyField) {
+                    $dataArray[$name] = $reflectionHelper->getProperty($data, $name);
                 }
+
+                foreach ($belongsTo as $name => $belongsToField) {
+                    $dataValue = $reflectionHelper->getProperty($data, $name);
+                    if (!$dataValue) {
+                        continue;
+                    }
+
+                    if (is_object($dataValue)) {
+                        $dataArray[$name] = $dataValue->id;
+                    } else {
+                        $dataArray[$name] = $dataValue;
+                    }
+                }
+
+                $query = $relationModel->getDataListQuery($dataListOptions);
+                $query->addConditionWithVariables($condition, $dataArray);
+
+                $result = $query->query();
+
+                $selectOptions = $relationModel->getDataListResult($result);
+            } else {
+                $selectOptions = $relationModel->getDataList($dataListOptions);
             }
 
-            $query = $relationModel->getDataListQuery($dataListOptions);
-            $query->addConditionWithVariables($condition, $dataArray);
+            $isMultiSelect = $field instanceof HasManyField;
 
-            $result = $query->query();
-
-            $selectOptions = $relationModel->getDataListResult($result);
+            if (!$isMultiSelect) {
+                $selectOptions = array('' => '---') + $selectOptions;
+            }
         } else {
-            $selectOptions = $relationModel->getDataList($dataListOptions);
-        }
+            $options = $field->getOption('scaffold.form.select.options');
+            if ($options) {
+                $selectOptions = json_decode($options, true);
+            } else {
+                $selectOptions = array();
+            }
 
-        $isMultiSelect = $field instanceof HasManyField;
-
-        if (!$isMultiSelect) {
-            $selectOptions = array('' => '---') + $selectOptions;
+            $isMultiSelect = false;
         }
 
         $builder->addRow($fieldName, 'select', array(
