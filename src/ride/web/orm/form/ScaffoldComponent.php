@@ -347,8 +347,6 @@ class ScaffoldComponent extends AbstractComponent {
                 $path = str_replace('%public%', $options['fileBrowser']->getPublicDirectory()->getAbsolutePath(), $path);
 
                 $rowOptions['path'] = $options['fileBrowser']->getFileSystem()->getFile($path);
-            } else {
-                $rowOptions['path'] = $options['fileBrowser']->getApplicationDirectory()->getChild('data');
             }
         }
 
