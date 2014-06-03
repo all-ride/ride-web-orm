@@ -58,7 +58,8 @@ class BuilderController extends AbstractController {
         $meta = $model->getMeta();
         $modelTable = $meta->getModelTable();
         $modelClass = get_class($model);
-        $dataClass = $meta->getDataClassName();
+        $entryClass = $meta->getEntryClassName();
+        $proxyClass = $meta->getProxyClassName();
 
         $tableAction = $this->request->getUrl();
         $modelAction = $this->getUrl('system.orm.model', array('model' => '%model%'));
@@ -77,7 +78,8 @@ class BuilderController extends AbstractController {
         	'model' => $model,
             'modelTable' => $modelTable,
             'modelClass' => $modelClass,
-            'dataClass' => $dataClass,
+            'entryClass' => $entryClass,
+            'proxyClass' => $proxyClass,
             'tableAction' => $tableAction,
             'tableFields' => $tableFields,
             'tableFieldsForm' => $tableFieldsForm,

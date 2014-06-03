@@ -9,7 +9,7 @@ use ride\library\http\Header;
 use ride\library\http\Response;
 use ride\library\i18n\I18n;
 use ride\library\orm\definition\ModelTable;
-use ride\library\orm\model\data\format\DataFormatter;
+use ride\library\orm\entry\format\EntryFormatter;
 use ride\library\orm\model\Model;
 use ride\library\security\exception\UnauthorizedException;
 use ride\library\validation\exception\ValidationException;
@@ -98,42 +98,6 @@ class ScaffoldController extends AbstractController {
     const PARAMETER_REFERER = 'referer';
 
     /**
-     * Translation key for the not deletable error
-     * @var string
-     */
-    const TRANSLATION_ERROR_DELETABLE = 'orm.error.permission.delete';
-
-    /**
-     * Translation key for the not readable error
-     * @var string
-     */
-    const TRANSLATION_ERROR_READABLE = 'orm.error.permission.read';
-
-    /**
-     * Translation key for the not writable error
-     * @var string
-     */
-    const TRANSLATION_ERROR_WRITABLE = 'orm.error.permission.write';
-
-    /**
-     * Model option for the title of the scaffolding
-     * @var string
-     */
-    const OPTION_TITLE = 'scaffold.title';
-
-    /**
-     * Model option for the title of the add button
-     * @var string
-     */
-    const OPTION_TITLE_ADD = 'scaffold.title.add';
-
-    /**
-     * Model option for a condition of the overview query
-     * @var string
-     */
-    const OPTION_CONDITION = 'scaffold.query.condition';
-
-    /**
      * Route for the index action
      * @var string
      */
@@ -212,10 +176,10 @@ class ScaffoldController extends AbstractController {
     protected $pagination;
 
     /**
-     * Recursive depth used when retrieving data
+     * Depth for the form relation fields
      * @var integer|null
      */
-    protected $recursiveDepth;
+    protected $formDepth;
 
     /**
      * Translation key for the add title
@@ -253,7 +217,7 @@ class ScaffoldController extends AbstractController {
         $this->model = $model;
         $this->pkField = ModelTable::PRIMARY_KEY;
 
-        $this->recursiveDepth = $meta->getOption('scaffold.recursive.depth', 1);
+        $this->formDepth = $meta->getOption('scaffold.form.depth', 1);
         $this->isLocalized = $meta->isLocalized();
 
         $this->pagination = $pagination;
@@ -269,8 +233,8 @@ class ScaffoldController extends AbstractController {
             self::ACTION_EXPORT => self::ROUTE_EXPORT,
         );
 
-        $this->translationTitle = $meta->getOption(self::OPTION_TITLE);
-        $this->translationAdd = $meta->getOption(self::OPTION_TITLE_ADD);
+        $this->translationTitle = $meta->getOption('scaffold.title');
+        $this->translationAdd = $meta->getOption('scaffold.title.add');
     }
 
     /**
@@ -319,8 +283,8 @@ class ScaffoldController extends AbstractController {
         if ($this->orderMethod === null && $this->orderDirection === null) {
             $meta = $this->model->getMeta();
 
-            $this->orderMethod = $meta->getOption('scaffold.order.field');
-            $this->orderDirection = $meta->getOption('scaffold.order.direction');
+            $this->orderMethod = $meta->getOption('order.field');
+            $this->orderDirection = $meta->getOption('order.direction');
 
             if ($this->orderMethod) {
                 $field = $meta->getField($this->orderMethod);
@@ -482,7 +446,7 @@ class ScaffoldController extends AbstractController {
             $table->addDecorator($localizeDecorator);
         }
 
-        $condition = $this->model->getMeta()->getOption(self::OPTION_CONDITION);
+        $condition = $this->model->getMeta()->getOption('scaffold.condition');
         if ($condition) {
             $table->getModelQuery()->addCondition($condition);
         }
@@ -582,15 +546,15 @@ class ScaffoldController extends AbstractController {
                 $data = $this->getFormData($form);
 
                 if ($this->isLocalized) {
-                    $data->dataLocale = $this->locale;
+                    $data->setLocale($this->locale);
                 }
 
                 $this->saveData($data);
 
                 $this->response->setRedirect($this->getFormReferer($data));
 
-                $format = $this->model->getMeta()->getDataFormat(DataFormatter::FORMAT_TITLE);
-                $data = $this->orm->getDataFormatter()->formatData($data, $format);
+                $format = $this->model->getMeta()->getFormat(EntryFormatter::FORMAT_TITLE);
+                $data = $this->orm->getEntryFormatter()->formatEntry($data, $format);
 
                 $this->addSuccess('success.data.saved', array('data' => $data));
 
@@ -665,8 +629,7 @@ class ScaffoldController extends AbstractController {
      */
     protected function getData($id) {
         $query = $this->model->createQuery($this->locale);
-        $query->setRecursiveDepth($this->recursiveDepth);
-        $query->setFetchUnlocalizedData(true);
+        $query->setFetchUnlocalized(true);
         $query->addCondition('{' . $this->pkField . '} = %1%', $id);
 
         return $query->queryFirst();
@@ -677,7 +640,7 @@ class ScaffoldController extends AbstractController {
      * @return mixed
      */
     protected function createData() {
-        return $this->model->createData();
+        return $this->model->createEntry();
     }
 
     /**
@@ -810,16 +773,16 @@ class ScaffoldController extends AbstractController {
      * @param mixed $data The data which is being displayed, used only with the form view
      * @return string
      */
-    protected function getViewSubtitle($data = null) {
+    protected function getViewSubtitle($entry = null) {
         $pkField = $this->pkField;
 
-        if (!$data || !$data->$pkField) {
+        if (!$entry || !$entry->$pkField) {
             return;
         }
 
-        $format = $this->model->getMeta()->getDataFormat(DataFormatter::FORMAT_TITLE);
+        $format = $this->model->getMeta()->getFormat(EntryFormatter::FORMAT_TITLE);
 
-        return $this->orm->getDataFormatter()->formatData($data, $format);
+        return $this->orm->getEntryFormatter()->formatEntry($entry, $format);
     }
 
     /**
@@ -839,7 +802,7 @@ class ScaffoldController extends AbstractController {
         }
 
         if ($this->component instanceof ScaffoldComponent) {
-            $this->component->setDefaultRecursiveDepth($this->recursiveDepth);
+            $this->component->setDepth($this->formDepth);
         }
 
         $this->component->setLocale($this->locale);

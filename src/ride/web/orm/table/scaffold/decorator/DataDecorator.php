@@ -9,7 +9,7 @@ use ride\library\html\Anchor;
 use ride\library\html\Image;
 use ride\library\image\exception\ImageException;
 use ride\library\image\ImageUrlGenerator;
-use ride\library\orm\model\data\format\DataFormatter;
+use ride\library\orm\entry\format\EntryFormatter;
 use ride\library\orm\model\Model;
 
 /**
@@ -42,23 +42,22 @@ class DataDecorator extends LibraryDataDecorator {
     public function __construct(ImageUrlGenerator $imageUrlGenerator, Model $model, $action = null, $pkField = null, $defaultImage = null) {
         parent::__construct($model->getReflectionHelper(), $action, $imageUrlGenerator, $defaultImage);
 
-        $modelTable = $model->getMeta()->getModelTable();
-
         if ($pkField) {
             $this->propertyId = $pkField;
         } else {
             $this->propertyId = ModelTable::PRIMARY_KEY;
         }
 
-        $this->propertyTitle = $modelTable->getDataFormat(DataFormatter::FORMAT_TITLE);
-        $this->propertyTeaser = $modelTable->getDataFormat(DataFormatter::FORMAT_TEASER, false);
-        $this->propertyImage = $modelTable->getDataFormat(DataFormatter::FORMAT_IMAGE, false);
+        $modelMeta = $model->getMeta();
+        $this->propertyTitle = $modelMeta->getFormat(EntryFormatter::FORMAT_TITLE);
+        $this->propertyTeaser = $modelMeta->getFormat(EntryFormatter::FORMAT_TEASER);
+        $this->propertyImage = $modelMeta->getFormat(EntryFormatter::FORMAT_IMAGE);
 
         if (!$this->propertyImage) {
             $this->imageUrlGenerator = null;
         }
 
-        $this->formatter = $model->getOrmManager()->getDataFormatter();
+        $this->formatter = $model->getOrmManager()->getEntryFormatter();
         $this->model = $model;
     }
 
@@ -68,7 +67,7 @@ class DataDecorator extends LibraryDataDecorator {
      * @return string|null
      */
     protected function getDataTitle($data) {
-        return $this->formatter->formatData($data, $this->propertyTitle);
+        return $this->formatter->formatEntry($data, $this->propertyTitle);
     }
 
     /**
@@ -78,7 +77,7 @@ class DataDecorator extends LibraryDataDecorator {
      */
     protected function getDataTeaser($data) {
         if ($this->propertyTeaser) {
-            return $this->formatter->formatData($data, $this->propertyTeaser);
+            return $this->formatter->formatEntry($data, $this->propertyTeaser);
         }
 
         return null;
@@ -91,7 +90,7 @@ class DataDecorator extends LibraryDataDecorator {
      */
     protected function getDataImage($data) {
         if ($this->propertyImage) {
-            return $this->formatter->formatData($data, $this->propertyImage);
+            return $this->formatter->formatEntry($data, $this->propertyImage);
         }
 
         return null;

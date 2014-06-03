@@ -11,9 +11,11 @@ use ride\library\orm\definition\field\HasManyField;
 use ride\library\orm\definition\field\ModelField;
 use ride\library\orm\definition\field\RelationField;
 use ride\library\orm\definition\ModelTable;
+use ride\library\orm\entry\format\EntryFormatter;
 use ride\library\orm\model\Model;
 use ride\library\reflection\ReflectionHelper;
 
+use ride\web\orm\decorator\FormatDecorator;
 use ride\web\orm\decorator\PropertyDecorator;
 use ride\web\orm\taxonomy\OrmTagHandler;
 use ride\web\WebApplication;
@@ -42,10 +44,16 @@ class ScaffoldComponent extends AbstractComponent {
     protected $locale;
 
     /**
-     * Default field recursive depth
+     * Default field relation depth
      * @var string
      */
-    protected $recursiveDepth;
+    protected $depth;
+
+    /**
+     * Names of the fields with their depth
+     * @var array
+     */
+    protected $fieldDepths;
 
     /**
      * Names of the fields to hide
@@ -60,16 +68,10 @@ class ScaffoldComponent extends AbstractComponent {
     protected $omittedFields;
 
     /**
-     * Names of the fields with their recursive depth
-     * @var array
-     */
-    protected $recursiveFields;
-
-    /**
-     * Instance of the data
+     * Instance of the entry
      * @var mixed
      */
-    protected $data;
+    protected $entry;
 
     /**
      * Constructs a new scaffold form component
@@ -80,58 +82,52 @@ class ScaffoldComponent extends AbstractComponent {
      */
     public function __construct(WebApplication $web, ReflectionHelper $reflectionHelper, Model $model) {
         $this->web = $web;
-        $this->helper = $reflectionHelper;
+        $this->reflectionHelper = $reflectionHelper;
         $this->model = $model;
         $this->locale = null;
-        $this->recursiveDepth = 1;
+        $this->depth = 1;
 
         $this->hiddenFields = array(
             ModelTable::PRIMARY_KEY => true,
         );
 
         $this->omittedFields = array();
-        $this->recursiveFields = array();
+        $this->fieldDepths = array();
 
-        $meta = $model->getMeta();
-
-        $hiddenFields = $meta->getOption('scaffold.fields.hide');
-        if ($hiddenFields) {
-            $hiddenFields = explode(',', $hiddenFields);
-            foreach ($hiddenFields as $fieldName) {
-                $fieldName = trim($fieldName);
-
-                $this->hiddenFields[$fieldName] = true;
-            }
-        }
-
-        $omittedFields = $meta->getOption('scaffold.fields.omit');
-        if ($omittedFields) {
-            $omittedFields = explode(',', $omittedFields);
-            foreach ($omittedFields as $fieldName) {
-                $fieldName = trim($fieldName);
-
+        $fields = $this->model->getMeta()->getFields();
+        foreach ($fields as $fieldName => $field) {
+            if ($field->getOption('scaffold.form.omit')) {
                 $this->omittedFields[$fieldName] = true;
             }
+
+            if ($field->getOption('scaffold.form.type') == 'hidden') {
+                $this->hiddenFields[$fieldName] = true;
+            }
+
+            $depth = $field->getOption('scaffold.form.depth');
+            if ($depth !== null) {
+                $this->fieldDepths[$name] = $depth;
+            }
         }
     }
 
     /**
-     * Sets the default recursive depth for relation fields
-     * @param integer $recursiveDepth
+     * Sets the default field depth for relation fields
+     * @param integer $depth
      * @return null
      */
-    public function setDefaultRecursiveDepth($recursiveDepth) {
-        $this->recursiveDepth = $recursiveDepth;
+    public function setDepth($depth) {
+        $this->depth = $depth;
     }
 
     /**
-     * Sets the recursive depth for a relation field
-     * @param string $name
-     * @param integer $recursiveDepth
+     * Sets the depth for a relation field
+     * @param string $name Name of the field
+     * @param integer $depth Depth of the field
      * @return null
      */
-    public function setFieldRecursiveDepth($name, $recursiveDepth) {
-        $this->recursiveFields[$name] = $recursiveDepth;
+    public function setFieldDepth($name, $depth) {
+        $this->fieldDepths[$name] = $depth;
     }
 
     /**
@@ -175,49 +171,53 @@ class ScaffoldComponent extends AbstractComponent {
      * @return string|null A string for a data class, null for an array
      */
     public function getDataType() {
-        return $this->model->getMeta()->getDataClassName();
+        return $this->model->getMeta()->getEntryClassName();
     }
 
     /**
-     * Parse the data to form values for the component rows
+     * Parse the entry to form values for the component rows
      * @param mixed $data
      * @return array $data
      */
-    public function parseSetData($data) {
-        if (!$data) {
+    public function parseSetData($entry) {
+        if (!$entry) {
             return null;
         }
 
-        $this->data = $data;
+        $this->entry = $entry;
 
         $result = array();
 
         $fields = $this->model->getMeta()->getFields();
         foreach ($fields as $fieldName => $field) {
-            $result[$fieldName] = $this->helper->getProperty($data, $fieldName);
+            if (isset($this->omittedFields[$fieldName])) {
+                continue;
+            }
+
+            $result[$fieldName] = $this->reflectionHelper->getProperty($entry, $fieldName);
         }
 
         return $result;
     }
 
     /**
-     * Parse the form values to data of the component
+     * Parse the form values of an entry of this component
      * @param array $data
-     * @return mixed $data
+     * @return mixed Entry
      */
     public function parseGetData(array $data) {
-        if (!$this->data) {
-            $this->data = $this->model->createData();
+        if (!$this->entry) {
+            $this->entry = $this->model->createEntry();
         }
 
         $fields = $this->model->getMeta()->getFields();
         foreach ($fields as $fieldName => $field) {
-            if (isset($this->omittedFields[$fieldName]) || $field->getOption('scaffold.form.omit')) {
+            if (isset($this->omittedFields[$fieldName])) {
                 continue;
             }
 
             if (isset($data[$fieldName])) {
-                $this->helper->setProperty($this->data, $fieldName, $data[$fieldName]);
+                $value = $data[$fieldName];
             } else {
                 $value = null;
                 if ($field instanceof HasManyField) {
@@ -225,12 +225,12 @@ class ScaffoldComponent extends AbstractComponent {
                 } elseif (!$field instanceof RelationField && $field->getType() == 'boolean') {
                     $value = false;
                 }
-
-                $this->helper->setProperty($this->data, $fieldName, $value);
             }
+
+            $this->reflectionHelper->setProperty($this->entry, $fieldName, $value);
         }
 
-        return $this->data;
+        return $this->entry;
     }
 
     /**
@@ -240,29 +240,26 @@ class ScaffoldComponent extends AbstractComponent {
      * @return null
      */
     public function prepareForm(FormBuilder $builder, array $options) {
-        $translator = $options['translator'];
-
         $meta = $this->model->getMeta();
         $validationConstraint = $this->model->getValidationConstraint();
 
         $fields = $meta->getFields();
         foreach ($fields as $fieldName => $field) {
-            if (isset($this->omittedFields[$fieldName]) || $field->getOption('scaffold.form.omit')) {
+            if (isset($this->omittedFields[$fieldName])) {
                 continue;
             }
 
-            if (isset($this->hiddenFields[$fieldName]) || $field->getOption('scaffold.form.hide')) {
+            if (isset($this->hiddenFields[$fieldName])) {
                 $builder->addRow($fieldName, 'hidden');
 
                 continue;
             }
 
-            $control = $field->getOption('scaffold.form.control');
-
+            $type = $field->getOption('scaffold.form.type');
             $label = null;
             $description = null;
 
-            $this->getLabel($translator, $field, $label, $description);
+            $this->getLabel($options['translator'], $field, $label, $description);
 
             if ($validationConstraint) {
                 $filters = $validationConstraint->getFilters($fieldName);
@@ -272,24 +269,25 @@ class ScaffoldComponent extends AbstractComponent {
                 $validators = array();
             }
 
-            if (($control != 'select' && !$field instanceof RelationField) || $control == 'tags') {
-                $this->addPropertyRow($builder, $field, $label, $description, $filters, $validators, $options, $control);
+            if (($type != 'select' && !$field instanceof RelationField) || $type == 'tags') {
+                $this->addPropertyRow($builder, $field, $label, $description, $filters, $validators, $options, $type);
 
                 continue;
             }
 
-            $recursiveDepth = $this->recursiveDepth;
-            if (isset($this->recursiveFields[$fieldName])) {
-                $recursiveDepth = $this->recursiveFields[$fieldName];
+            if (isset($this->fieldDepths[$fieldName])) {
+                $depth = $this->fieldDepths[$fieldName];
+            } else {
+                $depth = $this->depth;
             }
 
-            if ($control == 'select' || (!$control && ($recursiveDepth == 0 || $field instanceof BelongsToField))) {
+            if ($type == 'object' || (!$type && ($depth == 0 || $field instanceof BelongsToField))) {
                 $this->addSelectRow($builder, $field, $label, $description, $filters, $validators, $options);
 
                 continue;
             }
 
-            $this->addComponentRow($builder, $field, $label, $description, $filters, $validators, $options, $recursiveDepth);
+            $this->addComponentRow($builder, $field, $label, $description, $filters, $validators, $options, $depth);
         }
     }
 
@@ -316,8 +314,22 @@ class ScaffoldComponent extends AbstractComponent {
             'filters' => $filters,
         );
 
+        if ($type == 'float') {
+            $type = 'number';
+        }
+
         if ($type != 'label') {
             $rowOptions['validators'] = $validators;
+        }
+
+        if ($type == 'file' || $type == 'image') {
+            $path = $field->getOption('upload.path');
+            if ($path) {
+                $path = str_replace('%application%', $options['fileBrowser']->getApplicationDirectory()->getAbsolutePath(), $path);
+                $path = str_replace('%public%', $options['fileBrowser']->getPublicDirectory()->getAbsolutePath(), $path);
+
+                $rowOptions['path'] = $options['fileBrowser']->getFileSystem()->getFile($path);
+            }
         }
 
         if ($type == 'tags') {
@@ -334,20 +346,6 @@ class ScaffoldComponent extends AbstractComponent {
 
             $rowOptions['handler'] = new OrmTagHandler($this->model->getOrmManager(), $vocabulary);
             $rowOptions['autocomplete.url'] = $this->web->getUrl('api.orm.list', array('model' => 'TaxonomyTerm')) . $urlSuffix;
-        }
-
-        if ($type == 'float') {
-            $type = 'number';
-        }
-
-        if ($type == 'file' || $type == 'image') {
-            $path = $field->getOption('upload.path');
-            if ($path) {
-                $path = str_replace('%application%', $options['fileBrowser']->getApplicationDirectory()->getAbsolutePath(), $path);
-                $path = str_replace('%public%', $options['fileBrowser']->getPublicDirectory()->getAbsolutePath(), $path);
-
-                $rowOptions['path'] = $options['fileBrowser']->getFileSystem()->getFile($path);
-            }
         }
 
         $builder->addRow($field->getName(), $type, $rowOptions);
@@ -367,21 +365,28 @@ class ScaffoldComponent extends AbstractComponent {
     protected function addSelectRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options) {
         $fieldName = $field->getName();
 
+        $rowOptions = array(
+            'label' => $label,
+            'description' => $description,
+            'filters' => $filters,
+            'validators' => $validators,
+        );
+
         if (!$field instanceof PropertyField) {
+            $entry = $options['data'];
+
             $relationModel = $this->model->getRelationModel($fieldName);
 
-            $data = $options['data'];
-            $dataListOptions = array(
-                'locale' => $this->locale,
-            );
+            $query = $relationModel->createQuery($this->locale);
+            $query->setFetchUnlocalized(true);
 
-            $condition = $field->getOption('scaffold.select.condition');
+            $condition = $field->getOption('scaffold.form.condition');
             if ($condition) {
-                if (!$data) {
-                    $data = $relationModel->createData();
+                if (!$entry) {
+                    $entry = $relationModel->createEntry();
                 }
 
-                $dataArray = array();
+                $variables = array();
 
                 $reflectionHelper = $this->model->getReflectionHelper();
                 $meta = $this->model->getMeta();
@@ -389,57 +394,58 @@ class ScaffoldComponent extends AbstractComponent {
                 $belongsTo = $meta->getBelongsTo();
 
                 foreach ($properties as $name => $propertyField) {
-                    $dataArray[$name] = $reflectionHelper->getProperty($data, $name);
+                    $variables[$name] = $reflectionHelper->getProperty($data, $name);
                 }
 
                 foreach ($belongsTo as $name => $belongsToField) {
-                    $dataValue = $reflectionHelper->getProperty($data, $name);
-                    if (!$dataValue) {
+                    $value = $reflectionHelper->getProperty($entry, $name);
+                    if (!$value) {
                         continue;
                     }
 
-                    if (is_object($dataValue)) {
-                        $dataArray[$name] = $dataValue->id;
+                    if (is_object($value)) {
+                        $variables[$name] = $value->getId();
                     } else {
-                        $dataArray[$name] = $dataValue;
+                        $variables[$name] = $value;
                     }
                 }
 
-                $query = $relationModel->getDataListQuery($dataListOptions);
-                $query->addConditionWithVariables($condition, $dataArray);
-
-                $result = $query->query();
-
-                $selectOptions = $relationModel->getDataListResult($result);
-            } else {
-                $selectOptions = $relationModel->getDataList($dataListOptions);
+                $query->addConditionWithVariables($condition, $variables);
             }
+
+
+            $selectOptions = $query->query();
 
             $isMultiSelect = $field instanceof HasManyField;
-
             if (!$isMultiSelect) {
-                $selectOptions = array('' => '---') + $selectOptions;
+                $selectOptions = array('' => null) + $selectOptions;
             }
+
+            $entryFormatter = $this->model->getOrmManager()->getEntryFormatter();
+            $format = $relationModel->getMeta()->getFormat(EntryFormatter::FORMAT_TITLE);
+
+            $rowOptions['decorator'] = new FormatDecorator($entryFormatter, $format);
+            $rowOptions['value'] = 'id';
+            $type = 'object';
         } else {
-            $options = $field->getOption('scaffold.form.select.options');
-            if ($options) {
-                $selectOptions = json_decode($options, true);
+            $selectOptions = $field->getOption('scaffold.form.options');
+            if ($selectOptions) {
+                $selectOptions = json_decode($selectOptions, true);
+                foreach ($selectOptions as $index => $value) {
+                    $selectOptions[$index] = $options['translator']->translate($value);
+                }
             } else {
                 $selectOptions = array();
             }
 
             $isMultiSelect = false;
+            $type = 'select';
         }
 
-        $builder->addRow($fieldName, 'select', array(
-            'decorator' => new PropertyDecorator($this->model->getReflectionHelper(), ModelTable::PRIMARY_KEY),
-            'options' => $selectOptions,
-            'multiple' => $isMultiSelect,
-            'label' => $label,
-            'description' => $description,
-            'filters' => $filters,
-            'validators' => $validators,
-        ));
+        $rowOptions['multiple'] = $isMultiSelect;
+        $rowOptions['options'] = $selectOptions;
+
+        $builder->addRow($fieldName, $type, $rowOptions);
     }
 
     /**
@@ -449,16 +455,16 @@ class ScaffoldComponent extends AbstractComponent {
      * @param string $label Label for the field
      * @param string $description Description of the field
      * @param array $options Extra options from the controller
-     * @param integer $recursiveDepth Number of model to recurse
+     * @param integer $depth Depth for the relation fields
      * @return null
      */
-    protected function addComponentRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options, $recursiveDepth) {
+    protected function addComponentRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options, $depth) {
         $fieldName = $field->getName();
         $relationField = $this->model->getMeta()->getRelationForeignKey($fieldName);
         $relationModel = $this->model->getRelationModel($fieldName);
 
-        $formComponent = new self($this->web, $this->helper, $relationModel);
-        $formComponent->setDefaultRecursiveDepth($recursiveDepth - 1);
+        $formComponent = new self($this->web, $this->reflectionHelper, $relationModel);
+        $formComponent->setDepth($depth - 1);
         if ($relationField) {
             $formComponent->omitField($relationField);
         }
@@ -494,18 +500,16 @@ class ScaffoldComponent extends AbstractComponent {
      * @return null
      */
     protected function getLabel(Translator $translator, ModelField $field, &$label, &$description) {
-        $label = $field->getOption('label');
+        $label = $field->getOption('label.name');
         if ($label) {
-            $descriptionLabel = $label . '.description';
-            $description = $translator->translate($descriptionLabel);
-            if ($description == '[' . $descriptionLabel . ']') {
-                $description = null;
-            }
-
             $label = $translator->translate($label);
         } else {
             $label = ucfirst($field->getName());
-            $description = null;
+        }
+
+        $description = $field->getOption('label.description');
+        if ($description) {
+            $description = $translator->translate($description);
         }
     }
 
