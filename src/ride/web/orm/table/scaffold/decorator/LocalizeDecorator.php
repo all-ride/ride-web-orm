@@ -6,6 +6,7 @@ use ride\library\html\table\decorator\Decorator;
 use ride\library\html\table\Cell;
 use ride\library\html\table\Row;
 use ride\library\html\Anchor;
+use ride\library\orm\entry\LocalizedEntry;
 use ride\library\orm\model\Model;
 
 /**
@@ -77,30 +78,30 @@ class LocalizeDecorator implements Decorator {
      * @return null
      */
     public function decorate(Cell $cell, Row $row, $rowNumber, array $remainingValues) {
-        $data = $cell->getValue();
+        $entry = $cell->getValue();
         $value = '';
 
-        if (!$this->meta->isValidData($data)) {
+        if (!$this->meta->isValidEntry($entry) || !$entry instanceof LocalizedEntry) {
             $cell->setValue($value);
 
             return;
         }
 
-        if (isset($data->dataLocale) && $data->dataLocale != $this->locale) {
+        if (!$entry->isLocalized()) {
             $row->addToClass(self::STYLE_UNLOCALIZED);
         }
 
-        $ids = $this->localizedModel->getLocalizedIds($data->id);
+        $ids = $this->localizedModel->getLocalizedIds($entry->getId());
 
         foreach ($this->locales as $locale) {
-            if (array_key_exists($locale, $ids)) {
+            if (isset($ids[$locale])) {
                 $localeString = '<strong>' . $locale . '</strong>';
             } else {
                 $localeString = $locale;
             }
 
             if ($this->action !== null) {
-                $action = str_replace('%25id%25', $data->id, $this->action);
+                $action = str_replace('%25id%25', $entry->getId(), $this->action);
                 $action = str_replace('%25locale%25', $locale, $action);
                 $action = str_replace('%locale%', $locale, $action);
 

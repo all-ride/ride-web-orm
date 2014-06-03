@@ -20,24 +20,23 @@ class RestController extends AbstractController {
      * @param string $model Name of the model
      * @return null
      */
-    public function searchAction(OrmManager $orm, $model) {
+    public function searchAction(OrmManager $orm, $model, $locale = null) {
         $model = $this->getModel($orm, $model);
         if (!$model) {
             return;
         }
 
-        $result = array();
         $options = $this->request->getQueryParameters();
-
+        $locale = $this->request->getQueryParameter('locale', $locale);
         $page = $this->request->getQueryParameter('page', 1);
         $limit = $this->request->getQueryParameter('limit', 20);
 
-        $query = $model->createQuery();
-        $query->setLimit($limit, ($page - 1) * $limit);
+        $options['page'] = $page;
+        $options['limit'] = $limit;
 
-        $entries = $query->query();
-        foreach ($entries as $entry) {
-            $result[$entry->id] = $model->convertDataToArray($entry);
+        $entries = $model->find($options, $locale);
+        foreach ($entries as $index => $entry) {
+            $entries[$index] = $model->convertEntryToArray($entry);
         }
 
         $this->setJsonView($result);
@@ -49,17 +48,19 @@ class RestController extends AbstractController {
      * @param string $model Name of the model
      * @return null
      */
-    public function listAction(OrmManager $orm, $model) {
+    public function listAction(OrmManager $orm, $model, $locale = null) {
         $model = $this->getModel($orm, $model);
         if (!$model) {
             return;
         }
 
         $options = $this->request->getQueryParameters();
+        $locale = $this->request->getQueryParameter('locale', $locale);
 
-        $data = $model->getDataList($options);
+        $entries = $model->find($options, $locale);
+        $options = $model->getOptionsFromEntries($entries);
 
-        $this->setJsonView($data);
+        $this->setJsonView($options);
     }
 
     /**
@@ -68,20 +69,22 @@ class RestController extends AbstractController {
      * @param string $model Name of the model
      * @return null
      */
-    public function detailAction(OrmManager $orm, $model, $id) {
+    public function detailAction(OrmManager $orm, $model, $id, $locale = null) {
         $model = $this->getModel($orm, $model);
         if (!$model) {
             return;
         }
 
-        $data = $model->getById($id);
-        if (!$data) {
+        $locale = $this->request->getQueryParameter('locale', $locale);
+
+        $entry = $model->getById($id, $locale);
+        if (!$entry) {
             $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
 
             return;
         }
 
-        $data = $model->convertDataToArray($data);
+        $data = $model->convertEntryToArray($entry);
 
         $this->setJsonView($data);
     }

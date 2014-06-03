@@ -45,7 +45,7 @@ class ScaffoldTable extends ModelTable {
         $meta = $model->getMeta();
 
         if ($meta->isLocalized()) {
-            $this->query->setFetchUnlocalizedData(true);
+            $this->query->setFetchUnlocalized(true);
             $this->query->setWillAddIsLocalizedOrder(true);
         }
 

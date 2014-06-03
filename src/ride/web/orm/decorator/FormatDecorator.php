@@ -3,18 +3,18 @@
 namespace ride\web\orm\decorator;
 
 use ride\library\decorator\Decorator;
-use ride\library\orm\model\data\format\DataFormatter;
+use ride\library\orm\entry\format\EntryFormatter;
 
 /**
- * Decorator for a orm data object based on the data formats
+ * Decorator for a orm entry based on a format
  */
-class DataFormatDecorator implements Decorator {
+class FormatDecorator implements Decorator {
 
     /**
      * Instance of the data formatter
      * @var \ride\library\orm\model\data\format\DataFormatter
      */
-    protected $dataFormatter;
+    protected $entryFormatter;
 
     /**
      * Format to apply on the data
@@ -23,14 +23,13 @@ class DataFormatDecorator implements Decorator {
     protected $format;
 
     /**
-     * Constructs a new data decorator
-     * @param \ride\library\orm\model\data\format\DataFormatter $dataFormatter
+     * Constructs a new format decorator
+     * @param \ride\library\orm\entry\format\EntryFormatter $entryFormatter
      * @param string $format
-     * @param string $property
      * @return null
      */
-    public function __construct(DataFormatter $dataFormatter, $format) {
-        $this->dataFormatter = $dataFormatter;
+    public function __construct(EntryFormatter $entryFormatter, $format) {
+        $this->entryFormatter = $entryFormatter;
         $this->format = $format;
     }
 
@@ -44,7 +43,7 @@ class DataFormatDecorator implements Decorator {
             return $value;
         }
 
-        return $this->dataFormatter->formatData($value, $this->format);
+        return $this->entryFormatter->formatEntry($value, $this->format);
     }
 
 }
