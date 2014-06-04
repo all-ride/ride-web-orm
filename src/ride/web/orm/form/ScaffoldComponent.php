@@ -255,6 +255,7 @@ class ScaffoldComponent extends AbstractComponent {
                 continue;
             }
 
+
             $type = $field->getOption('scaffold.form.type');
             $label = null;
             $description = null;
@@ -281,7 +282,7 @@ class ScaffoldComponent extends AbstractComponent {
                 $depth = $this->depth;
             }
 
-            if ($type == 'object' || (!$type && ($depth == 0 || $field instanceof BelongsToField))) {
+            if ($type == 'object' || $type == 'select' || (!$type && ($depth == 0 || $field instanceof BelongsToField))) {
                 $this->addSelectRow($builder, $field, $label, $description, $filters, $validators, $options);
 
                 continue;
