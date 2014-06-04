@@ -517,8 +517,8 @@ class ScaffoldController extends AbstractController {
                 throw new UnauthorizedException();
             }
 
-            $data = $this->getData($id);
-            if ($data == null) {
+            $entry = $this->getEntry($id);
+            if (!$entry) {
                 $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
 
                 return;
@@ -528,14 +528,14 @@ class ScaffoldController extends AbstractController {
                 throw new UnauthorizedException();
             }
 
-            $data = $this->createData();
+            $entry = $this->createEntry();
         }
 
         // handle form
-        $form = $this->getForm($data);
+        $form = $this->getForm($entry);
         if ($form->isSubmitted()) {
             if ($this->request->getBodyParameter('cancel')) {
-                $this->response->setRedirect($this->getFormReferer($data));
+                $this->response->setRedirect($this->getFormReferer($entry));
 
                 return;
             }
@@ -543,20 +543,20 @@ class ScaffoldController extends AbstractController {
             try {
                 $form->validate();
 
-                $data = $this->getFormData($form);
+                $entry = $this->getFormEntry($form);
 
                 if ($this->isLocalized) {
-                    $data->setLocale($this->locale);
+                    $entry->setLocale($this->locale);
                 }
 
-                $this->saveData($data);
+                $this->saveEntry($entry);
 
-                $this->response->setRedirect($this->getFormReferer($data));
+                $this->response->setRedirect($this->getFormReferer($entry));
 
+                $entryFormatter = $this->orm->getEntryFormatter();
                 $format = $this->model->getMeta()->getFormat(EntryFormatter::FORMAT_TITLE);
-                $data = $this->orm->getEntryFormatter()->formatEntry($data, $format);
 
-                $this->addSuccess('success.data.saved', array('data' => $data));
+                $this->addSuccess('success.data.saved', array('data' => $entryFormatter->formatEntry($entry, $format)));
 
                 return;
             } catch (ValidationException $exception) {
@@ -595,15 +595,15 @@ class ScaffoldController extends AbstractController {
         // handle display
         $referer = $this->request->getQueryParameter(self::PARAMETER_REFERER);
 
-        $this->setFormView($form, $referer, $i18n->getLocaleCodeList(), $locale, $data);
+        $this->setFormView($form, $referer, $i18n->getLocaleCodeList(), $locale, $entry);
     }
 
     /**
      * Gets the referer for a save action
-     * @param mixed $data Data container
+     * @param mixed $entry Entry instance
      * @return string
      */
-    protected function getFormReferer($data) {
+    protected function getFormReferer($entry) {
         $referer = $this->request->getQueryParameter(self::PARAMETER_REFERER);
         if ($referer) {
             return $referer;
@@ -611,8 +611,8 @@ class ScaffoldController extends AbstractController {
 
         $pkField = $this->pkField;
 
-        if (isset($data->$pkField)) {
-            $referer = $this->getAction(self::ACTION_DETAIL, array('id' => $data->$pkField));
+        if (isset($entry->$pkField)) {
+            $referer = $this->getAction(self::ACTION_DETAIL, array('id' => $entry->$pkField));
         }
 
         if ($referer) {
@@ -623,11 +623,11 @@ class ScaffoldController extends AbstractController {
     }
 
     /**
-     * Gets the data for the edit action
-     * @param integer $id Primary key of the data to retrieve
-     * @return mixed Data object for the provided id
+     * Gets an entry
+     * @param integer $id Primary key of the entry
+     * @return mixed Instance of the entry with the provided id
      */
-    protected function getData($id) {
+    protected function getEntry($id) {
         $query = $this->model->createQuery($this->locale);
         $query->setFetchUnlocalized(true);
         $query->addCondition('{' . $this->pkField . '} = %1%', $id);
@@ -636,62 +636,62 @@ class ScaffoldController extends AbstractController {
     }
 
     /**
-     * Creates a new data container for the add action
+     * Creates a new entry for the add action
      * @return mixed
      */
-    protected function createData() {
+    protected function createEntry() {
         return $this->model->createEntry();
     }
 
     /**
-     * Gets the data object from the provided form
+     * Gets the entry from the provided form
      * @param \ride\library\html\form\Form $form
-     * @return mixed Data object
+     * @return mixed Entry instance
      */
-    protected function getFormData(Form $form) {
+    protected function getFormEntry(Form $form) {
         return $form->getData();
     }
 
     /**
-     * Saves the data to the model
-     * @param mixed $data
+     * Saves an entry to the model
+     * @param mixed $entry Entry to save
      * @return null
      */
-    protected function saveData($data) {
-        $this->model->save($data);
+    protected function saveEntry($entry) {
+        $this->model->save($entry);
     }
 
     /**
-     * Action to delete the data from the model
-     * @param array $data Array of primary keys
+     * Action to delete the entries from the model
+     * @param array $entries Array of entries or entry primary keys
      * @return null
      */
-    public function delete($data) {
-        if (!$data || !$this->isDeletable()) {
+    public function delete($entries) {
+        if (!$entries || !$this->isDeletable()) {
             return;
         }
 
-        $referer = $this->request->getHeader(Header::HEADER_REFERER);
-        if (!$referer) {
-            $referer = $this->request->getUrl();
-        }
+        $entryFormatter = $this->orm->getEntryFormatter();
+        $format = $this->model->getMeta()->getFormat(EntryFormatter::FORMAT_TITLE);
 
-        $format = $this->model->getMeta()->getDataFormat(DataFormatter::FORMAT_TITLE);
+        foreach ($entries as $entry) {
+            if (is_numeric($entry)) {
+                $entryId = $entry;
+            } else {
+                $entryId = $entry->id;
+            }
 
-        $dataFormatter = $this->orm->getDataFormatter();
-
-        $this->response->setRedirect($referer);
-
-        foreach ($data as $id) {
-            if (!$this->isDeletable($id, false)) {
+            if (!$this->isDeletable($entryId, false)) {
 
             } else {
                 try {
-                    $data = $this->getData($id);
+                    if (is_numeric($entry)) {
+                        $entry = $this->model->createProxy($entry);
+                    }
 
-                    $this->model->delete($data);
+                    $entry = $this->model->delete($entry);
 
-                    $this->addSuccess('success.data.deleted', array('data' => $dataFormatter->formatData($data, $format)));
+                    $this->addSuccess('success.data.deleted', array('data' => $entryFormatter->formatEntry($entry, $format)));
                 } catch (ValidationException $exception) {
                     $errors = $exception->getAllErrors();
                     foreach ($errors as $fieldName => $fieldErrors) {
@@ -702,18 +702,25 @@ class ScaffoldController extends AbstractController {
                 }
             }
         }
+
+        $referer = $this->request->getHeader(Header::HEADER_REFERER);
+        if (!$referer) {
+            $referer = $this->request->getUrl();
+        }
+
+        $this->response->setRedirect($referer);
     }
 
     /**
      * Sets the form view for the scaffolding to the response
-     * @param \ride\library\form\Form $form Form of the data
+     * @param \ride\library\form\Form $form Form of the entry
      * @param string $referer URL of the referer of the form action
      * @param array $locales Available locale codes
      * @param string $locale Code of the current locale
-     * @param mixed $data Data object
+     * @param mixed $entry Entry instance
      * @return null
      */
-    protected function setFormView(Form $form, $referer, array $locales, $locale, $data = null) {
+    protected function setFormView(Form $form, $referer, array $locales, $locale, $entry = null) {
         if ($referer) {
             $urlReferer = '?' . self::PARAMETER_REFERER . '=' . urlencode($referer);
         } else {
@@ -721,8 +728,8 @@ class ScaffoldController extends AbstractController {
         }
 
         $meta = $this->model->getMeta();
-        $title = $this->getViewTitle($data);
-        $subtitle = $this->getViewSubtitle($data);
+        $title = $this->getViewTitle($entry);
+        $subtitle = $this->getViewSubtitle($entry);
         $action = $this->request->getUrl() . $urlReferer;
 
         $pkField = $this->pkField;
@@ -732,7 +739,7 @@ class ScaffoldController extends AbstractController {
             'form' => $form->getView(),
             'action' => $action,
             'referer' => $referer,
-            'data' => $data,
+            'entry' => $entry,
             'title' => $title,
             'subtitle' => $subtitle,
             'localizeUrl' => null,
@@ -741,8 +748,8 @@ class ScaffoldController extends AbstractController {
         if ($this->model->getMeta()->isLocalized()) {
             $variables['locales'] = $locales;
             $variables['locale'] = $locale;
-            if ($data && $data->$pkField) {
-                $variables['localizeUrl'] = $this->getAction(self::ACTION_EDIT, array('locale' => '%locale%', 'id' => $data->$pkField)) . $urlReferer;
+            if ($entry && $entry->$pkField) {
+                $variables['localizeUrl'] = $this->getAction(self::ACTION_EDIT, array('locale' => '%locale%', 'id' => $entry->$pkField)) . $urlReferer;
             } else {
                 $variables['localizeUrl'] = $this->getAction(self::ACTION_ADD, array('locale' => '%locale%'));
             }
@@ -757,10 +764,11 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Gets a title for the view
-     * @param mixed $data The data which is being displayed, used only with the form view
+     * @param mixed $entry Entry which is being displayed, used only with the
+     * form view
      * @return string
      */
-    protected function getViewTitle($data = null) {
+    protected function getViewTitle($entry = null) {
         if ($this->translationTitle) {
             return $this->getTranslator()->translate($this->translationTitle);
         }
@@ -770,7 +778,8 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Gets a subtitle for the view
-     * @param mixed $data The data which is being displayed, used only with the form view
+     * @param mixed $entry Entry which is being displayed, used only with the
+     * form view
      * @return string
      */
     protected function getViewSubtitle($entry = null) {
@@ -786,11 +795,11 @@ class ScaffoldController extends AbstractController {
     }
 
     /**
-     * Gets the form for the data of the model
-     * @param mixed $data Data object to preset the form
+     * Gets the form for an entry of the model
+     * @param mixed $entry Entry instance to preset the form
      * @return \ride\library\form\Form
      */
-    protected function getForm($data = null) {
+    protected function getForm($entry = null) {
         $web = $this->dependencyInjector->get('ride\\web\\WebApplication');
         $reflectionHelper = $this->model->getReflectionHelper();
 
@@ -807,9 +816,8 @@ class ScaffoldController extends AbstractController {
 
         $this->component->setLocale($this->locale);
 
-        $formBuilder = $this->createFormBuilder($data);
+        $formBuilder = $this->createFormBuilder($entry);
         $formBuilder->setComponent($this->component);
-        $formBuilder->setRequest($this->request);
 
         return $formBuilder->build();
     }
@@ -850,7 +858,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Gets the URL of the provided route
-     * @param string $routeId The id of the route
+     * @param string $routeId Id of the route
      * @param array $arguments Path arguments for the route
      * @return string
      * @throws \ride\library\router\exception\RouterException If the route is
@@ -866,9 +874,10 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Checks if this model or a record thereof is deletable for the current user
-     * @param integer $id The id of the data
-     * @param boolean $addErrorToResponse Set to true to add an error messsage and the base view to the response when the data is not deletable
-     * @return boolean True when the data is deletable, false otherwise
+     * @param integer $id Id of the entry
+     * @param boolean $addErrorToResponse Set to true to add an error messsage
+     * and the base view to the response when the entry is not deletable
+     * @return boolean True when the entry is deletable, false otherwise
      */
     protected function isDeletable($id = null, $addErrorToResponse = true) {
         return true;
@@ -876,9 +885,10 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Checks if this model or a record thereof is readable for the current user
-     * @param integer $id The id of the data
-     * @param boolean $addErrorToResponse Set to true to add an error messsage and the base view to the response when the data is not readable
-     * @return boolean True when the data is readable, false otherwise
+     * @param integer $id Id of the entry
+     * @param boolean $addErrorToResponse Set to true to add an error messsage
+     * and the base view to the response when the entry is not readable
+     * @return boolean True when the entry is readable, false otherwise
      */
     protected function isReadable($id = null, $addErrorToResponse = true) {
         return true;
@@ -886,9 +896,10 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Checks if this model or a record thereof is writable for the current user
-     * @param integer $id The id of the data
-     * @param boolean $addErrorToResponse Set to true to add an error messsage and the base view to the response when the data is not writable
-     * @return boolean True when the data is writable, false otherwise
+     * @param integer $id Id of the entry
+     * @param boolean $addErrorToResponse Set to true to add an error messsage
+     * and the base view to the response when the entry is not writable
+     * @return boolean True when the entry is writable, false otherwise
      */
     protected function isWritable($id = null, $addErrorToResponse = true) {
         return true;
