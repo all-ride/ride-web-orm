@@ -317,6 +317,8 @@ class ScaffoldComponent extends AbstractComponent {
 
         if ($type == 'float') {
             $type = 'number';
+
+            $rowOptions['attributes']['step'] = 'any';
         }
 
         if ($type != 'label') {
