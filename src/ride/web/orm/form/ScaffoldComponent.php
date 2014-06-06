@@ -416,7 +416,6 @@ class ScaffoldComponent extends AbstractComponent {
                 $query->addConditionWithVariables($condition, $variables);
             }
 
-
             $selectOptions = $query->query();
 
             $isMultiSelect = $field instanceof HasManyField;
