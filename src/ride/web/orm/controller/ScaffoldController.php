@@ -289,7 +289,7 @@ class ScaffoldController extends AbstractController {
             if ($this->orderMethod) {
                 $field = $meta->getField($this->orderMethod);
 
-                $label = $field->getOption('label');
+                $label = $field->getOption('label.name');
                 if ($label) {
                     $this->orderMethod = $this->getTranslator()->translate($label);
                 } else {
