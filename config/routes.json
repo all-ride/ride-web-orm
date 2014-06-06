@@ -7,6 +7,12 @@
             "id": "system.orm"
         },
         {
+            "path": "/admin/system/orm/log",
+            "controller": "ride\\web\\orm\\controller\\EntryLogController",
+            "action": "indexAction",
+            "id": "system.orm.log"
+        },
+        {
             "path": "/admin/system/orm/model/%model%",
             "controller": "ride\\web\\orm\\controller\\BuilderController",
             "action": "modelAction",

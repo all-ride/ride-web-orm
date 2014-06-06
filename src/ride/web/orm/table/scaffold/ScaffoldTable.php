@@ -125,12 +125,11 @@ class ScaffoldTable extends ModelTable {
                 $orderStatements = $fieldName;
             } else {
                 $field = $meta->getField($fieldName);
-
                 if (!$field->getOption('scaffold.order') || $field instanceof RelationField) {
                     continue;
                 }
 
-                $label = $field->getOption('label');
+                $label = $field->getOption('label.name');
                 if ($this->translator && $label) {
                     $label = $this->translator->translate($label);
                 } else {
@@ -149,34 +148,23 @@ class ScaffoldTable extends ModelTable {
         }
 
         // set initial order
-        $order = $meta->getOption('scaffold.query.order');
-        if (!$order) {
+        $orderField = $meta->getOption('order.field');
+        if (!$orderField) {
             return;
         }
 
-        if (strpos($order, ' ') !== false) {
-            list($orderFieldName, $orderDirection) = explode(' ', $order, 2);
-            $orderDirection = strtoupper($orderDirection);
-        } else {
-            $orderFieldName = $order;
-            $orderDirection = 'ASC';
-        }
-
-        $trimmedOrderFieldName = substr($orderFieldName, 1, -1);
-        if ($orderFieldName == '{' . $trimmedOrderFieldName . '}') {
-            $orderFieldName = $trimmedOrderFieldName;
-        }
-
+        $orderDirection = $meta->getOption('order.direction');
         if ($orderDirection != 'ASC' && $orderDirection != 'DESC') {
             $orderDirection = 'ASC';
         }
 
-        $field = $meta->getField($orderFieldName);
-        $label = $field->getOption('label');
+        $field = $meta->getField($orderField);
+
+        $label = $field->getOption('label.name');
         if ($this->translator && $label) {
             $orderMethod = $this->translator->translate($label);
         } else {
-            $orderMethod = ucfirst($orderFieldName);
+            $orderMethod = ucfirst($orderField);
         }
 
         $this->setOrderMethod($orderMethod);
