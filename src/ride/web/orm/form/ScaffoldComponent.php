@@ -313,10 +313,13 @@ class ScaffoldComponent extends AbstractComponent {
             'label' => $label,
             'description' => $description,
             'filters' => $filters,
+            'attributes' => array(),
         );
 
         if ($type == 'float') {
             $type = 'number';
+
+            $rowOptions['attributes']['step'] = 'any';
         }
 
         if ($type != 'label') {
@@ -413,7 +416,6 @@ class ScaffoldComponent extends AbstractComponent {
 
                 $query->addConditionWithVariables($condition, $variables);
             }
-
 
             $selectOptions = $query->query();
 
