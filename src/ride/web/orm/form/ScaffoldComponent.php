@@ -313,6 +313,7 @@ class ScaffoldComponent extends AbstractComponent {
             'label' => $label,
             'description' => $description,
             'filters' => $filters,
+            'attributes' => array(),
         );
 
         if ($type == 'float') {
