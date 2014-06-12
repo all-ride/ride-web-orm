@@ -200,6 +200,18 @@ class ScaffoldController extends AbstractController {
     protected $routes;
 
     /**
+     * Path to the template resource for the form action
+     * @var string
+     */
+    protected $templateIndex;
+
+    /**
+     * Path to the template resource for the form action
+     * @var string
+     */
+    protected $templateForm;
+
+    /**
      * Constructs a new scaffold controller
      * @param string $modelName Name of the model to scaffold, if not provided the name will be retrieved from the class name
      * @param boolean|array $search Boolean to enable or disable the search functionality, an array of field names to query is also allowed to enable the search
@@ -232,6 +244,9 @@ class ScaffoldController extends AbstractController {
             self::ACTION_EDIT => self::ROUTE_EDIT,
             self::ACTION_EXPORT => self::ROUTE_EXPORT,
         );
+
+        $this->templateIndex = 'orm/scaffold/index';
+        $this->templateForm = 'orm/scaffold/form';
 
         $this->translationTitle = $meta->getOption('scaffold.title');
         $this->translationAdd = $meta->getOption('scaffold.title.add');
@@ -364,7 +379,7 @@ class ScaffoldController extends AbstractController {
             $variables['localizeUrl'] = $this->getAction(self::ACTION_INDEX, array('locale' => '%locale%'));
         }
 
-        return $this->setTemplateView('orm/scaffold/index', $variables);
+        return $this->setTemplateView($this->templateIndex, $variables);
     }
 
     /**
@@ -755,7 +770,7 @@ class ScaffoldController extends AbstractController {
             }
         }
 
-        $view = $this->setTemplateView('orm/scaffold/form', $variables);
+        $view = $this->setTemplateView($this->templateForm, $variables);
 
         $form->processView($view);
 
