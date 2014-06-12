@@ -364,7 +364,7 @@ class ScaffoldController extends AbstractController {
             $variables['localizeUrl'] = $this->getAction(self::ACTION_INDEX, array('locale' => '%locale%'));
         }
 
-        $this->setTemplateView('orm/scaffold/index', $variables);
+        return $this->setTemplateView('orm/scaffold/index', $variables);
     }
 
     /**
