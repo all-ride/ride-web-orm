@@ -4,6 +4,8 @@
     "label.class.entry": "Naam van de entry klasse",
     "label.class.model": "Naam van de model klasse",
     "label.class.proxy": "Naam van de entry proxy klasse",
+    "label.date.added": "Datum toevoeging",
+    "label.date.modified": "Datum laatste wijziging",
     "label.export": "Exporteren: ",
     "label.export.to": "Exporteer naar *.%format%",
     "label.field.type": "Type %type%",

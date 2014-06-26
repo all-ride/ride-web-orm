@@ -4,6 +4,8 @@
     "label.class.entry": "Name of the entry class",
     "label.class.model": "Name of the model class",
     "label.class.proxy": "Name of the entry proxy class",
+    "label.date.added": "Date Added",
+    "label.date.modified": "Date Modified",
     "label.export": "Export: ",
     "label.export.to": "Export to *.%format%",
     "label.field.type": "Type %type%",
