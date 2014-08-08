@@ -113,7 +113,7 @@ class ScaffoldController extends AbstractController {
      * Route for the edit action
      * @var string
      */
-    const ROUTE_EDIT = 'system.orm.scaffold.action.data';
+    const ROUTE_ENTRY = 'system.orm.scaffold.action.entry';
 
     /**
      * Route for the export action
@@ -241,7 +241,7 @@ class ScaffoldController extends AbstractController {
         $this->routes = array(
             self::ACTION_INDEX => self::ROUTE_INDEX,
             self::ACTION_ADD => self::ROUTE_ADD,
-            self::ACTION_EDIT => self::ROUTE_EDIT,
+            self::ACTION_EDIT => self::ROUTE_ENTRY,
             self::ACTION_EXPORT => self::ROUTE_EXPORT,
         );
 
@@ -314,7 +314,7 @@ class ScaffoldController extends AbstractController {
         }
 
         $baseUrl = $this->getAction(self::ACTION_INDEX);
-        $table = $this->getTable($this->getAction(self::ACTION_DETAIL));
+        $table = $this->getTable($this->getAction(self::ACTION_DETAIL, array('id' => '%id%')));
 
         $form = $this->processTable($table, $baseUrl, 10, $this->orderMethod, $this->orderDirection);
         if ($this->response->willRedirect() || $this->response->getView()) {
@@ -480,7 +480,7 @@ class ScaffoldController extends AbstractController {
     protected function addTableDecorators(FormTable $table, $detailAction) {
         $imageUrlGenerator = $this->dependencyInjector->get('ride\\library\\image\\ImageUrlGenerator');
 
-        $table->addDecorator(new DataDecorator($imageUrlGenerator, $this->model, $detailAction, $this->pkField));
+        $table->addDecorator(new DataDecorator($this->model, $imageUrlGenerator, $detailAction, $this->pkField));
     }
 
     /**
@@ -501,9 +501,23 @@ class ScaffoldController extends AbstractController {
     }
 
     /**
-     * Action to set a form with a data object to the view
-     * @param integer $id Primary key of the data object
+     * Action to view the details of a entry
      * @param string $locale Locale code of the data
+     * @param integer $id Primary key of the entry
+     * @return null
+     */
+    public function detailAction(I18n $i18n, $locale, $id) {
+        $this->locale = $i18n->getLocale($locale)->getCode();
+
+        $url = $this->getAction(self::ACTION_EDIT, array('locale' => $this->locale, 'id' => $id));
+
+        $this->response->setRedirect($url);
+    }
+
+    /**
+     * Action to show and handle a form with a entry to the view
+     * @param string $locale Locale code of the data
+     * @param integer $id Primary key of the data object
      * @return null
      */
     public function formAction(I18n $i18n, $locale = null, $id = null) {
@@ -513,7 +527,7 @@ class ScaffoldController extends AbstractController {
 
             if ($this->model->getMeta()->isLocalized()) {
                 if ($id) {
-                    $url = $this->getAction(self::ACTION_EDIT, array('locale' => $this->locale, $this->pkField => $id));
+                    $url = $this->getAction(self::ACTION_EDIT, array('locale' => $this->locale, 'id' => $id));
                 } else {
                     $url = $this->getAction(self::ACTION_ADD, array('locale' => $this->locale));
                 }
@@ -815,26 +829,36 @@ class ScaffoldController extends AbstractController {
      * @return \ride\library\form\Form
      */
     protected function getForm($entry = null) {
-        $web = $this->dependencyInjector->get('ride\\web\\WebApplication');
-        $reflectionHelper = $this->model->getReflectionHelper();
-
-        $component = $this->model->getMeta()->getOption('scaffold.component');
-        if ($component) {
-            $this->component = new $component($web, $reflectionHelper, $this->model);
-        } else {
-            $this->component = new ScaffoldComponent($web, $reflectionHelper, $this->model);
-        }
-
-        if ($this->component instanceof ScaffoldComponent) {
-            $this->component->setDepth($this->formDepth);
-        }
-
-        $this->component->setLocale($this->locale);
+        $this->component = $this->getFormComponent();
 
         $formBuilder = $this->createFormBuilder($entry);
         $formBuilder->setComponent($this->component);
 
         return $formBuilder->build();
+    }
+
+    /**
+     * Gets the component for the form
+     * @return \ride\library\form\component\Component
+     */
+    protected function getFormComponent() {
+        $web = $this->dependencyInjector->get('ride\\web\\WebApplication');
+        $reflectionHelper = $this->model->getReflectionHelper();
+
+        $component = $this->model->getMeta()->getOption('scaffold.component');
+        if ($component) {
+            $component = new $component($web, $reflectionHelper, $this->model);
+        } else {
+            $component = new ScaffoldComponent($web, $reflectionHelper, $this->model);
+        }
+
+        if ($component instanceof ScaffoldComponent) {
+            $component->setDepth($this->formDepth);
+        }
+
+        $component->setLocale($this->locale);
+
+        return $component;
     }
 
     /**

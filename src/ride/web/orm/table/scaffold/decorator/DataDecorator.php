@@ -39,7 +39,7 @@ class DataDecorator extends LibraryDataDecorator {
      * @param string $defaultImage Path to the default image of the data
      * @return null
      */
-    public function __construct(ImageUrlGenerator $imageUrlGenerator, Model $model, $action = null, $pkField = null, $defaultImage = null) {
+    public function __construct(Model $model, ImageUrlGenerator $imageUrlGenerator = null, $action = null, $pkField = null, $defaultImage = null) {
         parent::__construct($model->getReflectionHelper(), $action, $imageUrlGenerator, $defaultImage);
 
         if ($pkField) {

@@ -40,7 +40,7 @@
             "path": "/admin/system/orm/model/%model%/scaffold/%locale%/%id%/%action%",
             "controller": "ride\\web\\orm\\controller\\BuilderController",
             "action": "scaffoldAction",
-            "id": "system.orm.scaffold.action.data"
+            "id": "system.orm.scaffold.action.entry"
         },
         {
             "path": "/admin/system/orm/model/%model%/scaffold/%locale%/export/%format%",

@@ -175,6 +175,23 @@ class ScaffoldComponent extends AbstractComponent {
     }
 
     /**
+     * Gets the added row names
+     * @return array Array with the field name as key and value
+     */
+    public function getRowNames() {
+        $fields = $this->model->getMeta()->getFields();
+        foreach ($fields as $fieldName => $field) {
+            if (isset($this->omittedFields[$fieldName])) {
+                unset($fields[$fieldName]);
+            } else {
+                $fields[$fieldName] = $fieldName;
+            }
+        }
+
+        return $fields;
+    }
+
+    /**
      * Parse the entry to form values for the component rows
      * @param mixed $data
      * @return array $data
@@ -241,7 +258,11 @@ class ScaffoldComponent extends AbstractComponent {
      */
     public function prepareForm(FormBuilder $builder, array $options) {
         $meta = $this->model->getMeta();
+
         $validationConstraint = $this->model->getValidationConstraint();
+        if ($validationConstraint && get_class($validationConstraint) !== 'ride\\library\\validation\\constraint\\GenericConstraint') {
+            $validationConstraint = null;
+        }
 
         $fields = $meta->getFields();
         foreach ($fields as $fieldName => $field) {
@@ -254,7 +275,6 @@ class ScaffoldComponent extends AbstractComponent {
 
                 continue;
             }
-
 
             $type = $field->getOption('scaffold.form.type');
             $label = null;
