@@ -168,6 +168,17 @@ class BuilderController extends AbstractController {
                 $actionArguments['id'] = $id;
 
                 break;
+            case ScaffoldController::ACTION_DETAIL:
+                if ($id === null) {
+                    $this->response->setStatusCode(404);
+
+                    return;
+                }
+
+                $controllerAction = 'detailAction';
+                $actionArguments['id'] = $id;
+
+                break;
             default:
                 $this->response->setStatusCode(404);
 
@@ -178,8 +189,12 @@ class BuilderController extends AbstractController {
 
         $model = $orm->getModel($modelName);
 
-        $className = $model->getMeta()->getOption('scaffold.controller', 'ride\\web\\orm\\controller\\ScaffoldController');
-        $controller = new $className($model);
+        $className = $model->getMeta()->getOption('scaffold.controller');
+        if ($className) {
+            $controller = $this->dependencyInjector->get($className);
+        } else {
+            $controller = $this->dependencyInjector->get('ride\\web\\orm\\controller\\ScaffoldController', null, array('model' => $model));
+        }
 
         $route = $this->request->getRoute();
         $path = $route->getPath() . '/' . $modelName . '/' . $locale . ($id ? '/' . $id : '') . ($action ? '/' . $action : '');
