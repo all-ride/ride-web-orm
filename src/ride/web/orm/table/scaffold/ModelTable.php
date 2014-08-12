@@ -12,6 +12,7 @@ use ride\library\html\table\FormTable;
 use ride\library\html\Element;
 use ride\library\orm\definition\field\BelongsToField;
 use ride\library\orm\definition\field\PropertyField;
+use ride\library\orm\definition\ModelTable as LibModelTable;
 use ride\library\orm\model\data\format\DataFormatter;
 use ride\library\orm\model\Model;
 
@@ -49,7 +50,7 @@ class ModelTable extends FormTable {
     public function __construct(Model $model, $locale = null) {
         $this->model = $model;
         $this->query = $model->createQuery($locale);
-        $this->pkField = null;
+        $this->pkField = LibModelTable::PRIMARY_KEY;
 
         parent::__construct(array());
     }
