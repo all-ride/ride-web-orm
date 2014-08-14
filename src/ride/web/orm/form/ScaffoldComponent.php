@@ -489,7 +489,13 @@ class ScaffoldComponent extends AbstractComponent {
         $formComponent = new self($this->web, $this->reflectionHelper, $relationModel);
         $formComponent->setDepth($depth - 1);
         if ($relationField) {
-            $formComponent->omitField($relationField);
+            if (!is_array($relationField)) {
+                $relationField = array($relationField);
+            }
+
+            foreach ($relationField as $omitField) {
+                $formComponent->omitField($omitField);
+            }
         }
 
         if ($field instanceof BelongsToField) {
