@@ -400,6 +400,7 @@ class ScaffoldComponent extends AbstractComponent {
             $entry = $options['data'];
 
             $relationModel = $this->model->getRelationModel($fieldName);
+            $relationMeta = $relationModel->getMeta();
 
             $query = $relationModel->createQuery($this->locale);
             $query->setFetchUnlocalized(true);
@@ -435,6 +436,11 @@ class ScaffoldComponent extends AbstractComponent {
                 }
 
                 $query->addConditionWithVariables($condition, $variables);
+            }
+
+            $orderField = $relationMeta->getOption('order.field');
+            if ($orderField) {
+                $query->addOrderBy('{' . $orderField . '} ' . $relationMeta->getOption('order.direction', 'ASC'));
             }
 
             $selectOptions = $query->query();
