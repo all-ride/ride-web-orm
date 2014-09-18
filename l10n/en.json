@@ -1,4 +1,5 @@
 {
+    "button.delete.locale": "Delete translation",
     "button.scaffold": "Scaffold",
     "error.validation.version": "Your data is outdated. You are trying to save version %yourVersion% over version %currentVersion%. Try updating your data first.",
     "label.class.entry": "Name of the entry class",
