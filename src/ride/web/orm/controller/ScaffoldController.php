@@ -489,15 +489,19 @@ class ScaffoldController extends AbstractController {
      * @return null
      */
     protected function addTableActions(FormTable $table) {
-        if ($this->isDeletable(null, false)) {
-            $translator = $this->getTranslator();
+        if (!$this->isDeletable(null, false)) {
+            return;
+        }
 
-            $table->addAction(
-                $translator->translate('button.delete'),
-                array($this, 'delete'),
-                $translator->translate('label.table.confirm.delete')
-            );
+        $translator = $this->getTranslator();
 
+        $table->addAction(
+            $translator->translate('button.delete'),
+            array($this, 'delete'),
+            $translator->translate('label.table.confirm.delete')
+        );
+
+        if ($this->isLocalized) {
             $table->addAction(
                 $translator->translate('button.delete.locale'),
                 array($this, 'deletelocale'),
@@ -745,6 +749,7 @@ class ScaffoldController extends AbstractController {
 
         $this->response->setRedirect($referer);
     }
+
     /**
      * Action to delete the locale entry from the model
      * @param array $entries Array of entries or entry primary keys
@@ -758,8 +763,8 @@ class ScaffoldController extends AbstractController {
         $entryFormatter = $this->orm->getEntryFormatter();
         $format = $this->model->getMeta()->getFormat(EntryFormatter::FORMAT_TITLE);
         $locale = $this->locale;
-        foreach ($entries as $entry) {
 
+        foreach ($entries as $entry) {
             if (is_numeric($entry)) {
                 $entryId = $entry;
             } else {
@@ -771,16 +776,17 @@ class ScaffoldController extends AbstractController {
             } else {
                 try {
                     if (is_numeric($entry)) {
-
                         $entry = $this->model->createProxy($entry, $locale);
                     }
 
                     $entryLocale = $this->model->deleteLocale($entry, $locale);
 
                     if (!$entryLocale){
-                        $this->addError('error.translation.empty', array('data' => $entryFormatter->formatEntry($entry, $format)));
+                        $this->addError('error.delete.translation.empty', array('data' => $entryFormatter->formatEntry($entry, $format)));
+
                         return;
                     }
+
                     $this->addSuccess('success.data.deleted', array('data' => $entryFormatter->formatEntry($entry, $format)));
                 } catch (ValidationException $exception) {
                     $errors = $exception->getAllErrors();
@@ -799,7 +805,6 @@ class ScaffoldController extends AbstractController {
         }
 
         $this->response->setRedirect($referer);
-
     }
 
     /**
