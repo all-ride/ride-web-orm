@@ -1,5 +1,7 @@
 {
+    "button.delete.locale": "Verwijder vertaling",
     "button.scaffold": "Scaffold",
+    "error.delete.translation.empty": "%data% is geen geldige vertaling in deze taal.",
     "error.validation.version": "Your data is outdated. You are trying to save version %yourVersion% over version %currentVersion%. Try updating your data first.",
     "label.class.entry": "Naam van de entry klasse",
     "label.class.model": "Naam van de model klasse",

@@ -489,12 +489,22 @@ class ScaffoldController extends AbstractController {
      * @return null
      */
     protected function addTableActions(FormTable $table) {
-        if ($this->isDeletable(null, false)) {
-            $translator = $this->getTranslator();
+        if (!$this->isDeletable(null, false)) {
+            return;
+        }
 
+        $translator = $this->getTranslator();
+
+        $table->addAction(
+            $translator->translate('button.delete'),
+            array($this, 'delete'),
+            $translator->translate('label.table.confirm.delete')
+        );
+
+        if ($this->isLocalized) {
             $table->addAction(
-                $translator->translate('button.delete'),
-                array($this, 'delete'),
+                $translator->translate('button.delete.locale'),
+                array($this, 'deletelocale'),
                 $translator->translate('label.table.confirm.delete')
             );
         }
@@ -674,7 +684,7 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Gets the entry from the provided form
-     * @param \ride\library\html\form\Form $form
+     * @param \ride\library\form\Form $form
      * @return mixed Entry instance
      */
     protected function getFormEntry(Form $form) {
@@ -719,6 +729,63 @@ class ScaffoldController extends AbstractController {
                     }
 
                     $entry = $this->model->delete($entry);
+
+                    $this->addSuccess('success.data.deleted', array('data' => $entryFormatter->formatEntry($entry, $format)));
+                } catch (ValidationException $exception) {
+                    $errors = $exception->getAllErrors();
+                    foreach ($errors as $fieldName => $fieldErrors) {
+                        foreach ($fieldErrors as $fieldError) {
+                            $this->addError($fieldError->getCode(), $fieldError->getParameters());
+                        }
+                    }
+                }
+            }
+        }
+
+        $referer = $this->request->getHeader(Header::HEADER_REFERER);
+        if (!$referer) {
+            $referer = $this->request->getUrl();
+        }
+
+        $this->response->setRedirect($referer);
+    }
+
+    /**
+     * Action to delete the locale entry from the model
+     * @param array $entries Array of entries or entry primary keys
+     * @return null
+     */
+    public function deleteLocale($entries){
+        if (!$entries || !$this->isDeletable()) {
+            return;
+        }
+
+        $entryFormatter = $this->orm->getEntryFormatter();
+        $format = $this->model->getMeta()->getFormat(EntryFormatter::FORMAT_TITLE);
+        $locale = $this->locale;
+
+        foreach ($entries as $entry) {
+            if (is_numeric($entry)) {
+                $entryId = $entry;
+            } else {
+                $entryId = $entry->id;
+            }
+
+            if (!$this->isDeletable($entryId, false)) {
+
+            } else {
+                try {
+                    if (is_numeric($entry)) {
+                        $entry = $this->model->createProxy($entry, $locale);
+                    }
+
+                    $entryLocale = $this->model->deleteLocale($entry, $locale);
+
+                    if (!$entryLocale){
+                        $this->addError('error.delete.translation.empty', array('data' => $entryFormatter->formatEntry($entry, $format)));
+
+                        return;
+                    }
 
                     $this->addSuccess('success.data.deleted', array('data' => $entryFormatter->formatEntry($entry, $format)));
                 } catch (ValidationException $exception) {
