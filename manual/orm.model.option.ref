@@ -1,7 +1,8 @@
-behaviour.date              Enable dated behaviour
-behaviour.log               Enable entry log
-behaviour.slug              Enable slug creation, can be a comma separated list with property names to base the slug upon.
-behaviour.version           Enable entry versioning
+behaviour.date              Enable dated behaviour: value ignored
+behaviour.log               Enable entry log: value ignored
+behaviour.slug              Enable slug creation: value should be a comma separated list with property names to base the slug upon.
+behaviour.owner             Enable owner field: true to use the User model as link, false to use the username
+behaviour.version           Enable entry versioning: value ignored
 rest.expose                 Expose the model to the REST service
 order.field                 Name of the default order field
 order.direction             Direction of the default order
