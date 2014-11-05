@@ -289,7 +289,6 @@ class ScaffoldComponent extends AbstractComponent {
                 $filters = array();
                 $validators = array();
             }
-
             if (($type != 'select' && !$field instanceof RelationField) || $type == 'tags') {
                 $this->addPropertyRow($builder, $field, $label, $description, $filters, $validators, $options, $type);
 
@@ -489,12 +488,14 @@ class ScaffoldComponent extends AbstractComponent {
      */
     protected function addComponentRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options, $depth) {
         $fieldName = $field->getName();
-        $relationField = $this->model->getMeta()->getRelationForeignKey($fieldName);
         $relationModel = $this->model->getRelationModel($fieldName);
+        $relationMeta = $this->model->getMeta()->getRelationMeta($fieldName);
 
         $formComponent = new self($this->web, $this->reflectionHelper, $relationModel);
         $formComponent->setDepth($depth - 1);
-        if ($relationField) {
+        if ($relationMeta && !$relationMeta->isHasManyAndBelongsToMany()) {
+            $relationField = $relationMeta->getForeignKey();
+
             if (!is_array($relationField)) {
                 $relationField = array($relationField);
             }
