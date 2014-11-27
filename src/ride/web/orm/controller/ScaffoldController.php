@@ -504,7 +504,7 @@ class ScaffoldController extends AbstractController {
         if ($this->isLocalized) {
             $table->addAction(
                 $translator->translate('button.delete.locale'),
-                array($this, 'deletelocale'),
+                array($this, 'deleteLocalized'),
                 $translator->translate('label.table.confirm.delete')
             );
         }
@@ -755,7 +755,7 @@ class ScaffoldController extends AbstractController {
      * @param array $entries Array of entries or entry primary keys
      * @return null
      */
-    public function deleteLocale($entries){
+    public function deleteLocalized($entries){
         if (!$entries || !$this->isDeletable()) {
             return;
         }
@@ -779,7 +779,7 @@ class ScaffoldController extends AbstractController {
                         $entry = $this->model->createProxy($entry, $locale);
                     }
 
-                    $entryLocale = $this->model->deleteLocale($entry, $locale);
+                    $entryLocale = $this->model->deleteLocalized($entry, $locale);
 
                     if (!$entryLocale){
                         $this->addError('error.delete.translation.empty', array('data' => $entryFormatter->formatEntry($entry, $format)));

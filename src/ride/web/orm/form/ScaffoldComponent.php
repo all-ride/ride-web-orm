@@ -289,6 +289,13 @@ class ScaffoldComponent extends AbstractComponent {
                 $filters = array();
                 $validators = array();
             }
+
+            if ($type == 'option') {
+                $this->addSelectRow($builder, $field, $label, $description, $filters, $validators, $options, $type);
+
+                continue;
+            }
+
             if (($type != 'select' && !$field instanceof RelationField) || $type == 'tags') {
                 $this->addPropertyRow($builder, $field, $label, $description, $filters, $validators, $options, $type);
 
@@ -302,7 +309,7 @@ class ScaffoldComponent extends AbstractComponent {
             }
 
             if ($type == 'object' || $type == 'select' || (!$type && ($depth == 0 || $field instanceof BelongsToField))) {
-                $this->addSelectRow($builder, $field, $label, $description, $filters, $validators, $options);
+                $this->addSelectRow($builder, $field, $label, $description, $filters, $validators, $options, $type);
 
                 continue;
             }
@@ -385,7 +392,7 @@ class ScaffoldComponent extends AbstractComponent {
      * @param array $options Extra options from the controller
      * @return null
      */
-    protected function addSelectRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options) {
+    protected function addSelectRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options, $type) {
         $fieldName = $field->getName();
 
         $rowOptions = array(
@@ -445,7 +452,7 @@ class ScaffoldComponent extends AbstractComponent {
             $selectOptions = $query->query();
 
             $isMultiSelect = $field instanceof HasManyField;
-            if (!$isMultiSelect) {
+            if (!$isMultiSelect && $type != 'option') {
                 $selectOptions = array('' => null) + $selectOptions;
             }
 
@@ -454,7 +461,10 @@ class ScaffoldComponent extends AbstractComponent {
 
             $rowOptions['decorator'] = new FormatDecorator($entryFormatter, $format);
             $rowOptions['value'] = 'id';
-            $type = 'object';
+            if (!$type || $type == 'select') {
+                $type = 'object';
+            }
+
         } else {
             $selectOptions = $field->getOption('scaffold.form.options');
             if ($selectOptions) {
@@ -467,7 +477,6 @@ class ScaffoldComponent extends AbstractComponent {
             }
 
             $isMultiSelect = false;
-            $type = 'select';
         }
 
         $rowOptions['multiple'] = $isMultiSelect;
