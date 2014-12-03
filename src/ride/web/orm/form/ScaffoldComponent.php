@@ -363,7 +363,7 @@ class ScaffoldComponent extends AbstractComponent {
         }
 
         if ($type == 'tags') {
-            $urlSuffix = '?filter[name]=%term%';
+            $urlSuffix = '?match[name]=%term%';
 
             $vocabulary = $field->getOption('taxonomy.vocabulary');
             if ($vocabulary) {
