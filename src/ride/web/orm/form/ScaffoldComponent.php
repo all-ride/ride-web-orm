@@ -309,7 +309,7 @@ class ScaffoldComponent extends AbstractComponent {
                 $depth = $this->depth;
             }
 
-            if ($isOptionType || (!$type && ($depth == 0 || $field instanceof BelongsToField))) {
+            if ($isOptionType || (!$type && $depth == 0)) {
                 $this->addOptionRow($builder, $field, $label, $description, $filters, $validators, $options, $type);
 
                 continue;
