@@ -264,6 +264,8 @@ class ScaffoldComponent extends AbstractComponent {
             $validationConstraint = null;
         }
 
+        $optionTypes = array('option', 'select', 'object');
+
         $fields = $meta->getFields();
         foreach ($fields as $fieldName => $field) {
             if (isset($this->omittedFields[$fieldName])) {
@@ -277,9 +279,14 @@ class ScaffoldComponent extends AbstractComponent {
             }
 
             $type = $field->getOption('scaffold.form.type');
+            if ($type) {
+                $isOptionType = in_array($type, $optionTypes);
+            } else {
+                $isOptionType = false;
+            }
+
             $label = null;
             $description = null;
-
             $this->getLabel($options['translator'], $field, $label, $description);
 
             if ($validationConstraint) {
@@ -290,13 +297,7 @@ class ScaffoldComponent extends AbstractComponent {
                 $validators = array();
             }
 
-            if ($type == 'option') {
-                $this->addSelectRow($builder, $field, $label, $description, $filters, $validators, $options, $type);
-
-                continue;
-            }
-
-            if (($type != 'select' && !$field instanceof RelationField) || $type == 'tags') {
+            if ($type == 'tags' || (!$isOptionType && !$field instanceof RelationField)) {
                 $this->addPropertyRow($builder, $field, $label, $description, $filters, $validators, $options, $type);
 
                 continue;
@@ -308,8 +309,8 @@ class ScaffoldComponent extends AbstractComponent {
                 $depth = $this->depth;
             }
 
-            if ($type == 'object' || $type == 'select' || (!$type && ($depth == 0 || $field instanceof BelongsToField))) {
-                $this->addSelectRow($builder, $field, $label, $description, $filters, $validators, $options, $type);
+            if ($isOptionType || (!$type && ($depth == 0 || $field instanceof BelongsToField))) {
+                $this->addOptionRow($builder, $field, $label, $description, $filters, $validators, $options, $type);
 
                 continue;
             }
@@ -382,7 +383,7 @@ class ScaffoldComponent extends AbstractComponent {
     }
 
     /**
-     * Adds a select row for a relation field to the form
+     * Adds a option row for a (relation) field to the form
      * @param \ride\library\form\FormBuilder $builder Instance of the form builder
      * @param \ride\library\orm\definition\field\ModelField $field Field to add
      * @param string $label Label for the field
@@ -390,9 +391,10 @@ class ScaffoldComponent extends AbstractComponent {
      * @param array $filters Array with the filters for the property
      * @param array $validators Array with the validators for the property
      * @param array $options Extra options from the controller
+     * @param string $type Type detected to use as widget or row type
      * @return null
      */
-    protected function addSelectRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options, $type) {
+    protected function addOptionRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options, $type) {
         $fieldName = $field->getName();
 
         $rowOptions = array(
@@ -459,12 +461,15 @@ class ScaffoldComponent extends AbstractComponent {
             $entryFormatter = $this->model->getOrmManager()->getEntryFormatter();
             $format = $relationModel->getMeta()->getFormat(EntryFormatter::FORMAT_TITLE);
 
-            $rowOptions['decorator'] = new FormatDecorator($entryFormatter, $format);
-            $rowOptions['value'] = 'id';
-            if (!$type || $type == 'select') {
-                $type = 'object';
+            if ($type == 'object') {
+                $type = null;
             }
 
+            $rowOptions['decorator'] = new FormatDecorator($entryFormatter, $format);
+            $rowOptions['value'] = 'id';
+            $rowOptions['widget'] = $field->getOption('scaffold.form.widget', $type);
+
+            $type = 'object';
         } else {
             $selectOptions = $field->getOption('scaffold.form.options');
             if ($selectOptions) {
