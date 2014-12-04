@@ -9,4 +9,5 @@ order.direction             Direction of the default order
 scaffold.condition          Condition vor the overview of the scaffolding
 scaffold.expose             Expose the scaffolding to subsystems eg. cms
 scaffold.form.depth         Depth of the scaffold form
+scaffold.security           Flag to enable model security
 scaffold.title              Translation key for the title of the scaffolding

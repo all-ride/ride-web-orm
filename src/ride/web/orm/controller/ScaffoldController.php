@@ -212,6 +212,12 @@ class ScaffoldController extends AbstractController {
     protected $templateForm;
 
     /**
+     * Flag to see if the security function should actually check permissions
+     * @var boolean
+     */
+    protected $isSecured;
+
+    /**
      * Constructs a new scaffold controller
      * @param string $modelName Name of the model to scaffold, if not provided the name will be retrieved from the class name
      * @param boolean|array $search Boolean to enable or disable the search functionality, an array of field names to query is also allowed to enable the search
@@ -230,6 +236,7 @@ class ScaffoldController extends AbstractController {
         $this->pkField = ModelTable::PRIMARY_KEY;
 
         $this->formDepth = $meta->getOption('scaffold.form.depth', 1);
+        $this->isSecured = $meta->getOption('scaffold.security');
         $this->isLocalized = $meta->isLocalized();
 
         $this->pagination = $pagination;
@@ -277,22 +284,22 @@ class ScaffoldController extends AbstractController {
      * @return null
      */
     public function indexAction(I18n $i18n, $locale = null) {
-    	if (!$this->isReadable()) {
+        if (!$this->isReadable(null)) {
             throw new UnauthorizedException();
-    	}
+        }
 
-    	// resolve locale
-    	if (!$locale) {
-    	    $this->locale = $i18n->getLocale()->getCode();
+        // resolve locale
+        if (!$locale) {
+            $this->locale = $i18n->getLocale()->getCode();
 
-    	    if ($this->model->getMeta()->isLocalized()) {
+            if ($this->model->getMeta()->isLocalized()) {
                 $this->response->setRedirect($this->getAction(self::ACTION_INDEX, array('locale' => $this->locale)));
 
                 return;
-    	    }
-    	} else {
-    	    $this->locale = $i18n->getLocale($locale)->getCode();
-    	}
+            }
+        } else {
+            $this->locale = $i18n->getLocale($locale)->getCode();
+        }
 
         // handle table
         if ($this->orderMethod === null && $this->orderDirection === null) {
@@ -341,7 +348,7 @@ class ScaffoldController extends AbstractController {
         $viewActions = array();
 
         $addAction = $this->getAction(self::ACTION_ADD);
-        if ($this->isWritable(null, false) && $addAction) {
+        if ($this->isWritable(null) && $addAction) {
             $translator = $this->getTranslator();
 
             $addAction .=  '?referer=' . urlencode($this->request->getUrl());
@@ -489,7 +496,7 @@ class ScaffoldController extends AbstractController {
      * @return null
      */
     protected function addTableActions(FormTable $table) {
-        if (!$this->isDeletable(null, false)) {
+        if (!$this->isDeletable(null)) {
             return;
         }
 
@@ -563,7 +570,7 @@ class ScaffoldController extends AbstractController {
                 return;
             }
         } else {
-            if (!$this->isWritable()) {
+            if (!$this->isWritable(null)) {
                 throw new UnauthorizedException();
             }
 
@@ -577,6 +584,10 @@ class ScaffoldController extends AbstractController {
                 $this->response->setRedirect($this->getFormReferer($entry));
 
                 return;
+            }
+
+            if (!$this->isWritable(null)) {
+                throw new UnauthorizedException();
             }
 
             try {
@@ -720,7 +731,7 @@ class ScaffoldController extends AbstractController {
                 $entryId = $entry->id;
             }
 
-            if (!$this->isDeletable($entryId, false)) {
+            if (!$this->isDeletable($entryId)) {
 
             } else {
                 try {
@@ -771,7 +782,7 @@ class ScaffoldController extends AbstractController {
                 $entryId = $entry->id;
             }
 
-            if (!$this->isDeletable($entryId, false)) {
+            if (!$this->isDeletable($entryId)) {
 
             } else {
                 try {
@@ -831,7 +842,7 @@ class ScaffoldController extends AbstractController {
         $pkField = $this->pkField;
 
         $variables = array(
-        	'meta' => $meta,
+            'meta' => $meta,
             'form' => $form->getView(),
             'action' => $action,
             'referer' => $referer,
@@ -839,6 +850,7 @@ class ScaffoldController extends AbstractController {
             'title' => $title,
             'subtitle' => $subtitle,
             'localizeUrl' => null,
+            'isWritable' => $this->isWritable(),
         );
 
         if ($this->model->getMeta()->isLocalized()) {
@@ -981,34 +993,43 @@ class ScaffoldController extends AbstractController {
     /**
      * Checks if this model or a record thereof is deletable for the current user
      * @param integer $id Id of the entry
-     * @param boolean $addErrorToResponse Set to true to add an error messsage
-     * and the base view to the response when the entry is not deletable
      * @return boolean True when the entry is deletable, false otherwise
      */
-    protected function isDeletable($id = null, $addErrorToResponse = true) {
-        return true;
+    protected function isDeletable($id = null) {
+        return $this->checkPermission('delete');
     }
 
     /**
      * Checks if this model or a record thereof is readable for the current user
      * @param integer $id Id of the entry
-     * @param boolean $addErrorToResponse Set to true to add an error messsage
-     * and the base view to the response when the entry is not readable
      * @return boolean True when the entry is readable, false otherwise
      */
-    protected function isReadable($id = null, $addErrorToResponse = true) {
-        return true;
+    protected function isReadable($id = null) {
+        return $this->checkPermission('read');
     }
 
     /**
      * Checks if this model or a record thereof is writable for the current user
      * @param integer $id Id of the entry
-     * @param boolean $addErrorToResponse Set to true to add an error messsage
-     * and the base view to the response when the entry is not writable
      * @return boolean True when the entry is writable, false otherwise
      */
-    protected function isWritable($id = null, $addErrorToResponse = true) {
-        return true;
+    protected function isWritable($id = null) {
+        return $this->checkPermission('write');
+    }
+
+    /**
+     * Checks a permission
+     * @param string $permission Internal permission name
+     * @return boolean
+     */
+    protected function checkPermission($permission) {
+        if (!$this->isSecured) {
+            return true;
+        }
+
+        $permission = 'orm.model.' . $this->model->getName() . '.' . $permission;
+
+        return $this->getSecurityManager()->isPermissionGranted($permission);
     }
 
 }
