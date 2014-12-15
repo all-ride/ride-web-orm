@@ -5,6 +5,7 @@ scaffold.form.depth         Form relation depth for this field
 scaffold.form.type          Override the form row type of the field
 scaffold.form.omit          Omit this field when building the form
 scaffold.form.options       Json encoded string with options for a property field. Your json should be an structure with the value as key and the translation key as value.
+scaffold.form.tab           Name of the tab this field belongs to
 scaffold.form.widget        Name of the widget form the row type
 scaffold.order              Enable order on this field
 scaffold.search             Enable searching through this field
