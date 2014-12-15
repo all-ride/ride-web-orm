@@ -74,6 +74,12 @@ class ScaffoldComponent extends AbstractComponent {
     protected $entry;
 
     /**
+     * Array with the tabs
+     * @var array
+     */
+    protected $tabs;
+
+    /**
      * Constructs a new scaffold form component
      * @param \ride\web\WebApplication $web Instance of the web application
      * @param \ride\library\reflection\ReflectionHelper $reflectionHelper
@@ -93,8 +99,19 @@ class ScaffoldComponent extends AbstractComponent {
 
         $this->omittedFields = array();
         $this->fieldDepths = array();
+        $this->tabs = array();
 
-        $fields = $this->model->getMeta()->getFields();
+        $meta = $this->model->getMeta();
+
+        $tabs = explode(',', $meta->getOption('scaffold.form.tabs'));
+        foreach ($tabs as $tab) {
+            $this->tabs[$tab] = array(
+                'translation' => $meta->getOption('scaffold.form.tab.' . $tab, 'label.' . $tab),
+                'rows' => array(),
+            );
+        }
+
+        $fields = $meta->getFields();
         foreach ($fields as $fieldName => $field) {
             if ($field->getOption('scaffold.form.omit')) {
                 $this->omittedFields[$fieldName] = true;
@@ -107,6 +124,11 @@ class ScaffoldComponent extends AbstractComponent {
             $depth = $field->getOption('scaffold.form.depth');
             if ($depth !== null) {
                 $this->fieldDepths[$name] = $depth;
+            }
+
+            $tab = $field->getOption('scaffold.form.tab');
+            if (isset($this->tabs[$tab])) {
+                $this->tabs[$tab]['rows'][$fieldName] = $fieldName;
             }
         }
     }
@@ -172,6 +194,15 @@ class ScaffoldComponent extends AbstractComponent {
      */
     public function getDataType() {
         return $this->model->getMeta()->getEntryClassName();
+    }
+
+    /**
+     * Gets the tabs for this component
+     * @return array Array with the machine name of the tab as key and an array
+     * with the translation and rows elements
+     */
+    public function getTabs() {
+        return $this->tabs;
     }
 
     /**
