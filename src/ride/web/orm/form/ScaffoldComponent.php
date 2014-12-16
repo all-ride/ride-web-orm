@@ -103,12 +103,15 @@ class ScaffoldComponent extends AbstractComponent {
 
         $meta = $this->model->getMeta();
 
-        $tabs = explode(',', $meta->getOption('scaffold.form.tabs'));
-        foreach ($tabs as $tab) {
-            $this->tabs[$tab] = array(
-                'translation' => $meta->getOption('scaffold.form.tab.' . $tab, 'label.' . $tab),
-                'rows' => array(),
-            );
+        $tabs = $meta->getOption('scaffold.form.tabs');
+        if ($tabs) {
+            $tabs = explode(',', $tabs);
+            foreach ($tabs as $tab) {
+                $this->tabs[$tab] = array(
+                    'translation' => $meta->getOption('scaffold.form.tab.' . $tab, 'label.' . $tab),
+                    'rows' => array(),
+                );
+            }
         }
 
         $fields = $meta->getFields();
@@ -124,6 +127,10 @@ class ScaffoldComponent extends AbstractComponent {
             $depth = $field->getOption('scaffold.form.depth');
             if ($depth !== null) {
                 $this->fieldDepths[$name] = $depth;
+            }
+
+            if (isset($this->omittedFields[$fieldName]) || isset($this->hiddenFields[$fieldName])) {
+                continue;
             }
 
             $tab = $field->getOption('scaffold.form.tab');
