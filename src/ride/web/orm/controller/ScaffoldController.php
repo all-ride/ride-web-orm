@@ -841,9 +841,15 @@ class ScaffoldController extends AbstractController {
 
         $pkField = $this->pkField;
 
-        $tabs = $this->component->getTabs();
-        $tabNames = array_keys($tabs);
-        $activeTab = array_shift($tabNames);
+        if (isset($this->component)) {
+            $tabs = $this->component->getTabs();
+            $tabNames = array_keys($tabs);
+            $activeTab = array_shift($tabNames);
+        } else {
+            $tabs = array();
+            $tabNames = array();
+            $activeTab = null;
+        }
 
         $variables = array(
             'meta' => $meta,
