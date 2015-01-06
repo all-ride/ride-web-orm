@@ -199,12 +199,12 @@ class ScaffoldTable extends ModelTable {
 
         $value = '%' . $this->searchQuery . '%';
 
-        $condition = '';
+        $condition = '{id} = %2%';
         foreach ($this->searchFields as $fieldName => $null) {
             $condition .= ($condition == '' ? '' : ' OR ') . '{' . $fieldName . '} LIKE %1%';
         }
 
-        $this->query->addCondition($condition, $value);
+        $this->query->addCondition($condition, $value, $this->searchQuery);
     }
 
     /**
