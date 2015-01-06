@@ -485,9 +485,16 @@ class ScaffoldController extends AbstractController {
      * @return null
      */
     protected function addTableDecorators(FormTable $table, $detailAction) {
+        $theme = $this->config->get('system.theme');
+        if (!$theme) {
+            $themes = array_keys($this->dependencyInjector->getAll('ride\\library\\template\\theme\\Theme'));
+            $theme = array_pop($themes);
+        }
+
+        $defaultImage = $theme . '/img/data.png';
         $imageUrlGenerator = $this->dependencyInjector->get('ride\\library\\image\\ImageUrlGenerator');
 
-        $table->addDecorator(new DataDecorator($this->model, $imageUrlGenerator, $detailAction, $this->pkField));
+        $table->addDecorator(new DataDecorator($this->model, $imageUrlGenerator, $detailAction, $this->pkField, $defaultImage));
     }
 
     /**
