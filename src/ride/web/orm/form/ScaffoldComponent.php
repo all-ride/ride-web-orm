@@ -5,6 +5,7 @@ namespace ride\web\orm\form;
 use ride\library\form\component\AbstractComponent;
 use ride\library\form\FormBuilder;
 use ride\library\i18n\translator\Translator;
+use ride\library\log\Log;
 use ride\library\orm\definition\field\PropertyField;
 use ride\library\orm\definition\field\BelongsToField;
 use ride\library\orm\definition\field\HasManyField;
@@ -42,6 +43,12 @@ class ScaffoldComponent extends AbstractComponent {
      * @var string
      */
     protected $locale;
+
+    /**
+     * Instance of the log
+     * @var \ride\library\log\Log
+     */
+    protected $log;
 
     /**
      * Default field relation depth
@@ -100,6 +107,7 @@ class ScaffoldComponent extends AbstractComponent {
         $this->omittedFields = array();
         $this->fieldDepths = array();
         $this->tabs = array();
+        $this->proxy = array();
 
         $meta = $this->model->getMeta();
 
@@ -138,6 +146,15 @@ class ScaffoldComponent extends AbstractComponent {
                 $this->tabs[$tab]['rows'][$fieldName] = $fieldName;
             }
         }
+    }
+
+    /**
+     * Sets the instance of the log
+     * @param \ride\library\log\Log $log Instance of the log
+     * @return null
+     */
+    public function setLog(Log $log) {
+        $this->log = $log;
     }
 
     /**
@@ -249,7 +266,18 @@ class ScaffoldComponent extends AbstractComponent {
                 continue;
             }
 
-            $result[$fieldName] = $this->reflectionHelper->getProperty($entry, $fieldName);
+            $value = $this->reflectionHelper->getProperty($entry, $fieldName);
+            if (isset($this->proxy[$fieldName])) {
+                if (is_array($value)) {
+                    foreach ($value as $index => $indexValue) {
+                        $value[$index] = $indexValue->getId();
+                    }
+                } elseif ($value) {
+                    $value = $value->getId();
+                }
+            }
+
+            $result[$fieldName] = $value;
         }
 
         return $result;
@@ -282,6 +310,18 @@ class ScaffoldComponent extends AbstractComponent {
                 }
             }
 
+            if (isset($this->proxy[$fieldName])) {
+                $relationModel = $this->model->getRelationModel($fieldName);
+
+                if (is_array($value)) {
+                    foreach ($value as $index => $indexValue) {
+                        $value[$index] = $relationModel->createProxy($indexValue, $this->locale);
+                    }
+                } else {
+                    $value = $relationModel->createProxy($value, $this->locale);
+                }
+            }
+
             $this->reflectionHelper->setProperty($this->entry, $fieldName, $value);
         }
 
@@ -306,6 +346,10 @@ class ScaffoldComponent extends AbstractComponent {
 
         $fields = $meta->getFields();
         foreach ($fields as $fieldName => $field) {
+            if ($this->log) {
+                $this->log->logDebug('Generating field ' . $fieldName);
+            }
+
             if (isset($this->omittedFields[$fieldName])) {
                 continue;
             }
@@ -446,13 +490,12 @@ class ScaffoldComponent extends AbstractComponent {
             $entry = $options['data'];
 
             $relationModel = $this->model->getRelationModel($fieldName);
-            $relationMeta = $relationModel->getMeta();
-
-            $query = $relationModel->createQuery($this->locale);
-            $query->setFetchUnlocalized(true);
 
             $condition = $field->getOption('scaffold.form.condition');
             if ($condition) {
+                $query = $relationModel->createQuery($this->locale);
+                $query->setFetchUnlocalized(true);
+
                 if (!$entry) {
                     $entry = $relationModel->createEntry();
                 }
@@ -482,32 +525,32 @@ class ScaffoldComponent extends AbstractComponent {
                 }
 
                 $query->addConditionWithVariables($condition, $variables);
-            }
 
-            $orderField = $relationMeta->getOption('order.field');
-            if ($orderField) {
-                $query->addOrderBy('{' . $orderField . '} ' . $relationMeta->getOption('order.direction', 'ASC'));
-            }
+                $relationMeta = $relationModel->getMeta();
+                $orderField = $relationMeta->getOption('order.field');
+                if ($orderField) {
+                    $query->addOrderBy('{' . $orderField . '} ' . $relationMeta->getOption('order.direction', 'ASC'));
+                }
 
-            $selectOptions = $query->query();
+                $selectOptions = $relationModel->getOptionsFromEntries($query->query());
+            } else {
+                $selectOptions = $relationModel->getEntryList($this->locale);
+            }
 
             $isMultiSelect = $field instanceof HasManyField;
             if (!$isMultiSelect && $type != 'option') {
                 $selectOptions = array('' => null) + $selectOptions;
             }
 
-            $entryFormatter = $this->model->getOrmManager()->getEntryFormatter();
-            $format = $relationModel->getMeta()->getFormat(EntryFormatter::FORMAT_TITLE);
-
             if ($type == 'object') {
                 $type = null;
             }
 
-            $rowOptions['decorator'] = new FormatDecorator($entryFormatter, $format);
-            $rowOptions['value'] = 'id';
             $rowOptions['widget'] = $field->getOption('scaffold.form.widget', $type);
 
-            $type = 'object';
+            $type = 'option';
+
+            $this->proxy[$fieldName] = true;
         } else {
             $selectOptions = $field->getOption('scaffold.form.options');
             if ($selectOptions) {
