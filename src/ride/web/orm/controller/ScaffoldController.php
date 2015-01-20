@@ -946,6 +946,7 @@ class ScaffoldController extends AbstractController {
 
         if ($component instanceof ScaffoldComponent) {
             $component->setDepth($this->formDepth);
+            $component->setLog($this->getLog());
         }
 
         $component->setLocale($this->locale);
