@@ -317,8 +317,10 @@ class ScaffoldComponent extends AbstractComponent {
                     foreach ($value as $index => $indexValue) {
                         $value[$index] = $relationModel->createProxy($indexValue, $this->locale);
                     }
-                } else {
+                } elseif ($value) {
                     $value = $relationModel->createProxy($value, $this->locale);
+                } else {
+                    $value = null;
                 }
             }
 
