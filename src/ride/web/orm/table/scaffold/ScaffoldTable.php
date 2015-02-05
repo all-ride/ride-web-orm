@@ -31,8 +31,7 @@ class ScaffoldTable extends ModelTable {
      * @param \ride\library\i18n\translator\Translator $translator Instance of
      * the translator
      * @param string $locale Code of the data locale
-     * @param boolean|array $search False to disable search, True to search all
-     * properties or an array with the fields to query
+     * @param boolean $search False to disable search, True to search all
      * @param boolean|array $order False to disable order, True to order all
      * properties or an array with the fields to order
      * @return null
@@ -49,13 +48,7 @@ class ScaffoldTable extends ModelTable {
             $this->query->setWillAddIsLocalizedOrder(true);
         }
 
-        if ($search) {
-            if ($search && !is_array($search)) {
-                $search = array();
-            }
-
-            $this->setSearchFields($search);
-        }
+        $this->setHasSearch($search);
 
         if ($order) {
             if ($order && !is_array($order)) {
@@ -66,33 +59,6 @@ class ScaffoldTable extends ModelTable {
         }
 
         unset($this->translator);
-    }
-
-    /**
-     * Enables the search on this table and sets the provided fields as search query fields
-     * @param array $fieldNames Array with the field names to search in. If none provided, all the properties of the model will be queried
-     * @return null
-     */
-    protected function setSearchFields(array $fieldNames) {
-        if ($fieldNames) {
-
-            $this->searchFields = $fieldNames;
-        } else {
-            $this->searchFields = array();
-
-            $fields = $this->model->getMeta()->getFields();
-            foreach ($fields as $field) {
-                if (!$field->getOption('scaffold.search')) {
-                    continue;
-                }
-
-                $this->searchFields[$field->getName()] = true;
-            }
-        }
-
-        if ($this->searchFields) {
-            $this->setHasSearch(true);
-        }
     }
 
     /**
@@ -193,18 +159,11 @@ class ScaffoldTable extends ModelTable {
      * @return null
      */
     protected function applySearch() {
-        if (empty($this->searchQuery) || empty($this->searchFields)) {
+        if (empty($this->searchQuery)) {
             return;
         }
 
-        $value = '%' . $this->searchQuery . '%';
-
-        $condition = '{id} = %2%';
-        foreach ($this->searchFields as $fieldName => $null) {
-            $condition .= ($condition == '' ? '' : ' OR ') . '{' . $fieldName . '} LIKE %1%';
-        }
-
-        $this->query->addCondition($condition, $value, $this->searchQuery);
+        $this->model->applySearch($this->query, array('query' => $this->searchQuery));
     }
 
     /**
