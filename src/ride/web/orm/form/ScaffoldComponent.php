@@ -345,6 +345,7 @@ class ScaffoldComponent extends AbstractComponent {
         }
 
         $optionTypes = array('option', 'select', 'object');
+        $propertyTypes = array('tags', 'assets');
 
         $fields = $meta->getFields();
         foreach ($fields as $fieldName => $field) {
@@ -381,7 +382,7 @@ class ScaffoldComponent extends AbstractComponent {
                 $validators = array();
             }
 
-            if ($type == 'tags' || (!$isOptionType && !$field instanceof RelationField)) {
+            if (in_array($type, $propertyTypes) || (!$isOptionType && !$field instanceof RelationField)) {
                 $this->addPropertyRow($builder, $field, $label, $description, $filters, $validators, $options, $type);
 
                 continue;
@@ -461,6 +462,15 @@ class ScaffoldComponent extends AbstractComponent {
 
             $rowOptions['handler'] = new OrmTagHandler($this->model->getOrmManager(), $vocabulary);
             $rowOptions['autocomplete.url'] = $this->web->getUrl('api.orm.list', array('model' => 'TaxonomyTerm')) . $urlSuffix;
+        }
+
+        if ($type == 'assets') {
+            $rowOptions['multiple'] = $field instanceof HasManyField;
+
+            $folder = $field->getOption('assets.folder');
+            if ($folder) {
+                $rowOptions['folder'] = $folder;
+            }
         }
 
         $builder->addRow($field->getName(), $type, $rowOptions);
