@@ -578,6 +578,11 @@ class ScaffoldController extends AbstractController {
             $entry = $this->createEntry();
         }
 
+        // override locale to get the localized relations
+        if ($this->isLocalized) {
+            $entry->setLocale($locale);
+        }
+
         // handle form
         $form = $this->getForm($entry);
         if ($form->isSubmitted()) {
@@ -596,9 +601,9 @@ class ScaffoldController extends AbstractController {
 
                 $entry = $this->getFormEntry($form);
 
-                if ($this->isLocalized) {
-                    $entry->setLocale($this->locale);
-                }
+                // if ($this->isLocalized) {
+                    // $entry->setLocale($this->locale);
+                // }
 
                 $this->saveEntry($entry);
 
