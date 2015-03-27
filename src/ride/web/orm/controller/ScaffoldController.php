@@ -194,6 +194,12 @@ class ScaffoldController extends AbstractController {
     protected $translationTitle;
 
     /**
+     * Translation key for the submit button of the form
+     * @var string
+     */
+    protected $translationSubmit;
+
+    /**
      * Routes for actions
      * @var array
      */
@@ -257,6 +263,17 @@ class ScaffoldController extends AbstractController {
 
         $this->translationTitle = $meta->getOption('scaffold.title');
         $this->translationAdd = $meta->getOption('scaffold.title.add');
+        $this->translationSubmit = 'button.save';
+
+        $this->initialize();
+    }
+
+    /**
+     * Hook after the constructor
+     * @return null
+     */
+    protected function initialize() {
+
     }
 
     /**
@@ -363,6 +380,8 @@ class ScaffoldController extends AbstractController {
 
         if ($actions) {
             $viewActions += $actions;
+        } else {
+            $viewActions += $this->getIndexActions($locale);
         }
 
         $exportActions = $this->dependencyInjector->getAll('ride\\library\\html\\table\\export\\ExportFormat');
@@ -387,6 +406,16 @@ class ScaffoldController extends AbstractController {
         }
 
         return $this->setTemplateView($this->templateIndex, $variables);
+    }
+
+    /**
+     * Hook to add extra actions in the overview
+     * @param string $locale Code of the locale
+     * @return array Array with the URL of the action as key and the label as
+     * value
+     */
+    protected function getIndexActions($locale) {
+        return array();
     }
 
     /**
@@ -560,15 +589,15 @@ class ScaffoldController extends AbstractController {
 
         // resolve data
         if ($id) {
-            if (!$this->isReadable($id)) {
-                throw new UnauthorizedException();
-            }
-
             $entry = $this->getEntry($id);
             if (!$entry) {
                 $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
 
                 return;
+            }
+
+            if (!$this->isReadable($entry)) {
+                throw new UnauthorizedException();
             }
         } else {
             if (!$this->isWritable(null)) {
@@ -592,18 +621,13 @@ class ScaffoldController extends AbstractController {
                 return;
             }
 
-            if (!$this->isWritable(null)) {
-                throw new UnauthorizedException();
-            }
-
             try {
                 $form->validate();
 
                 $entry = $this->getFormEntry($form);
-
-                // if ($this->isLocalized) {
-                    // $entry->setLocale($this->locale);
-                // }
+                if (!$this->isWritable($entry)) {
+                    throw new UnauthorizedException();
+                }
 
                 $this->saveEntry($entry);
 
@@ -731,29 +755,23 @@ class ScaffoldController extends AbstractController {
         $format = $this->model->getMeta()->getFormat(EntryFormatter::FORMAT_TITLE);
 
         foreach ($entries as $entry) {
-            if (is_numeric($entry)) {
-                $entryId = $entry;
-            } else {
-                $entryId = $entry->id;
-            }
+            try {
+                if (is_numeric($entry)) {
+                    $entry = $this->model->createProxy($entry);
+                }
 
-            if (!$this->isDeletable($entryId)) {
-
-            } else {
-                try {
-                    if (is_numeric($entry)) {
-                        $entry = $this->model->createProxy($entry);
-                    }
-
+                if (!$this->isDeletable($entry)) {
+                    $this->addError('error.data.deleted.permission', array('data' => $entryFormatter->formatEntry($entry, $format)));
+                } else {
                     $entry = $this->model->delete($entry);
 
                     $this->addSuccess('success.data.deleted', array('data' => $entryFormatter->formatEntry($entry, $format)));
-                } catch (ValidationException $exception) {
-                    $errors = $exception->getAllErrors();
-                    foreach ($errors as $fieldName => $fieldErrors) {
-                        foreach ($fieldErrors as $fieldError) {
-                            $this->addError($fieldError->getCode(), $fieldError->getParameters());
-                        }
+                }
+            } catch (ValidationException $exception) {
+                $errors = $exception->getAllErrors();
+                foreach ($errors as $fieldName => $fieldErrors) {
+                    foreach ($fieldErrors as $fieldError) {
+                        $this->addError($fieldError->getCode(), $fieldError->getParameters());
                     }
                 }
             }
@@ -782,35 +800,27 @@ class ScaffoldController extends AbstractController {
         $locale = $this->locale;
 
         foreach ($entries as $entry) {
-            if (is_numeric($entry)) {
-                $entryId = $entry;
-            } else {
-                $entryId = $entry->id;
-            }
+            try {
+                if (is_numeric($entry)) {
+                    $entry = $this->model->createProxy($entry, $locale);
+                }
 
-            if (!$this->isDeletable($entryId)) {
-
-            } else {
-                try {
-                    if (is_numeric($entry)) {
-                        $entry = $this->model->createProxy($entry, $locale);
-                    }
-
+                if (!$this->isDeletable($entry)) {
+                    $this->addError('error.data.deleted.permission', array('data' => $entryFormatter->formatEntry($entry, $format)));
+                } else {
                     $entryLocale = $this->model->deleteLocalized($entry, $locale);
 
                     if (!$entryLocale){
                         $this->addError('error.delete.translation.empty', array('data' => $entryFormatter->formatEntry($entry, $format)));
-
-                        return;
+                    } else {
+                        $this->addSuccess('success.data.deleted', array('data' => $entryFormatter->formatEntry($entry, $format)));
                     }
-
-                    $this->addSuccess('success.data.deleted', array('data' => $entryFormatter->formatEntry($entry, $format)));
-                } catch (ValidationException $exception) {
-                    $errors = $exception->getAllErrors();
-                    foreach ($errors as $fieldName => $fieldErrors) {
-                        foreach ($fieldErrors as $fieldError) {
-                            $this->addError($fieldError->getCode(), $fieldError->getParameters());
-                        }
+                }
+            } catch (ValidationException $exception) {
+                $errors = $exception->getAllErrors();
+                foreach ($errors as $fieldName => $fieldErrors) {
+                    foreach ($fieldErrors as $fieldError) {
+                        $this->addError($fieldError->getCode(), $fieldError->getParameters());
                     }
                 }
             }
@@ -867,8 +877,9 @@ class ScaffoldController extends AbstractController {
             'entry' => $entry,
             'title' => $title,
             'subtitle' => $subtitle,
+            'translationSubmit' => $this->translationSubmit,
             'localizeUrl' => null,
-            'isWritable' => $this->isWritable(),
+            'isWritable' => $this->isWritable($entry),
         );
 
         if ($this->model->getMeta()->isLocalized()) {
@@ -1011,28 +1022,31 @@ class ScaffoldController extends AbstractController {
 
     /**
      * Checks if this model or a record thereof is deletable for the current user
-     * @param integer $id Id of the entry
+     * @param mixed $entry An entry for a specific permission, null for a
+     * generic one
      * @return boolean True when the entry is deletable, false otherwise
      */
-    protected function isDeletable($id = null) {
+    protected function isDeletable($entry = null) {
         return $this->checkPermission('delete');
     }
 
     /**
      * Checks if this model or a record thereof is readable for the current user
-     * @param integer $id Id of the entry
+     * @param mixed $entry An entry for a specific permission, null for a
+     * generic one
      * @return boolean True when the entry is readable, false otherwise
      */
-    protected function isReadable($id = null) {
+    protected function isReadable($entry = null) {
         return $this->checkPermission('read');
     }
 
     /**
      * Checks if this model or a record thereof is writable for the current user
-     * @param integer $id Id of the entry
+     * @param mixed $entry An entry for a specific permission, null for a
+     * generic one
      * @return boolean True when the entry is writable, false otherwise
      */
-    protected function isWritable($id = null) {
+    protected function isWritable($entry = null) {
         return $this->checkPermission('write');
     }
 

@@ -1,6 +1,7 @@
 {
     "button.delete.locale": "Delete translation",
     "button.scaffold": "Scaffold",
+    "error.data.deleted.permission": "You don't have enough permissions to delete %data%.",
     "error.delete.translation.empty": "%data% is not valid translation to remove for this language",
     "error.validation.version": "Your data is outdated. You are trying to save version %yourVersion% over version %currentVersion%. Try updating your data first.",
     "label.class.entry": "Name of the entry class",
