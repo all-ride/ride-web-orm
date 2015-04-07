@@ -293,7 +293,13 @@ class ScaffoldComponent extends AbstractComponent {
             $this->entry = $this->model->createEntry();
         }
 
-        $fields = $this->model->getMeta()->getFields();
+        $meta = $this->model->getMeta();
+
+        if ($this->locale && $meta->isLocalized()) {
+            $this->entry->setLocale($this->locale);
+        }
+
+        $fields = $meta->getFields();
         foreach ($fields as $fieldName => $field) {
             if (isset($this->omittedFields[$fieldName])) {
                 continue;
@@ -600,6 +606,7 @@ class ScaffoldComponent extends AbstractComponent {
 
         $formComponent = new self($this->web, $this->reflectionHelper, $relationModel);
         $formComponent->setDepth($depth - 1);
+        $formComponent->setLocale($this->locale);
         if ($relationMeta && !$relationMeta->isHasManyAndBelongsToMany()) {
             $relationField = $relationMeta->getForeignKey();
 
