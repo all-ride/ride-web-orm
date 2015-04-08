@@ -628,6 +628,11 @@ class ScaffoldComponent extends AbstractComponent {
                 'validators' => $validators,
             ));
         } else {
+            $isOrdered = false;
+            if ($field instanceof HasManyField) {
+                $isOrdered = $field->isOrdered();
+            }
+
             $builder->addRow($fieldName, 'collection', array(
                 'type' => 'component',
                 'options' => array(
@@ -635,6 +640,7 @@ class ScaffoldComponent extends AbstractComponent {
                 ),
                 'label' => $label,
                 'description' => $description,
+                'order' => $isOrdered,
                 'filters' => $filters,
                 'validators' => $validators,
             ));
