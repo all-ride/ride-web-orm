@@ -134,7 +134,7 @@ class ScaffoldComponent extends AbstractComponent {
 
             $depth = $field->getOption('scaffold.form.depth');
             if ($depth !== null) {
-                $this->fieldDepths[$name] = $depth;
+                $this->fieldDepths[$fieldName] = $depth;
             }
 
             if (isset($this->omittedFields[$fieldName]) || isset($this->hiddenFields[$fieldName])) {
@@ -570,14 +570,19 @@ class ScaffoldComponent extends AbstractComponent {
 
             $this->proxy[$fieldName] = true;
         } else {
-            $selectOptions = $field->getOption('scaffold.form.options');
-            if ($selectOptions) {
-                $selectOptions = json_decode($selectOptions, true);
-                foreach ($selectOptions as $index => $value) {
-                    $selectOptions[$index] = $options['translator']->translate($value);
-                }
+            $optionMethod = $field->getOption('scaffold.form.options.method');
+            if ($optionMethod) {
+                $selectOptions = $this->model->$optionMethod($options['translator']);
             } else {
-                $selectOptions = array();
+                $selectOptions = $field->getOption('scaffold.form.options.json');
+                if ($selectOptions) {
+                    $selectOptions = json_decode($selectOptions, true);
+                    foreach ($selectOptions as $index => $value) {
+                        $selectOptions[$index] = $options['translator']->translate($value);
+                    }
+                } else {
+                    $selectOptions = array();
+                }
             }
 
             $isMultiSelect = false;
