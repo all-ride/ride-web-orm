@@ -116,6 +116,10 @@ class ModelFieldDecorator implements Decorator {
                     $value .= $this->translator->translate('label.relation.type', $parameters);
                 }
             }
+
+            if ($relationType == 'hasMany') {
+                $value .= '<br />' . $field->getRelationOrder();
+            }
         } else {
             $value .= $this->translator->translate('label.field.type', array('type' => $field->getType())) . '<br />';
 
