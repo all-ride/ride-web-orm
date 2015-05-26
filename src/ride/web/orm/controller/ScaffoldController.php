@@ -952,12 +952,13 @@ class ScaffoldController extends AbstractController {
     protected function getFormComponent() {
         $web = $this->dependencyInjector->get('ride\\web\\WebApplication');
         $reflectionHelper = $this->model->getReflectionHelper();
+        $securityManager = $this->getSecurityManager();
 
         $component = $this->model->getMeta()->getOption('scaffold.component');
         if ($component) {
-            $component = new $component($web, $reflectionHelper, $this->model);
+            $component = new $component($web, $reflectionHelper, $securityManager, $this->model);
         } else {
-            $component = new ScaffoldComponent($web, $reflectionHelper, $this->model);
+            $component = new ScaffoldComponent($web, $reflectionHelper, $securityManager, $this->model);
         }
 
         if ($component instanceof ScaffoldComponent) {

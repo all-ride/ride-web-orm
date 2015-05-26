@@ -15,6 +15,7 @@ use ride\library\orm\definition\ModelTable;
 use ride\library\orm\entry\format\EntryFormatter;
 use ride\library\orm\model\Model;
 use ride\library\reflection\ReflectionHelper;
+use ride\library\security\SecurityManager;
 
 use ride\web\orm\decorator\FormatDecorator;
 use ride\web\orm\decorator\PropertyDecorator;
@@ -31,6 +32,18 @@ class ScaffoldComponent extends AbstractComponent {
      * @var \ride\web\WebApplication
      */
     protected $web;
+
+    /**
+     * Instance of the reflection helper
+     * @var \ride\library\reflection\ReflectionHelper
+     */
+    protected $reflectionHelper;
+
+    /**
+     * Instance of the security manager
+     * @var \ride\library\security\SecurityManager
+     */
+    protected $securityManager;
 
     /**
      * Model of this form component
@@ -93,9 +106,10 @@ class ScaffoldComponent extends AbstractComponent {
      * @param \ride\library\orm\model\Model $model
      * @return null
      */
-    public function __construct(WebApplication $web, ReflectionHelper $reflectionHelper, Model $model) {
+    public function __construct(WebApplication $web, ReflectionHelper $reflectionHelper, SecurityManager $securityManager, Model $model) {
         $this->web = $web;
         $this->reflectionHelper = $reflectionHelper;
+        $this->securityManager = $securityManager;
         $this->model = $model;
         $this->locale = null;
         $this->depth = 1;
@@ -135,6 +149,11 @@ class ScaffoldComponent extends AbstractComponent {
             $depth = $field->getOption('scaffold.form.depth');
             if ($depth !== null) {
                 $this->fieldDepths[$fieldName] = $depth;
+            }
+
+            $permission = $field->getOption('scaffold.form.permission');
+            if ($permission && !$this->securityManager->isPermissionGranted($permission)) {
+                $this->omittedFields[$fieldName] = true;
             }
 
             if (isset($this->omittedFields[$fieldName]) || isset($this->hiddenFields[$fieldName])) {
@@ -609,7 +628,7 @@ class ScaffoldComponent extends AbstractComponent {
         $relationModel = $this->model->getRelationModel($fieldName);
         $relationMeta = $this->model->getMeta()->getRelationMeta($fieldName);
 
-        $formComponent = new self($this->web, $this->reflectionHelper, $relationModel);
+        $formComponent = new self($this->web, $this->reflectionHelper, $relationModel, $this->securityManager);
         $formComponent->setDepth($depth - 1);
         $formComponent->setLocale($this->locale);
         if ($relationMeta && !$relationMeta->isHasManyAndBelongsToMany()) {
