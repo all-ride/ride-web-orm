@@ -628,7 +628,7 @@ class ScaffoldComponent extends AbstractComponent {
         $relationModel = $this->model->getRelationModel($fieldName);
         $relationMeta = $this->model->getMeta()->getRelationMeta($fieldName);
 
-        $formComponent = new self($this->web, $this->reflectionHelper, $relationModel, $this->securityManager);
+        $formComponent = new self($this->web, $this->reflectionHelper, $this->securityManager, $relationModel);
         $formComponent->setDepth($depth - 1);
         $formComponent->setLocale($this->locale);
         if ($relationMeta && !$relationMeta->isHasManyAndBelongsToMany()) {
