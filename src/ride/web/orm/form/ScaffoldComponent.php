@@ -457,13 +457,9 @@ class ScaffoldComponent extends AbstractComponent {
             $type = 'number';
 
             $rowOptions['attributes']['step'] = 'any';
-        }
-
-        if ($type != 'label') {
-            $rowOptions['validators'] = $validators;
-        }
-
-        if ($type == 'file' || $type == 'image') {
+        } elseif ($type == 'date') {
+            $rowOptions['round'] = true;
+        } elseif ($type == 'file' || $type == 'image') {
             $path = $field->getOption('upload.path');
             if ($path) {
                 $path = str_replace('%application%', $options['fileBrowser']->getApplicationDirectory()->getAbsolutePath(), $path);
@@ -471,9 +467,7 @@ class ScaffoldComponent extends AbstractComponent {
 
                 $rowOptions['path'] = $options['fileBrowser']->getFileSystem()->getFile($path);
             }
-        }
-
-        if ($type == 'tags') {
+        } elseif ($type == 'tags') {
             $urlSuffix = '?match[name]=%term%';
 
             $vocabulary = $field->getOption('taxonomy.vocabulary');
@@ -487,15 +481,17 @@ class ScaffoldComponent extends AbstractComponent {
 
             $rowOptions['handler'] = new OrmTagHandler($this->model->getOrmManager(), $vocabulary);
             $rowOptions['autocomplete.url'] = $this->web->getUrl('api.orm.list', array('model' => 'TaxonomyTerm')) . $urlSuffix;
-        }
-
-        if ($type == 'assets') {
+        } elseif ($type == 'assets') {
             $rowOptions['multiple'] = $field instanceof HasManyField;
 
             $folder = $field->getOption('assets.folder');
             if ($folder) {
                 $rowOptions['folder'] = $folder;
             }
+        }
+
+        if ($type != 'label') {
+            $rowOptions['validators'] = $validators;
         }
 
         $builder->addRow($field->getName(), $type, $rowOptions);
