@@ -370,7 +370,7 @@ class ScaffoldComponent extends AbstractComponent {
         }
 
         $optionTypes = array('option', 'select', 'object');
-        $propertyTypes = array('tags', 'assets');
+        $propertyTypes = array('tags', 'assets', 'label');
 
         $fields = $meta->getFields();
         foreach ($fields as $fieldName => $field) {
