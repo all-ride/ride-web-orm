@@ -1,5 +1,6 @@
 label.name                      Translation key for the name of the field
 label.description               Translation key for the description of the field
+scaffold.export                 Enable export of this field, you can add comma separated list of relation fields to export
 scaffold.form.condition         Condition string for the field options
 scaffold.form.depth             Form relation depth for this field
 scaffold.form.type              Override the form row type of the field

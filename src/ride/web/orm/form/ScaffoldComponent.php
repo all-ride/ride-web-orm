@@ -12,13 +12,10 @@ use ride\library\orm\definition\field\HasManyField;
 use ride\library\orm\definition\field\ModelField;
 use ride\library\orm\definition\field\RelationField;
 use ride\library\orm\definition\ModelTable;
-use ride\library\orm\entry\format\EntryFormatter;
 use ride\library\orm\model\Model;
 use ride\library\reflection\ReflectionHelper;
 use ride\library\security\SecurityManager;
 
-use ride\web\orm\decorator\FormatDecorator;
-use ride\web\orm\decorator\PropertyDecorator;
 use ride\web\orm\taxonomy\OrmTagHandler;
 use ride\web\WebApplication;
 
@@ -365,8 +362,15 @@ class ScaffoldComponent extends AbstractComponent {
         $meta = $this->model->getMeta();
 
         $validationConstraint = $this->model->getValidationConstraint();
-        if ($validationConstraint && get_class($validationConstraint) !== 'ride\\library\\validation\\constraint\\GenericConstraint') {
-            $validationConstraint = null;
+        if ($validationConstraint) {
+            $validationConstraintClass = get_class($validationConstraint);
+            switch ($validationConstraintClass) {
+                case 'ride\\library\\orm\\entry\\constraint\\EntryConstraint':
+                case 'ride\\library\\validation\\constraint\\GenericConstraint':
+                    break;
+                default:
+                    $validationConstraint = null;
+            }
         }
 
         $optionTypes = array('option', 'select', 'object');
@@ -627,6 +631,7 @@ class ScaffoldComponent extends AbstractComponent {
         $formComponent = new self($this->web, $this->reflectionHelper, $this->securityManager, $relationModel);
         $formComponent->setDepth($depth - 1);
         $formComponent->setLocale($this->locale);
+
         if ($relationMeta && !$relationMeta->isHasManyAndBelongsToMany()) {
             $relationField = $relationMeta->getForeignKey();
 
