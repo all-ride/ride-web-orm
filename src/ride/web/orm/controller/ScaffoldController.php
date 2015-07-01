@@ -2,16 +2,20 @@
 
 namespace ride\web\orm\controller;
 
+use ride\library\dependency\exception\DependencyException;
 use ride\library\form\exception\FormException;
 use ride\library\form\Form;
 use ride\library\html\table\FormTable;
 use ride\library\http\Header;
 use ride\library\http\Response;
 use ride\library\i18n\I18n;
+use ride\library\import\provider\FileProvider;
+use ride\library\import\OrmModelExporter;
 use ride\library\orm\definition\ModelTable;
 use ride\library\orm\entry\format\EntryFormatter;
 use ride\library\orm\model\Model;
 use ride\library\security\exception\UnauthorizedException;
+use ride\library\system\file\FileSystem;
 use ride\library\validation\exception\ValidationException;
 
 use ride\web\base\controller\AbstractController;
@@ -319,23 +323,7 @@ class ScaffoldController extends AbstractController {
         }
 
         // handle table
-        if ($this->orderMethod === null && $this->orderDirection === null) {
-            $meta = $this->model->getMeta();
-
-            $this->orderMethod = $meta->getOption('order.field');
-            $this->orderDirection = $meta->getOption('order.direction');
-
-            if ($this->orderMethod) {
-                $field = $meta->getField($this->orderMethod);
-
-                $label = $field->getOption('label.name');
-                if ($label) {
-                    $this->orderMethod = $this->getTranslator()->translate($label);
-                } else {
-                    $this->orderMethod = ucfirst($field->getName());
-                }
-            }
-        }
+        $this->initializeOrder();
 
         $baseUrl = $this->getAction(self::ACTION_INDEX);
         $table = $this->getTable($this->getAction(self::ACTION_DETAIL, array('id' => '%id%')));
@@ -384,9 +372,11 @@ class ScaffoldController extends AbstractController {
             $viewActions += $this->getIndexActions($locale);
         }
 
-        $exportActions = $this->dependencyInjector->getAll('ride\\library\\html\\table\\export\\ExportFormat');
-        foreach ($exportActions as $extension => $exportFormat) {
-            $exportActions[$extension] = $this->getAction(self::ACTION_EXPORT, array('format' => $extension));
+        $exportActions = $this->dependencyInjector->getAll('ride\\library\\import\\provider\\DestinationProvider');
+        foreach ($exportActions as $extension => $exportProvider) {
+            if ($exportProvider instanceof FileProvider) {
+                $exportActions[$extension] = $this->getAction(self::ACTION_EXPORT, array('format' => $extension));
+            }
         }
 
         $variables = array(
@@ -424,7 +414,7 @@ class ScaffoldController extends AbstractController {
      * @param string $extension The extension for the export
      * @return null
      */
-    public function exportAction(i18n $i18n, $locale = null, $format = null) {
+    public function exportAction(i18n $i18n, FileSystem $fileSystem, OrmModelExporter $exporter, $locale = null, $format = null) {
         if (!$locale) {
             $locale = $i18n->getLocale()->getCode();
 
@@ -436,39 +426,76 @@ class ScaffoldController extends AbstractController {
         }
 
         try {
-            $export = $this->dependencyInjector->get('ride\\library\\html\\table\\export\\ExportFormat', $format);
+            $destinationProvider = $this->dependencyInjector->get('ride\\library\\import\\provider\\DestinationProvider', $format);
+            if (!$destinationProvider instanceof FileProvider) {
+                throw new DependencyInjection('Destination provider is not a file provider');
+            }
+
+            $destinationProvider->setFile($fileSystem->getTemporaryFile());
         } catch (DependencyException $exception) {
-            $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
+            $this->addError('error.format.export.unsupported', array('format' => $format));
+            $this->response->setRedirect($this->getAction(self::ACTION_INDEX));
 
             return;
         }
 
-        ini_set('memory_limit', '512M');
-        ini_set('max_execution_time', '500');
-        ini_set('max_input_time', '500');
-
-        $title = $this->model->getName();
-
-        $export->initExport($title);
+        $this->initializeOrder();
 
         $table = $this->getTable();
+        $tableHelper = $this->getTableHelper();
 
-        $this->processExport($table);
+        $page = 1;
+        $rowsPerPage = 10;
+        $searchQuery = null;
 
-        $table->populateExport($export);
+        $parameters = $this->request->getQueryParameters();
 
-        $file = $export->finishExport();
+        $tableHelper->getArgumentsFromArray($parameters, $page, $rowsPerPage, $searchQuery, $this->orderMethod, $this->orderDirection);
+        $tableHelper->setArgumentsToTable($table, $page, $rowsPerPage, $searchQuery, $this->orderMethod, $this->orderDirection);
 
-        $this->setDownloadView($file, $title . '.xlsx', true);
+        $form = $this->buildForm($table);
+
+        $table->processExport($form);
+
+        // ini_set('memory_limit', '512M');
+        // ini_set('max_execution_time', '500');
+        // ini_set('max_input_time', '500');
+
+        $exporter->setTranslator($this->getTranslator());
+        $exporter->export($table->getModelQuery(), $destinationProvider);
+
+        $file = $destinationProvider->getFile();
+        $title = $this->model->getName();
+
+        $this->setDownloadView($file, $title . '.' . $format, true);
     }
 
     /**
-     * Processes the export action
-     * @param \ride\library\html\table\FormTable $table Table of the index view
+     * Initializes the order parameters
      * @return null
      */
-    protected function processExport(FormTable $table) {
-        $table->processExport($this->request);
+    protected function initializeOrder() {
+        if ($this->orderMethod !== null || $this->orderDirection !== null) {
+            return;
+        }
+
+        $meta = $this->model->getMeta();
+
+        $this->orderMethod = $meta->getOption('order.field');
+        $this->orderDirection = $meta->getOption('order.direction');
+
+        if (!$this->orderMethod) {
+            return;
+        }
+
+        $field = $meta->getField($this->orderMethod);
+
+        $label = $field->getOption('label.name');
+        if ($label) {
+            $this->orderMethod = $this->getTranslator()->translate($label);
+        } else {
+            $this->orderMethod = ucfirst($field->getName());
+        }
     }
 
     /**
@@ -658,8 +685,6 @@ class ScaffoldController extends AbstractController {
                         if ($row->getType() == 'hidden') {
                             throw new FormException();
                         }
-
-                        continue;
                     } catch (FormException $e) {
                         // field not in the form, add error as general error
                         foreach ($fieldErrors as $error) {

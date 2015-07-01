@@ -7,6 +7,7 @@ rest.expose                 Expose the model to the REST service
 order.field                 Name of the default order field
 order.direction             Direction of the default order
 scaffold.condition          Condition vor the overview of the scaffolding
+scaffold.export             Comma separated list of field names to export
 scaffold.expose             Expose the scaffolding to subsystems eg. cms
 scaffold.form.depth         Depth of the scaffold form
 scaffold.form.tabs          Comma separated list of tab names, defining the order and availability
