@@ -32,6 +32,7 @@
     "label.slug": "Slug",
     "label.unlinked.model": "Unlinked models: %model%",
     "label.unlinked.models": "Unlinked models: %first% and %last%",
+    "label.version": "Version",
     "label.weight": "Weight",
     "title.orm": "ORM"
 }
