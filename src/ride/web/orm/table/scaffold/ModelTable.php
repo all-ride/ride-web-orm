@@ -89,6 +89,21 @@ class ModelTable extends FormTable {
     }
 
     /**
+     * Processes the search and order for the export
+     * @param \ride\library\form\Form $form Form of the table
+     * @return null
+     */
+    public function processExport(Form $form) {
+        if (!parent::processExport($form)) {
+            return false;
+        }
+
+        $this->values = $this->query->query();
+
+        return true;
+    }
+
+    /**
      * Processes and applies the actions, search, order and pagination of this
      * table
      * @param \ride\library\form\Form $form
