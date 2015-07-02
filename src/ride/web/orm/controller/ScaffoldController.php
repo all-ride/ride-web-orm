@@ -372,19 +372,12 @@ class ScaffoldController extends AbstractController {
             $viewActions += $this->getIndexActions($locale);
         }
 
-        $exportActions = $this->dependencyInjector->getAll('ride\\library\\import\\provider\\DestinationProvider');
-        foreach ($exportActions as $extension => $exportProvider) {
-            if ($exportProvider instanceof FileProvider) {
-                $exportActions[$extension] = $this->getAction(self::ACTION_EXPORT, array('format' => $extension));
-            }
-        }
-
         $variables = array(
             'meta' => $meta,
             'form' => $form->getView(),
             'table' => $table,
             'actions' => $viewActions,
-            'exports' => $exportActions,
+            'exports' => $this->getExportActions($locale, $table),
             'title' => $title,
             'localizeUrl' => null,
         );
@@ -406,6 +399,39 @@ class ScaffoldController extends AbstractController {
      */
     protected function getIndexActions($locale) {
         return array();
+    }
+
+    /**
+     * Gets the export actions of the overview
+     * @param string $locale Code of the locale
+     * @param \ride\library\html\table\FormTable $table
+     * @return array Array with the extension of the format as key and the URL
+     * to the export as value
+     */
+    protected function getExportActions($locale, FormTable $table) {
+        $exportQuery = array();
+        if ($table->hasSearch()) {
+            $exportQuery['search'] = 'search=' . urlencode($table->getSearchQuery());
+        }
+        if ($table->hasOrderMethods()) {
+            $exportQuery['order'] = 'order=' . urlencode($table->getOrderMethod());
+            $exportQuery['direction'] = 'direction=' . urlencode($table->getOrderDirection());
+        }
+
+        if ($exportQuery) {
+            $exportQuery = '?' . implode('&', $exportQuery);
+        } else {
+            $exportQuery = '';
+        }
+
+        $exportActions = $this->dependencyInjector->getAll('ride\\library\\import\\provider\\DestinationProvider');
+        foreach ($exportActions as $extension => $exportProvider) {
+            if ($exportProvider instanceof FileProvider) {
+                $exportActions[$extension] = $this->getAction(self::ACTION_EXPORT, array('format' => $extension)) . $exportQuery;
+            }
+        }
+
+        return $exportActions;
     }
 
     /**
