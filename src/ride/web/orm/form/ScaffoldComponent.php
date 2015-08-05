@@ -2,6 +2,7 @@
 
 namespace ride\web\orm\form;
 
+use ride\library\decorator\EntryFormatDecorator;
 use ride\library\form\component\AbstractComponent;
 use ride\library\form\FormBuilder;
 use ride\library\i18n\translator\Translator;
@@ -463,6 +464,14 @@ class ScaffoldComponent extends AbstractComponent {
             $rowOptions['attributes']['step'] = 'any';
         } elseif ($type == 'date') {
             $rowOptions['round'] = true;
+        } elseif ($type == 'label' && $field instanceof BelongsToField) {
+            $orm = $this->model->getOrmManager();
+            $relationModel = $orm->getModel($field->getRelationModelName());
+
+            $entryFormatter = $orm->getEntryFormatter();
+            $format = $relationModel->getMeta()->getFormat('title');
+
+            $rowOptions['decorator'] = new EntryFormatDecorator($entryFormatter, $format);
         } elseif ($type == 'file' || $type == 'image') {
             $path = $field->getOption('upload.path');
             if ($path) {
