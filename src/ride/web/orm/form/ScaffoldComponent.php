@@ -580,7 +580,7 @@ class ScaffoldComponent extends AbstractComponent {
 
                 $selectOptions = $relationModel->getOptionsFromEntries($query->query());
             } else {
-                $selectOptions = $relationModel->getEntryList($this->locale);
+                $selectOptions = $relationModel->getEntryList($this->locale, true);
             }
 
             $isMultiSelect = $field instanceof HasManyField;
