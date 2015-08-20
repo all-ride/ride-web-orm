@@ -311,7 +311,7 @@ class ScaffoldController extends AbstractController {
 
         // resolve locale
         if (!$locale) {
-            $this->locale = $i18n->getLocale()->getCode();
+            $this->locale = $this->getContentLocale();
 
             if ($this->model->getMeta()->isLocalized()) {
                 $this->response->setRedirect($this->getAction(self::ACTION_INDEX, array('locale' => $this->locale)));
@@ -320,6 +320,8 @@ class ScaffoldController extends AbstractController {
             }
         } else {
             $this->locale = $i18n->getLocale($locale)->getCode();
+
+            $this->setContentLocale($this->locale);
         }
 
         // handle table
@@ -623,7 +625,7 @@ class ScaffoldController extends AbstractController {
     public function formAction(I18n $i18n, $locale = null, $id = null) {
         // resolve locale
         if (!$locale) {
-            $this->locale = $i18n->getLocale()->getCode();
+            $this->locale = $this->getContentLocale();
 
             if ($this->model->getMeta()->isLocalized()) {
                 if ($id) {
@@ -638,6 +640,8 @@ class ScaffoldController extends AbstractController {
             }
         } else {
             $this->locale = $i18n->getLocale($locale)->getCode();
+
+            $this->setContentLocale($this->locale);
         }
 
         // resolve data
