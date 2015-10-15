@@ -481,19 +481,20 @@ class ScaffoldComponent extends AbstractComponent {
                 $rowOptions['path'] = $options['fileBrowser']->getFileSystem()->getFile($path);
             }
         } elseif ($type == 'tags') {
-            $urlSuffix = '?match[name]=%term%';
+            $urlSuffix = '?list=1&fields[taxonomy-terms]=&filter[match][name]=%term%';
 
             $vocabulary = $field->getOption('taxonomy.vocabulary');
             if ($vocabulary) {
                 if (is_numeric($vocabulary)) {
-                    $urlSuffix .= '&filter[vocabulary]=' . $vocabulary;
+                    $urlSuffix .= '&filter[exact][vocabulary]=' . $vocabulary;
                 } else {
-                    $urlSuffix .= '&filter[vocabulary.slug]=' . $vocabulary;
+                    $urlSuffix .= '&filter[exact][vocabulary.slug]=' . $vocabulary;
                 }
             }
 
             $rowOptions['handler'] = new OrmTagHandler($this->model->getOrmManager(), $vocabulary);
-            $rowOptions['autocomplete.url'] = $this->web->getUrl('api.orm.list', array('model' => 'TaxonomyTerm')) . $urlSuffix;
+            $rowOptions['autocomplete.url'] = $this->web->getUrl('api.orm.entry.index', array('type' => 'taxonomy-terms')) . $urlSuffix;
+            $rowOptions['autocomplete.type'] = 'jsonapi';
         } elseif ($type == 'assets') {
             $rowOptions['multiple'] = $field instanceof HasManyField;
 
