@@ -644,6 +644,8 @@ class ScaffoldController extends AbstractController {
             $this->setContentLocale($this->locale);
         }
 
+        $this->model->getOrmManager()->setLocale($this->locale);
+
         // resolve data
         if ($id) {
             $entry = $this->getEntry($id);
