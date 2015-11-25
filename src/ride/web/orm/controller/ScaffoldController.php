@@ -1070,7 +1070,7 @@ class ScaffoldController extends AbstractController {
      * @throws \ride\library\router\exception\RouterException If the route is
      * not found
      */
-    protected function getUrl($routeId, array $arguments = null) {
+    protected function getUrl($routeId, array $arguments = null, array $queryParameters = null, $querySeparator = '&') {
         if (!isset($arguments['locale'])) {
             $arguments['locale'] = $this->locale;
         }
