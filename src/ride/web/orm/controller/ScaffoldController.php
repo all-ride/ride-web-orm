@@ -1075,7 +1075,7 @@ class ScaffoldController extends AbstractController {
             $arguments['locale'] = $this->locale;
         }
 
-        return parent::getUrl($routeId, $arguments = null, $queryParameters = null, $querySeparator = '&');
+        return parent::getUrl($routeId, $arguments, $queryParameters, $querySeparator);
     }
 
     /**
