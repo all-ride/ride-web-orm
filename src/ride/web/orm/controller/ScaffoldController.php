@@ -430,6 +430,8 @@ class ScaffoldController extends AbstractController {
         foreach ($exportActions as $extension => $exportProvider) {
             if ($exportProvider instanceof FileProvider) {
                 $exportActions[$extension] = $this->getAction(self::ACTION_EXPORT, array('format' => $extension)) . $exportQuery;
+            } else {
+                unset($exportActions[$extension]);
             }
         }
 
