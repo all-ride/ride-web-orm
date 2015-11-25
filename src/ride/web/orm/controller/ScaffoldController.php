@@ -430,6 +430,8 @@ class ScaffoldController extends AbstractController {
         foreach ($exportActions as $extension => $exportProvider) {
             if ($exportProvider instanceof FileProvider) {
                 $exportActions[$extension] = $this->getAction(self::ACTION_EXPORT, array('format' => $extension)) . $exportQuery;
+            } else {
+                unset($exportActions[$extension]);
             }
         }
 
@@ -1075,7 +1077,7 @@ class ScaffoldController extends AbstractController {
             $arguments['locale'] = $this->locale;
         }
 
-        return parent::getUrl($routeId, $arguments);
+        return parent::getUrl($routeId, $arguments, $queryParameters, $querySeparator);
     }
 
     /**
