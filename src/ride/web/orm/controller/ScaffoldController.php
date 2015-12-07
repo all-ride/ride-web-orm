@@ -330,7 +330,7 @@ class ScaffoldController extends AbstractController {
         $baseUrl = $this->getAction(self::ACTION_INDEX);
         $table = $this->getTable($this->getAction(self::ACTION_DETAIL, array('id' => '%id%')));
 
-        $form = $this->processTable($table, $baseUrl, 10, $this->orderMethod, $this->orderDirection);
+        $form = $this->processTable($table, $baseUrl, 25, $this->orderMethod, $this->orderDirection);
         if ($this->response->willRedirect() || $this->response->getView()) {
             return;
         }
@@ -475,7 +475,7 @@ class ScaffoldController extends AbstractController {
         $tableHelper = $this->getTableHelper();
 
         $page = 1;
-        $rowsPerPage = 10;
+        $rowsPerPage = 25;
         $searchQuery = null;
 
         $parameters = $this->request->getQueryParameters();
