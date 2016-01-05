@@ -375,7 +375,7 @@ class ScaffoldComponent extends AbstractComponent {
         }
 
         $optionTypes = array('option', 'select', 'object');
-        $propertyTypes = array('tags', 'assets', 'label');
+        $propertyTypes = array('tags', 'assets', 'label', 'geo');
 
         $fields = $meta->getFields();
         foreach ($fields as $fieldName => $field) {
@@ -502,6 +502,10 @@ class ScaffoldComponent extends AbstractComponent {
             if ($folder) {
                 $rowOptions['folder'] = $folder;
             }
+        } elseif ($type == 'geo') {
+            $rowOptions['multiple'] = $field instanceof HasManyField;
+            $rowOptions['filter'] = $field->getOption('geo.filter');
+            $rowOptions['type'] = $field->getOption('geo.type', 'city');
         }
 
         if ($type != 'label') {

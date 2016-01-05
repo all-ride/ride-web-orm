@@ -1,6 +1,27 @@
 {
     "dependencies": [
         {
+            "interfaces": ["ride\\library\\form\\row\\Row"],
+            "class": "ride\\web\\orm\\form\\row\\GeoLocationRow",
+            "id": "geo",
+            "calls": [
+                {
+                    "method": "setGeoLocationModel",
+                    "arguments": [
+                        {
+                            "name": "geoLocationModel",
+                            "type": "call",
+                            "properties": {
+                                "interface": "ride\\library\\orm\\OrmManager",
+                                "method": "getGeoLocationModel"
+                            }
+                        }
+                    ]
+                },
+                "setWebApplication"
+            ]
+        },
+        {
             "class": "ride\\web\\base\\menu\\MenuItem",
             "id": "system.orm",
             "calls": [
