@@ -176,4 +176,27 @@ class GeoLocationRow extends AutoCompleteStringRow {
         return $this->model->getBy($filter);
     }
 
+    /**
+     * Creates the widget for this row
+     * @param string $name
+     * @param mixed $default
+     * @param array $attributes
+     * @return \ride\library\form\widget\Widget
+     */
+    protected function createWidget($name, $default, array $attributes) {
+        if ($this->getOption(self::OPTION_AUTO_COMPLETE_MULTIPLE) && is_array($default)) {
+            foreach ($default as $index => $geoLocation) {
+                if ($geoLocation instanceof GeoLocationEntry) {
+                    $default[$index] = $geoLocation->getName() . ' (' . $geoLocation->getCode() . ')';
+                }
+            }
+
+            $default = implode(',', $default);
+        } elseif ($default instanceof GeoLocationEntry) {
+            $default = $default->getName() . ' (' . $default->getCode() . ')';
+        }
+
+        return parent::createWidget($name, $default, $attributes);
+    }
+
 }
