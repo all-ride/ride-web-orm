@@ -159,8 +159,8 @@ class GeoLocationRow extends AutoCompleteStringRow {
             return null;
         }
 
-        $filter = array(
-            'exact' => array(
+        $options = array(
+            'filter' => array(
                 'name' => $value,
             ),
         );
@@ -168,12 +168,12 @@ class GeoLocationRow extends AutoCompleteStringRow {
         if (substr($value, -1) === ')') {
             $position = strrpos($value, '(');
             if ($position) {
-                $filter['exact']['name'] = substr($value, 0, $position - 1);
-                $filter['exact']['code'] = substr($value, $position + 1, -1);
+                $options['filter']['name'] = substr($value, 0, $position - 1);
+                $options['filter']['code'] = substr($value, $position + 1, -1);
             }
         }
 
-        return $this->model->getBy($filter);
+        return $this->model->getBy($options);
     }
 
     /**
