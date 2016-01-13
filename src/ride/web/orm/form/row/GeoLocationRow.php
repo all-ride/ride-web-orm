@@ -150,6 +150,57 @@ class GeoLocationRow extends AutoCompleteStringRow {
     }
 
     /**
+     * Sets the data to this row
+     * @param mixed $data
+     * @return null
+     */
+    public function setData($data) {
+        $this->data = $data;
+
+        if ($this->widget) {
+            $this->widget->setValue($this->getStringForGeoLocation($data));
+        }
+    }
+
+    /**
+     * Creates the widget for this row
+     * @param string $name
+     * @param mixed $default
+     * @param array $attributes
+     * @return \ride\library\form\widget\Widget
+     */
+    protected function createWidget($name, $default, array $attributes) {
+        $default = $this->getStringForGeoLocation($default);
+
+        return parent::createWidget($name, $default, $attributes);
+    }
+
+    /**
+     * Gets a string for the provided GeoLocation
+     * @param mixed $value
+     * @return string
+     */
+    protected function getStringForGeoLocation($value) {
+        if (!$value) {
+            return '';
+        }
+
+        if ($this->getOption(self::OPTION_AUTO_COMPLETE_MULTIPLE) && is_array($value)) {
+            foreach ($value as $index => $geoLocation) {
+                if ($geoLocation instanceof GeoLocationEntry) {
+                    $value[$index] = $geoLocation->getName() . ' (' . $geoLocation->getCode() . ')';
+                }
+            }
+
+            $value = implode(',', $value);
+        } elseif ($value instanceof GeoLocationEntry) {
+            $value = $value->getName() . ' (' . $value->getCode() . ')';
+        }
+
+        return $value;
+    }
+
+    /**
      * Gets the requested GeoLocation based on the submitted value
      * @param string $value
      * @return \ride\application\orm\geo\entry\GeoLocationEntry|null
@@ -174,29 +225,6 @@ class GeoLocationRow extends AutoCompleteStringRow {
         }
 
         return $this->model->getBy($options);
-    }
-
-    /**
-     * Creates the widget for this row
-     * @param string $name
-     * @param mixed $default
-     * @param array $attributes
-     * @return \ride\library\form\widget\Widget
-     */
-    protected function createWidget($name, $default, array $attributes) {
-        if ($this->getOption(self::OPTION_AUTO_COMPLETE_MULTIPLE) && is_array($default)) {
-            foreach ($default as $index => $geoLocation) {
-                if ($geoLocation instanceof GeoLocationEntry) {
-                    $default[$index] = $geoLocation->getName() . ' (' . $geoLocation->getCode() . ')';
-                }
-            }
-
-            $default = implode(',', $default);
-        } elseif ($default instanceof GeoLocationEntry) {
-            $default = $default->getName() . ' (' . $default->getCode() . ')';
-        }
-
-        return parent::createWidget($name, $default, $attributes);
     }
 
 }
