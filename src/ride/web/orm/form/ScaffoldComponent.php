@@ -464,7 +464,7 @@ class ScaffoldComponent extends AbstractComponent {
             $rowOptions['attributes']['step'] = 'any';
         } elseif ($type == 'date') {
             $rowOptions['round'] = true;
-        } elseif ($type == 'label' && $field instanceof BelongsToField) {
+        } elseif ($type == 'label' && $field instanceof RelationField) {
             $orm = $this->model->getOrmManager();
             $relationModel = $orm->getModel($field->getRelationModelName());
 
