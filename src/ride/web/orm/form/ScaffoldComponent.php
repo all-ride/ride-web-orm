@@ -472,6 +472,20 @@ class ScaffoldComponent extends AbstractComponent {
             $format = $relationModel->getMeta()->getFormat('title');
 
             $rowOptions['decorator'] = new EntryFormatDecorator($entryFormatter, $format);
+        } elseif ($type == 'label') {
+            $decorator = $field->getOption('scaffold.form.decorator');
+            if ($decorator) {
+                if (strpos($decorator, '#')) {
+                    list($interface, $id) = explode('#', $decorator, 2);
+                } else {
+                    $interface = $decorator;
+                    $id = null;
+                }
+
+                $dependencyInjector = $this->model->getOrmManager()->getDependencyInjector();
+                $rowOptions['decorator'] = $dependencyInjector->get($interface, $id);
+                $rowOptions['html'] = true;
+            }
         } elseif ($type == 'file' || $type == 'image') {
             $path = $field->getOption('upload.path');
             if ($path) {
