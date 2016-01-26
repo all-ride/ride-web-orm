@@ -519,7 +519,7 @@ class ScaffoldComponent extends AbstractComponent {
         } elseif ($type == 'geo') {
             $rowOptions['multiple'] = $field instanceof HasManyField;
             $rowOptions['filter'] = $field->getOption('geo.filter');
-            $rowOptions['type'] = $field->getOption('geo.type', 'city');
+            $rowOptions['type'] = $field->getOption('geo.type');
         }
 
         if ($type != 'label') {

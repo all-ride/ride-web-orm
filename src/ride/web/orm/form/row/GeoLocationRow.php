@@ -92,7 +92,7 @@ class GeoLocationRow extends AutoCompleteStringRow {
     protected function setGeoLocationOptions() {
         $expression = array();
 
-        $type = $this->getOption(self::OPTION_TYPE, GeoLocationModel::TYPE_CITY);
+        $type = $this->getOption(self::OPTION_TYPE);
         if ($type) {
             $expression[] = '{type} = "' . $type . '"';
         }
