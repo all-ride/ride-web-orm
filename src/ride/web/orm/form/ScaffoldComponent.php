@@ -464,14 +464,6 @@ class ScaffoldComponent extends AbstractComponent {
             $rowOptions['attributes']['step'] = 'any';
         } elseif ($type == 'date') {
             $rowOptions['round'] = true;
-        } elseif ($type == 'label' && $field instanceof RelationField) {
-            $orm = $this->model->getOrmManager();
-            $relationModel = $orm->getModel($field->getRelationModelName());
-
-            $entryFormatter = $orm->getEntryFormatter();
-            $format = $relationModel->getMeta()->getFormat('title');
-
-            $rowOptions['decorator'] = new EntryFormatDecorator($entryFormatter, $format);
         } elseif ($type == 'label') {
             $decorator = $field->getOption('scaffold.form.decorator');
             if ($decorator) {
@@ -485,6 +477,16 @@ class ScaffoldComponent extends AbstractComponent {
                 $dependencyInjector = $this->model->getOrmManager()->getDependencyInjector();
                 $rowOptions['decorator'] = $dependencyInjector->get($interface, $id);
                 $rowOptions['html'] = true;
+            } elseif ($field instanceof RelationField) {
+                $orm = $this->model->getOrmManager();
+                $relationModel = $orm->getModel($field->getRelationModelName());
+
+                $entryFormatter = $orm->getEntryFormatter();
+                $format = $relationModel->getMeta()->getFormat('title');
+
+                $decorator = $field->getOption('scaffold.form.decorator');
+
+                $rowOptions['decorator'] = new EntryFormatDecorator($entryFormatter, $format);
             }
         } elseif ($type == 'file' || $type == 'image') {
             $path = $field->getOption('upload.path');
