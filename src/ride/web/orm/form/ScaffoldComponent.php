@@ -17,6 +17,8 @@ use ride\library\orm\model\Model;
 use ride\library\reflection\ReflectionHelper;
 use ride\library\security\SecurityManager;
 
+use ride\service\OrmService;
+
 use ride\web\orm\taxonomy\OrmTagHandler;
 use ride\web\WebApplication;
 
@@ -104,10 +106,11 @@ class ScaffoldComponent extends AbstractComponent {
      * @param \ride\library\orm\model\Model $model
      * @return null
      */
-    public function __construct(WebApplication $web, ReflectionHelper $reflectionHelper, SecurityManager $securityManager, Model $model) {
+    public function __construct(WebApplication $web, SecurityManager $securityManager, OrmService $ormService, Model $model) {
         $this->web = $web;
-        $this->reflectionHelper = $reflectionHelper;
+        $this->reflectionHelper = $model->getReflectionHelper();
         $this->securityManager = $securityManager;
+        $this->ormService = $ormService;
         $this->model = $model;
         $this->locale = null;
         $this->depth = 1;
@@ -511,6 +514,7 @@ class ScaffoldComponent extends AbstractComponent {
             $rowOptions['handler'] = new OrmTagHandler($this->model->getOrmManager(), $vocabulary);
             $rowOptions['autocomplete.url'] = $this->web->getUrl('api.orm.entry.index', array('type' => 'taxonomy-terms')) . $urlSuffix;
             $rowOptions['autocomplete.type'] = 'jsonapi';
+            $rowOptions['locale'] = $this->locale;
         } elseif ($type == 'assets') {
             $rowOptions['multiple'] = $field instanceof HasManyField;
 
@@ -522,6 +526,7 @@ class ScaffoldComponent extends AbstractComponent {
             $rowOptions['multiple'] = $field instanceof HasManyField;
             $rowOptions['filter'] = $field->getOption('geo.filter');
             $rowOptions['type'] = $field->getOption('geo.type');
+            $rowOptions['locale'] = $this->locale;
         }
 
         if ($type != 'label') {
@@ -544,69 +549,12 @@ class ScaffoldComponent extends AbstractComponent {
      * @return null
      */
     protected function addOptionRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options, $type) {
-        $fieldName = $field->getName();
-
-        $rowOptions = array(
-            'label' => $label,
-            'description' => $description,
-            'filters' => $filters,
-            'validators' => $validators,
-        );
+        $options = $this->ormService->getFieldInputOptions($this->model, $field, $options['translator'], $options['data']);
 
         if (!$field instanceof PropertyField) {
-            $entry = $options['data'];
-
-            $relationModel = $this->model->getRelationModel($fieldName);
-
-            $condition = $field->getOption('scaffold.form.condition');
-            if ($condition) {
-                $query = $relationModel->createQuery($this->locale);
-                $query->setFetchUnlocalized(true);
-
-                if (!$entry) {
-                    $entry = $relationModel->createEntry();
-                }
-
-                $variables = array();
-
-                $reflectionHelper = $this->model->getReflectionHelper();
-                $meta = $this->model->getMeta();
-                $properties = $meta->getProperties();
-                $belongsTo = $meta->getBelongsTo();
-
-                foreach ($properties as $name => $propertyField) {
-                    $variables[$name] = $reflectionHelper->getProperty($data, $name);
-                }
-
-                foreach ($belongsTo as $name => $belongsToField) {
-                    $value = $reflectionHelper->getProperty($entry, $name);
-                    if (!$value) {
-                        continue;
-                    }
-
-                    if (is_object($value)) {
-                        $variables[$name] = $value->getId();
-                    } else {
-                        $variables[$name] = $value;
-                    }
-                }
-
-                $query->addConditionWithVariables($condition, $variables);
-
-                $relationMeta = $relationModel->getMeta();
-                $orderField = $relationMeta->getOption('order.field');
-                if ($orderField) {
-                    $query->addOrderBy('{' . $orderField . '} ' . $relationMeta->getOption('order.direction', 'ASC'));
-                }
-
-                $selectOptions = $relationModel->getOptionsFromEntries($query->query());
-            } else {
-                $selectOptions = $relationModel->getEntryList($this->locale, true);
-            }
-
-            $isMultiSelect = $field instanceof HasManyField;
-            if (!$isMultiSelect && $type != 'option') {
-                $selectOptions = array('' => null) + $selectOptions;
+            $isMultiple = $field instanceof HasManyField;
+            if (!$isMultiple && $type != 'option') {
+                $options = array('' => null) + $options;
             }
 
             if ($type == 'object') {
@@ -617,30 +565,19 @@ class ScaffoldComponent extends AbstractComponent {
 
             $type = 'option';
 
-            $this->proxy[$fieldName] = true;
+            $this->proxy[$field->getName()] = true;
         } else {
-            $optionMethod = $field->getOption('scaffold.form.options.method');
-            if ($optionMethod) {
-                $selectOptions = $this->model->$optionMethod($options['translator']);
-            } else {
-                $selectOptions = $field->getOption('scaffold.form.options.json');
-                if ($selectOptions) {
-                    $selectOptions = json_decode($selectOptions, true);
-                    foreach ($selectOptions as $index => $value) {
-                        $selectOptions[$index] = $options['translator']->translate($value);
-                    }
-                } else {
-                    $selectOptions = array();
-                }
-            }
-
-            $isMultiSelect = false;
+            $isMultiple = false;
         }
 
-        $rowOptions['multiple'] = $isMultiSelect;
-        $rowOptions['options'] = $selectOptions;
-
-        $builder->addRow($fieldName, $type, $rowOptions);
+        $builder->addRow($field->getName(), $type, array(
+            'label' => $label,
+            'description' => $description,
+            'multiple' => $isMultiple,
+            'options'  => $options,
+            'filters' => $filters,
+            'validators' => $validators,
+        ));
     }
 
     /**
@@ -658,7 +595,7 @@ class ScaffoldComponent extends AbstractComponent {
         $relationModel = $this->model->getRelationModel($fieldName);
         $relationMeta = $this->model->getMeta()->getRelationMeta($fieldName);
 
-        $formComponent = new self($this->web, $this->reflectionHelper, $this->securityManager, $relationModel);
+        $formComponent = new self($this->web, $this->securityManager, $this->ormService, $relationModel);
         $formComponent->setDepth($depth - 1);
         $formComponent->setLocale($this->locale);
 
