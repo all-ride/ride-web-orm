@@ -191,7 +191,7 @@ class BuilderController extends AbstractController {
 
         $className = $model->getMeta()->getOption('scaffold.controller');
         if ($className) {
-            $controller = $this->dependencyInjector->get($className);
+            $controller = $this->dependencyInjector->get($className, null, array('model' => $model), true);
         } else {
             $controller = $this->dependencyInjector->get('ride\\web\\orm\\controller\\ScaffoldController', null, array('model' => $model));
         }
