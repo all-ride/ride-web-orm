@@ -550,32 +550,33 @@ class ScaffoldComponent extends AbstractComponent {
      */
     protected function addOptionRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options, $type) {
         $options = $this->ormService->getFieldInputOptions($this->model, $field, $options['translator'], $options['data']);
+
         $rowOptions = array(
             'label' => $label,
             'description' => $description,
             'options'  => $options,
             'filters' => $filters,
             'validators' => $validators,
+            'widget' => 'option',
         );
 
         if (!$field instanceof PropertyField) {
-            $isMultiple = $field instanceof HasManyField;
-            if (!$isMultiple && $type != 'option') {
-                $options = array('' => null) + $options;
-            }
-
             if ($type == 'object') {
                 $type = null;
             }
 
             $rowOptions['widget'] = $field->getOption('scaffold.form.widget', $type);
-            $rowOptions['multiple'] = $isMultiple;
+            $rowOptions['multiple'] = $field instanceof HasManyField;
 
             $type = 'option';
 
             $this->proxy[$field->getName()] = true;
         } else {
             $rowOptions['multiple'] = false;
+        }
+
+        if (!$rowOptions['multiple'] && $rowOptions['widget'] != 'option') {
+            $rowOptions['options'] = array('' => null) + $rowOptions['options'];
         }
 
         $builder->addRow($field->getName(), $type, $rowOptions);
