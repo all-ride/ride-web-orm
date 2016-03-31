@@ -176,7 +176,7 @@ class GeoLocationRow extends AutoCompleteStringRow {
     }
 
     /**
-     * Gets a string for the provided GeoLocation
+     * Gets a string for the provided value
      * @param mixed $value
      * @return string
      */
@@ -188,16 +188,30 @@ class GeoLocationRow extends AutoCompleteStringRow {
         if ($this->getOption(self::OPTION_AUTO_COMPLETE_MULTIPLE) && is_array($value)) {
             foreach ($value as $index => $geoLocation) {
                 if ($geoLocation instanceof GeoLocationEntry) {
-                    $value[$index] = $geoLocation->getName() . ' (' . $geoLocation->getCode() . ')';
+                    $value[$index] = $this->getGeoLocationString($geoLocation);
                 }
             }
 
             $value = implode(',', $value);
         } elseif ($value instanceof GeoLocationEntry) {
-            $value = $value->getName() . ' (' . $value->getCode() . ')';
+            $value = $this->getGeoLocationString($value);
         }
 
         return $value;
+    }
+
+    /**
+     * Gets the string representation of the provided geo location
+     * @param \ride\application\orm\geo\entry\GeoLocationEntry $geoLocation
+     * @return string
+     */
+    protected function getGeoLocationString(GeoLocationEntry $geoLocation) {
+        $locale = $this->getOption(self::OPTION_LOCALE);
+        if ($geoLocation->getLocale() != $locale) {
+            $geoLocation = $this->model->getById($geoLocation->getId(), $locale);
+        }
+
+        return $geoLocation->getName() . ' (' . $geoLocation->getCode() . ')';
     }
 
     /**
