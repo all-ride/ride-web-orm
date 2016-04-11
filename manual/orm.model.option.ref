@@ -1,5 +1,6 @@
 behaviour.date              Enable dated behaviour: value ignored
 behaviour.log               Enable entry log: value ignored
+behaviour.publication       Enable datePublished and isPublished fields: value should be true or the tab name where you want the fields.
 behaviour.slug              Enable slug creation: value should be a comma separated list with property names to base the slug upon.
 behaviour.owner             Enable owner field: true to use the User model as link, false to use the username
 behaviour.version           Enable entry versioning: value ignored
