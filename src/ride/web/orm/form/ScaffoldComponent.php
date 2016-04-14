@@ -16,6 +16,7 @@ use ride\library\orm\definition\ModelTable;
 use ride\library\orm\model\Model;
 use ride\library\reflection\ReflectionHelper;
 use ride\library\security\SecurityManager;
+use ride\library\validation\validator\SizeValidator;
 
 use ride\service\OrmService;
 
@@ -531,6 +532,14 @@ class ScaffoldComponent extends AbstractComponent {
 
         if ($type != 'label') {
             $rowOptions['validators'] = $validators;
+        }
+
+        if ($type == 'tags' || $type == 'geo') {
+            foreach ($validators as $validator) {
+                if ($validator instanceof SizeValidator) {
+                    $rowOptions['autocomplete.max.items'] = $validator->getOption('maximum', 0);
+                }
+            }
         }
 
         $builder->addRow($field->getName(), $type, $rowOptions);
