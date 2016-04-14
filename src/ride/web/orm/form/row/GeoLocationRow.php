@@ -48,8 +48,8 @@ class GeoLocationRow extends AutoCompleteStringRow {
     public function __construct($name, array $options) {
         parent::__construct($name, $options);
 
-        $this->setOption(self::OPTION_AUTO_COMPLETE_MINIMUM, 2);
-        $this->setOption(self::OPTION_AUTO_COMPLETE_MULTIPLE, $this->isMultiple());
+        $this->setOption(self::OPTION_AUTO_COMPLETE_MIN_LENGTH, 2);
+        $this->setOption(self::OPTION_AUTO_COMPLETE_MAX_ITEMS, $this->isMultiple() ? 0 : 1);
         $this->setOption(self::OPTION_AUTO_COMPLETE_TYPE, 'jsonapi');
         $this->setOption(self::OPTION_MULTIPLE, false);
     }
@@ -134,7 +134,9 @@ class GeoLocationRow extends AutoCompleteStringRow {
             return;
         }
 
-        if ($this->getOption(self::OPTION_AUTO_COMPLETE_MULTIPLE)) {
+        if ($this->getOption(self::OPTION_AUTO_COMPLETE_MAX_ITEMS) == 1) {
+            $this->data = $this->getGeoLocationByString($values[$this->name]);
+        } else {
             $this->data = explode(',', $values[$this->name]);
             foreach ($this->data as $index => $value) {
                 $value = $this->getGeoLocationByString($value);
@@ -144,8 +146,6 @@ class GeoLocationRow extends AutoCompleteStringRow {
                     unset($this->data[$index]);
                 }
             }
-        } else {
-            $this->data = $this->getGeoLocationByString($values[$this->name]);
         }
     }
 
@@ -185,7 +185,7 @@ class GeoLocationRow extends AutoCompleteStringRow {
             return '';
         }
 
-        if ($this->getOption(self::OPTION_AUTO_COMPLETE_MULTIPLE) && is_array($value)) {
+        if ($this->getOption(self::OPTION_AUTO_COMPLETE_MAX_ITEMS) != 1 && is_array($value)) {
             foreach ($value as $index => $geoLocation) {
                 if ($geoLocation instanceof GeoLocationEntry) {
                     $value[$index] = $this->getGeoLocationString($geoLocation);
