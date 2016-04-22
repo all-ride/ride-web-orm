@@ -7,6 +7,8 @@ use ride\library\orm\OrmManager;
 
 use ride\web\base\menu\MenuItem;
 
+use \Exception;
+
 class ApplicationListener {
 
     public function prepareContentMenu(Event $event, OrmManager $ormManager) {
@@ -35,6 +37,10 @@ class ApplicationListener {
             $menuName = $meta->getOption('scaffold.menu', 'content.menu');
 
             $menu = $applicationsMenu->getItem($menuName);
+            if (!$menu) {
+                throw new Exception('Could not add model ' . $meta->getName() . ' to menu ' . $menuName . ': menu does not exist');
+            }
+
             $menu->addMenuItem($menuItem);
         }
     }
