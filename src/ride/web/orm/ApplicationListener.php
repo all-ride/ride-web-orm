@@ -12,7 +12,7 @@ class ApplicationListener {
     public function prepareContentMenu(Event $event, OrmManager $ormManager) {
         $locale = $event->getArgument('locale');
         $taskbar = $event->getArgument('taskbar');
-        $menu = $taskbar->getApplicationsMenu()->getItem('content.menu');
+        $applicationsMenu = $taskbar->getApplicationsMenu();
 
         $models = $ormManager->getModels();
         foreach ($models as $model) {
@@ -32,6 +32,9 @@ class ApplicationListener {
 
             $menuItem->setRoute('system.orm.scaffold.index', array('locale' => $locale, 'model' => $meta->getName()));
 
+            $menuName = $meta->getOption('scaffold.menu', 'content.menu');
+
+            $menu = $applicationsMenu->getItem($menuName);
             $menu->addMenuItem($menuItem);
         }
     }
