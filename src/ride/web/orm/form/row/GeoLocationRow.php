@@ -94,7 +94,16 @@ class GeoLocationRow extends AutoCompleteStringRow {
 
         $type = $this->getOption(self::OPTION_TYPE);
         if ($type) {
-            $expression[] = '{type} = "' . $type . '"';
+            if (is_array($type)) {
+                $types = array();
+                foreach ($type as $t) {
+                    $types[$t] = '"' . $t . '"';
+                }
+
+                $expression[] = '{type} IN (' . implode(', ', $types) . ')';
+            } else {
+                $expression[] = '{type} = "' . $type . '"';
+            }
         }
 
         $filter = $this->getOption(self::OPTION_FILTER);

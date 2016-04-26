@@ -524,9 +524,14 @@ class ScaffoldComponent extends AbstractComponent {
                 $rowOptions['folder'] = $folder;
             }
         } elseif ($type == 'geo') {
+            $type = $field->getOption('geo.type');
+            if (strpos($type, ',')) {
+                $type = explode(',', $type);
+            }
+
             $rowOptions['multiple'] = $field instanceof HasManyField;
             $rowOptions['filter'] = $field->getOption('geo.filter');
-            $rowOptions['type'] = $field->getOption('geo.type');
+            $rowOptions['type'] = $type;
             $rowOptions['locale'] = $this->locale;
         }
 
