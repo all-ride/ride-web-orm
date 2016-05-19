@@ -4,6 +4,7 @@ scaffold.export                 Enable export of this field, you can add comma s
 scaffold.form.condition         Condition string for the field options
 scaffold.form.decorator         Decorator for a label field. Can be interface#id.
 scaffold.form.depth             Form relation depth for this field
+scaffold.form.dependant         Name of another (option) field on which this field is dependant, when the value is relevant use <fieldname>-<value>.
 scaffold.form.type              Override the form row type of the field
 scaffold.form.omit              Omit this field when building the form
 scaffold.form.options.json      Json encoded string with options for a property field. Your json should be an structure with the value as key and the translation key as value.

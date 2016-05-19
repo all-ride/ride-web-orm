@@ -462,7 +462,14 @@ class ScaffoldComponent extends AbstractComponent {
             'attributes' => array(),
         );
 
-        if ($type == 'float') {
+        $fieldDependency = $this->getFieldDependency($field);
+        if ($fieldDependency) {
+            $rowOptions['attributes']['class'] = $fieldDependency;
+        }
+
+        if ($type == 'boolean') {
+            $rowOptions['attributes']['data-toggle-dependant'] = 'option-' . $field->getName();
+        } elseif ($type == 'float') {
             $type = 'number';
 
             $rowOptions['attributes']['step'] = 'any';
@@ -569,10 +576,18 @@ class ScaffoldComponent extends AbstractComponent {
             'label' => $label,
             'description' => $description,
             'options'  => $options,
+            'attributes' => array(
+                'data-toggle-dependant' => 'option-' . $field->getName(),
+            ),
             'filters' => $filters,
             'validators' => $validators,
             'widget' => 'option',
         );
+
+        $fieldDependency = $this->getFieldDependency($field);
+        if ($fieldDependency) {
+            $rowOptions['attributes']['class'] = $fieldDependency;
+        }
 
         if (!$field instanceof PropertyField) {
             if ($type == 'object') {
@@ -627,32 +642,36 @@ class ScaffoldComponent extends AbstractComponent {
             }
         }
 
+        $rowOptions = array(
+            'label' => $label,
+            'description' => $description,
+            'filters' => $filters,
+            'attributes' => array(),
+        );
+
+        $fieldDependency = $this->getFieldDependency($field);
+        if ($fieldDependency) {
+            $rowOptions['attributes']['class'] = $fieldDependency;
+        }
+
         if ($field instanceof BelongsToField) {
-            $builder->addRow($fieldName, 'component', array(
-                'component' => $formComponent,
-                'label' => $label,
-                'description' => $description,
-                'filters' => $filters,
-                'validators' => $validators,
-            ));
+            $type = 'component';
+            $owOptions['component'] = $formComponent;
         } else {
             $isOrdered = false;
             if ($field instanceof HasManyField) {
                 $isOrdered = $field->isOrdered();
             }
 
-            $builder->addRow($fieldName, 'collection', array(
-                'type' => 'component',
-                'options' => array(
-                    'component' => $formComponent,
-                ),
-                'label' => $label,
-                'description' => $description,
-                'order' => $isOrdered,
-                'filters' => $filters,
-                'validators' => $validators,
-            ));
+            $type = 'collection';
+            $rowOptions['type'] = 'component';
+            $rowOptions['options'] = array(
+                'component' => $formComponent,
+            );
+            $rowOptions['order'] = $isOrdered;
         }
+
+        $builder->addRow($fieldName, $type, $rowOptions);
     }
 
     /**
@@ -675,6 +694,22 @@ class ScaffoldComponent extends AbstractComponent {
         if ($description) {
             $description = $translator->translate($description);
         }
+    }
+
+    protected function getFieldDependency(ModelField $field) {
+        $dependant = $field->getOption('scaffold.form.dependant');
+        if (!$dependant) {
+            return null;
+        }
+
+        if (strpos($dependant, '-')) {
+            list($dependantField, $dependantValue) = explode('-', $dependant, 2);
+        } else {
+            $dependantField = $dependant;
+            $dependantValue = '1';
+        }
+
+        return 'option-' . $dependantField . ' option-' . $dependantField . '-' . $dependantValue;
     }
 
 }
