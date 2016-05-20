@@ -93,40 +93,25 @@ class GeoLocationRow extends AutoCompleteStringRow {
         $expression = array();
 
         $type = $this->getOption(self::OPTION_TYPE);
-        if ($type) {
-            if (is_array($type)) {
-                $types = array();
-                foreach ($type as $t) {
-                    $types[$t] = '"' . $t . '"';
-                }
-
-                $expression[] = '{type} IN (' . implode(', ', $types) . ')';
-            } else {
-                $expression[] = '{type} = "' . $type . '"';
-            }
-        }
 
         $filter = $this->getOption(self::OPTION_FILTER);
-        if ($filter) {
-            if (is_string($filter)) {
-                $expression[] = '{path} LIKE "%~' . $filter . '~%"';
-            } elseif ($filter instanceof GeoLocationEntry) {
-                $expression[] = '{path} LIKE "' . $filter->getPath() . '~%"';
-            }
+        if ($filter && $filter instanceof GeoLocationEntry) {
+            $filter = $filter->getPath();
         }
-
-        $expression[] = '({name} LIKE "%%term%%" OR {code} LIKE "%%term%%")';
 
         $queryParameters = array(
             'list' => 1,
             'fields' => array(
-                'geo-locations' => 'name',
+                'geo-locations' => 'code,name',
             ),
             'filter' => array(
-                'expression' => implode(' AND ', $expression),
+                'term' => '%term%',
+                'type' => $type,
+                'path' => $filter,
             ),
         );
-        $url = $this->web->getUrl('api.orm.entry.index', array('type' => 'geo-locations'), $queryParameters);
+
+        $url = $this->web->getUrl('api.orm.geo.search', null, $queryParameters);
 
         $this->setOption(self::OPTION_AUTO_COMPLETE_URL, $url);
     }
