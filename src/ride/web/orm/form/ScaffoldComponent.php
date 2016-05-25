@@ -656,7 +656,7 @@ class ScaffoldComponent extends AbstractComponent {
 
         if ($field instanceof BelongsToField) {
             $type = 'component';
-            $owOptions['component'] = $formComponent;
+            $rowOptions['component'] = $formComponent;
         } else {
             $isOrdered = false;
             if ($field instanceof HasManyField) {
