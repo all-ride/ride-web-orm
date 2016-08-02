@@ -460,6 +460,7 @@ class ScaffoldComponent extends AbstractComponent {
             'description' => $description,
             'filters' => $filters,
             'attributes' => array(),
+            'order' => $field instanceof HasManyField && $field->isOrdered(),
         );
 
         $fieldDependency = $this->getFieldDependency($field);
@@ -596,6 +597,7 @@ class ScaffoldComponent extends AbstractComponent {
 
             $rowOptions['widget'] = $field->getOption('scaffold.form.widget', $type);
             $rowOptions['multiple'] = $field instanceof HasManyField;
+            $rowOptions['order'] = $rowOptions['multiple'] && $field->isOrdered();
 
             $type = 'option';
 
@@ -658,17 +660,12 @@ class ScaffoldComponent extends AbstractComponent {
             $type = 'component';
             $rowOptions['component'] = $formComponent;
         } else {
-            $isOrdered = false;
-            if ($field instanceof HasManyField) {
-                $isOrdered = $field->isOrdered();
-            }
-
             $type = 'collection';
             $rowOptions['type'] = 'component';
             $rowOptions['options'] = array(
                 'component' => $formComponent,
             );
-            $rowOptions['order'] = $isOrdered;
+            $rowOptions['order'] = $field instanceof HasManyField && $field->isOrdered();
         }
 
         $builder->addRow($fieldName, $type, $rowOptions);
