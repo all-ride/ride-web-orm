@@ -541,6 +541,8 @@ class ScaffoldComponent extends AbstractComponent {
             $rowOptions['filter'] = $field->getOption('geo.filter');
             $rowOptions['type'] = $geoType;
             $rowOptions['locale'] = $this->locale;
+        } elseif ($type == 'node') {
+            $rowOptions['locale'] = $this->locale;
         }
 
         if ($type != 'label') {
