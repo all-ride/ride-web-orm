@@ -28,7 +28,7 @@ class ModelTable extends FormTable {
 
         parent::__construct($models);
 
-        $this->addDecorator(new ModelDecorator($orm, $translator, $modelAction)); //, new StaticDecorator($translator->translate('orm.label.model')));
+        $this->addDecorator(new ModelDecorator($orm, $translator, $modelAction), new StaticDecorator($translator->translate('label.model')));
     }
 
 //     public function getHtml() {

@@ -381,12 +381,12 @@ class ScaffoldController extends AbstractController {
             'actions' => $viewActions,
             'exports' => $this->getExportActions($locale, $table),
             'title' => $title,
+            'locale' => $locale,
             'localizeUrl' => null,
         );
 
         if ($this->model->getMeta()->isLocalized()) {
             $variables['locales'] = $locales;
-            $variables['locale'] = $locale;
             $variables['localizeUrl'] = $this->getAction(self::ACTION_INDEX, array('locale' => '%locale%'));
         }
 
@@ -938,12 +938,12 @@ class ScaffoldController extends AbstractController {
             'subtitle' => $subtitle,
             'translationSubmit' => $this->translationSubmit,
             'localizeUrl' => null,
+            'locale' => $locale,
             'isWritable' => $this->isWritable($entry),
         );
 
         if ($this->model->getMeta()->isLocalized()) {
             $variables['locales'] = $locales;
-            $variables['locale'] = $locale;
             if ($entry && $entry->$pkField) {
                 $variables['localizeUrl'] = $this->getAction(self::ACTION_EDIT, array('locale' => '%locale%', 'id' => $entry->$pkField)) . $urlReferer;
             } else {

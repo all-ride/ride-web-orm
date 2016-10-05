@@ -2,6 +2,7 @@
 
 namespace ride\web\orm\table\builder;
 
+use ride\library\html\table\decorator\StaticDecorator;
 use ride\library\html\table\FormTable;
 use ride\library\i18n\translator\Translator;
 use ride\library\orm\definition\ModelTable;
@@ -35,9 +36,9 @@ class ModelFieldTable extends FormTable {
 
         parent::__construct($fields, $tableAction, self::NAME);
 
-        $this->addDecorator(new ModelFieldDecorator($translator, $modelAction, $fieldAction));
-        $this->addDecorator(new ModelFieldLabelDecorator($translator));
-        $this->addDecorator(new ModelFieldFlagsDecorator($translator));
+        $this->addDecorator(new ModelFieldDecorator($translator, $modelAction, $fieldAction), new StaticDecorator($translator->translate('label.field')));
+        $this->addDecorator(new ModelFieldLabelDecorator($translator), new StaticDecorator($translator->translate('label.label')));
+        $this->addDecorator(new ModelFieldFlagsDecorator($translator), new StaticDecorator($translator->translate('label.flags')));
     }
 
 //     /**
