@@ -460,6 +460,7 @@ class ScaffoldComponent extends AbstractComponent {
             'description' => $description,
             'filters' => $filters,
             'attributes' => array(),
+            'localized' => $field->isLocalized(),
             'order' => $field instanceof HasManyField && $field->isOrdered(),
         );
 
@@ -582,6 +583,7 @@ class ScaffoldComponent extends AbstractComponent {
             'attributes' => array(
                 'data-toggle-dependant' => 'option-' . $field->getName(),
             ),
+            'localized' => $field->isLocalized(),
             'filters' => $filters,
             'validators' => $validators,
             'widget' => 'option',
@@ -650,7 +652,9 @@ class ScaffoldComponent extends AbstractComponent {
             'label' => $label,
             'description' => $description,
             'filters' => $filters,
+            'validators' => $validators,
             'attributes' => array(),
+            'localized' => $field->isLocalized(),
         );
 
         $fieldDependency = $this->getFieldDependency($field);
