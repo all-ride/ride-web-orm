@@ -14,6 +14,7 @@ use ride\library\orm\definition\field\ModelField;
 use ride\library\orm\definition\field\RelationField;
 use ride\library\orm\definition\ModelTable;
 use ride\library\orm\model\Model;
+use ride\library\reflection\Boolean;
 use ride\library\reflection\ReflectionHelper;
 use ride\library\security\SecurityManager;
 use ride\library\validation\validator\SizeValidator;
@@ -671,6 +672,17 @@ class ScaffoldComponent extends AbstractComponent {
             $rowOptions['options'] = array(
                 'component' => $formComponent,
             );
+
+            $option = $field->getOption('scaffold.form.collection.add', true);
+            if (!Boolean::getBoolean($option)) {
+                $rowOptions['disable_add'] = true;
+            }
+
+            $option = $field->getOption('scaffold.form.collection.remove', true);
+            if (!Boolean::getBoolean($option)) {
+                $rowOptions['disable_remove'] = true;
+            }
+
             $rowOptions['order'] = $field instanceof HasManyField && $field->isOrdered();
         }
 
