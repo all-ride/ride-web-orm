@@ -1,6 +1,8 @@
 label.name                      Translation key for the name of the field
 label.description               Translation key for the description of the field
 scaffold.export                 Enable export of this field, you can add comma separated list of relation fields to export
+scaffold.form.collection.add    Flag to see if the add button of a collection field should be available
+scaffold.form.collection.remove Flag to see if the remove button of a collection field should be available
 scaffold.form.condition         Condition string for the field options
 scaffold.form.decorator         Decorator for a label field. Can be interface#id.
 scaffold.form.depth             Form relation depth for this field
