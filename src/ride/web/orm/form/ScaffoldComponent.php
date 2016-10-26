@@ -21,6 +21,7 @@ use ride\library\validation\validator\SizeValidator;
 
 use ride\service\OrmService;
 
+use ride\web\base\form\DateTimeComponent;
 use ride\web\orm\taxonomy\OrmTagHandler;
 use ride\web\WebApplication;
 
@@ -476,6 +477,10 @@ class ScaffoldComponent extends AbstractComponent {
             $type = 'number';
 
             $rowOptions['attributes']['step'] = 'any';
+        } elseif ($type == 'datetime') {
+            $type = 'component';
+
+            $rowOptions['component'] = new DateTimeComponent();
         } elseif ($type == 'date') {
             $rowOptions['round'] = true;
         } elseif ($type == 'label') {
