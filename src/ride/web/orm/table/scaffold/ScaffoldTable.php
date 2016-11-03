@@ -3,6 +3,7 @@
 namespace ride\web\orm\table\scaffold;
 
 use ride\library\i18n\translator\Translator;
+use ride\library\orm\exception\OrmException;
 use ride\library\orm\definition\field\RelationField;
 use ride\library\orm\definition\ModelTable as OrmModelTable;
 use ride\library\orm\model\Model;
@@ -16,13 +17,13 @@ class ScaffoldTable extends ModelTable {
      * Array with the field names to search in
      * @var array
      */
-    private $searchFields;
+    protected $searchFields;
 
     /**
      * Array with the statements for the order functionality
      * @var array
      */
-    private $orderStatements;
+    protected $orderStatements;
 
     /**
      * Constructs a new scaffold table
