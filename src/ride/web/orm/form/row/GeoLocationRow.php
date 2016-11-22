@@ -202,7 +202,10 @@ class GeoLocationRow extends AutoCompleteStringRow {
     protected function getGeoLocationString(GeoLocationEntry $geoLocation) {
         $locale = $this->getOption(self::OPTION_LOCALE);
         if ($geoLocation->getLocale() != $locale) {
-            $geoLocation = $this->model->getById($geoLocation->getId(), $locale);
+            $localizedGeoLocation = $this->model->getById($geoLocation->getId(), $locale);
+            if ($localizedGeoLocation) {
+                $geoLocation = $localizedGeoLocation;
+            }
         }
 
         return $geoLocation->getName() . ' (' . $geoLocation->getCode() . ')';
