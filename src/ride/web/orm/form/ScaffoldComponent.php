@@ -463,6 +463,7 @@ class ScaffoldComponent extends AbstractComponent {
             'filters' => $filters,
             'attributes' => array(),
             'localized' => $field->isLocalized(),
+            'locale' => $this->locale,
             'order' => $field instanceof HasManyField && $field->isOrdered(),
         );
 
@@ -530,7 +531,6 @@ class ScaffoldComponent extends AbstractComponent {
             $rowOptions['handler'] = new OrmTagHandler($this->model->getOrmManager(), $vocabulary);
             $rowOptions['autocomplete.url'] = $this->web->getUrl('api.orm.entry.index', array('type' => 'taxonomy-terms')) . $urlSuffix;
             $rowOptions['autocomplete.type'] = 'jsonapi';
-            $rowOptions['locale'] = $this->locale;
         } elseif ($type == 'assets') {
             $rowOptions['multiple'] = $field instanceof HasManyField;
 
@@ -547,9 +547,6 @@ class ScaffoldComponent extends AbstractComponent {
             $rowOptions['multiple'] = $field instanceof HasManyField;
             $rowOptions['filter'] = $field->getOption('geo.filter');
             $rowOptions['type'] = $geoType;
-            $rowOptions['locale'] = $this->locale;
-        } elseif ($type == 'node') {
-            $rowOptions['locale'] = $this->locale;
         }
 
         if ($type != 'label') {
