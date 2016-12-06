@@ -1,3 +1,8 @@
+# [1.2.0]
+## Added
+- ScaffoldComponent: added locale to all property fields
+- ScaffoldComponent: added fallback for unlocalized geo locations 
+
 # [1.1.1]
 ## Updated
 - ScaffoldTable: set $orderStatements and $searchFields to protected
