@@ -1,3 +1,7 @@
+# [1.3.0]
+## Added
+- added xls provider requirement for exports
+
 # [1.2.0]
 ## Added
 - ScaffoldComponent: added locale to all property fields
