@@ -635,19 +635,32 @@ class ScaffoldComponent extends AbstractComponent {
         $relationModel = $this->model->getRelationModel($fieldName);
         $relationMeta = $this->model->getMeta()->getRelationMeta($fieldName);
 
-        $formComponent = new self($this->web, $this->securityManager, $this->ormService, $relationModel);
-        $formComponent->setDepth($depth - 1);
-        $formComponent->setLocale($this->locale);
+        $component = $field->getOption('scaffold.form.component');
+        if (!$component) {
+            $component = $relationModel->getMeta()->getOption('scaffold.component');
+        }
 
-        if ($relationMeta && !$relationMeta->isHasManyAndBelongsToMany()) {
-            $relationField = $relationMeta->getForeignKey();
+        if ($component) {
+            $formComponent = new $component($this->web, $this->securityManager, $this->ormService, $relationModel);
+        } else {
+            $formComponent = new self($this->web, $this->securityManager, $this->ormService, $relationModel);
+        }
 
-            if (!is_array($relationField)) {
-                $relationField = array($relationField);
-            }
+        if ($formComponent instanceof self) {
+            $formComponent->setDepth($depth - 1);
+            $formComponent->setLocale($this->locale);
+            $formComponent->setLog($this->log);
 
-            foreach ($relationField as $omitField) {
-                $formComponent->omitField($omitField);
+            if ($relationMeta && !$relationMeta->isHasManyAndBelongsToMany()) {
+                $relationField = $relationMeta->getForeignKey();
+
+                if (!is_array($relationField)) {
+                    $relationField = array($relationField);
+                }
+
+                foreach ($relationField as $omitField) {
+                    $formComponent->omitField($omitField);
+                }
             }
         }
 
