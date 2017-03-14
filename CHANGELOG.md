@@ -1,3 +1,7 @@
+# [1.4.0]
+## Added
+- added scaffold form component option
+
 # [1.3.0]
 ## Added
 - added xls provider requirement for exports
