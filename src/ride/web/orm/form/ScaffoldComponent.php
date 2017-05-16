@@ -484,6 +484,10 @@ class ScaffoldComponent extends AbstractComponent {
             $rowOptions['component'] = new DateTimeComponent();
         } elseif ($type == 'date') {
             $rowOptions['round'] = true;
+        } elseif ($type == 'seconds') {
+            $type = 'time';
+            $rowOptions['seconds'] = true;
+            $rowOptions['hours'] = false;
         } elseif ($type == 'label') {
             $decorator = $field->getOption('scaffold.form.decorator');
             if ($decorator) {
@@ -579,6 +583,13 @@ class ScaffoldComponent extends AbstractComponent {
     protected function addOptionRow(FormBuilder $builder, ModelField $field, $label, $description, array $filters, array $validators, array $options, $type) {
         $options = $this->ormService->getFieldInputOptions($this->model, $field, $options['translator'], $options['data']);
 
+        if ($type == 'object') {
+            $widget = 'option';
+        } else {
+            $widget = $type;
+        }
+        $widget = $field->getOption('scaffold.form.widget', $widget);
+
         $rowOptions = array(
             'label' => $label,
             'description' => $description,
@@ -586,10 +597,11 @@ class ScaffoldComponent extends AbstractComponent {
             'attributes' => array(
                 'data-toggle-dependant' => 'option-' . $field->getName(),
             ),
+            'multiple' => $field instanceof HasManyField,
             'localized' => $field->isLocalized(),
             'filters' => $filters,
             'validators' => $validators,
-            'widget' => 'option',
+            'widget' => $widget,
         );
 
         $fieldDependency = $this->getFieldDependency($field);
@@ -598,19 +610,11 @@ class ScaffoldComponent extends AbstractComponent {
         }
 
         if (!$field instanceof PropertyField) {
-            if ($type == 'object') {
-                $type = null;
-            }
+            $this->proxy[$field->getName()] = true;
 
-            $rowOptions['widget'] = $field->getOption('scaffold.form.widget', $type);
-            $rowOptions['multiple'] = $field instanceof HasManyField;
             $rowOptions['order'] = $rowOptions['multiple'] && $field->isOrdered();
 
             $type = 'option';
-
-            $this->proxy[$field->getName()] = true;
-        } else {
-            $rowOptions['multiple'] = false;
         }
 
         if (!$rowOptions['multiple'] && $rowOptions['widget'] != 'option') {

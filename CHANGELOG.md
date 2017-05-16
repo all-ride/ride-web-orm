@@ -1,3 +1,9 @@
+# [1.5.0]
+## Added
+- support for seconds field
+## Updated 
+- fixed widget option not read from property field
+
 # [1.4.0]
 ## Added
 - added scaffold form component option
