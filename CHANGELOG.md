@@ -1,3 +1,7 @@
+# [1.5.1]
+## Updated
+- use setValidationException from AbstractController
+
 # [1.5.0]
 ## Added
 - support for seconds field

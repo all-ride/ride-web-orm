@@ -701,33 +701,7 @@ class ScaffoldController extends AbstractController {
 
                 return;
             } catch (ValidationException $exception) {
-                $this->response->setStatusCode(Response::STATUS_CODE_BAD_REQUEST);
-                $this->addError('error.validation');
-
-                $errors = $exception->getAllErrors();
-                foreach ($errors as $fieldName => $fieldErrors) {
-                    try {
-                        $row = $form;
-
-                        $tokens = explode('[', $fieldName);
-                        foreach ($tokens as $token) {
-                            $token = trim($token, ']');
-
-                            $row = $row->getRow($token);
-                        }
-
-                        if ($row->getType() == 'hidden') {
-                            throw new FormException();
-                        }
-                    } catch (FormException $e) {
-                        // field not in the form, add error as general error
-                        foreach ($fieldErrors as $error) {
-                            $this->addError($error->getCode(), $error->getParameters());
-                        }
-                    }
-                }
-
-                $form->setValidationException($exception);
+                $this->setValidationException($exception, $form);
             }
         }
 
