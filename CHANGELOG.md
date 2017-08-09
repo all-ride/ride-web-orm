@@ -1,3 +1,7 @@
+# [1.5.2]
+## Updated
+- order the used content menus in the taskbar
+
 # [1.5.1]
 ## Updated
 - use setValidationException from AbstractController
