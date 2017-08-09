@@ -4,5 +4,11 @@
             "interface": "ride\\web\\orm\\ApplicationListener",
             "method": "prepareContentMenu"
         }
+    ],
+    "app.taskbar.post": [
+        {
+            "interface": "ride\\web\\orm\\ApplicationListener",
+            "method": "sortContentMenu"
+        }
     ]
 }

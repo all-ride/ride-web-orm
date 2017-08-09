@@ -11,6 +11,8 @@ use \Exception;
 
 class ApplicationListener {
 
+    private $menuNames = array();
+
     public function prepareContentMenu(Event $event, OrmManager $ormManager) {
         $locale = $event->getArgument('locale');
         $taskbar = $event->getArgument('taskbar');
@@ -36,12 +38,24 @@ class ApplicationListener {
 
             $menuName = $meta->getOption('scaffold.menu', 'content.menu');
 
+            $this->menuNames[$menuName] = true;
+
             $menu = $applicationsMenu->getItem($menuName);
             if (!$menu) {
                 throw new Exception('Could not add model ' . $meta->getName() . ' to menu ' . $menuName . ': menu does not exist');
             }
 
             $menu->addMenuItem($menuItem);
+        }
+    }
+
+    public function sortContentMenu(Event $event) {
+        $taskbar = $event->getArgument('taskbar');
+        $applicationsMenu = $taskbar->getApplicationsMenu();
+
+        foreach ($this->menuNames as $menuName => $true) {
+            $menu = $applicationsMenu->getItem($menuName);
+            $menu->orderItems();
         }
     }
 
