@@ -1,3 +1,7 @@
+# [1.5.3]
+## Updated
+- check if the menu exists before sorting, security can remove certain menus if the user has no permission
+
 # [1.5.2]
 ## Updated
 - order the used content menus in the taskbar
