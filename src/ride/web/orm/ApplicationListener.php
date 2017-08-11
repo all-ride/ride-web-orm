@@ -55,7 +55,9 @@ class ApplicationListener {
 
         foreach ($this->menuNames as $menuName => $true) {
             $menu = $applicationsMenu->getItem($menuName);
-            $menu->orderItems();
+            if ($menu) {
+                $menu->orderItems();
+            }
         }
     }
 
