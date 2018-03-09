@@ -793,12 +793,14 @@ class ScaffoldController extends AbstractController {
                     $entry = $this->model->createProxy($entry);
                 }
 
-                if (!$this->isDeletable($entry)) {
-                    $this->addError('error.data.deleted.permission', array('data' => $entryFormatter->formatEntry($entry, $format)));
-                } else {
-                    $entry = $this->model->delete($entry);
+                $data = $entryFormatter->formatEntry($entry, $format);
 
-                    $this->addSuccess('success.data.deleted', array('data' => $entryFormatter->formatEntry($entry, $format)));
+                if (!$this->isDeletable($entry)) {
+                    $this->addError('error.data.deleted.permission', array('data' => $data));
+                } else {
+                    $this->model->delete($entry);
+
+                    $this->addSuccess('success.data.deleted', array('data' => $data));
                 }
             } catch (ValidationException $exception) {
                 $errors = $exception->getAllErrors();
