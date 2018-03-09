@@ -1,3 +1,7 @@
+# [1.5.4]
+## Updated
+- fixed success message after deleting an entry
+
 # [1.5.3]
 ## Updated
 - check if the menu exists before sorting, security can remove certain menus if the user has no permission
