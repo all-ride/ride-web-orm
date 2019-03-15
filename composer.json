@@ -25,7 +25,7 @@
         "ride/lib-security": "^1.0.0",
         "ride/lib-system": "^1.0.0",
         "ride/lib-validation": "^1.0.0",
-        "ride/web-base": "^1.0.0",
+        "ride/web-base": "~1.7",
         "ride/web-form": "^1.0.0"
     },
     "autoload": {

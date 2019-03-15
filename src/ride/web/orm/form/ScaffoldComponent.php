@@ -480,8 +480,14 @@ class ScaffoldComponent extends AbstractComponent {
             $rowOptions['attributes']['step'] = 'any';
         } elseif ($type == 'datetime') {
             $type = 'component';
+            $fieldValidators = $field->getValidators();
 
-            $rowOptions['component'] = new DateTimeComponent();
+            $component = new DateTimeComponent();
+            if (isset($fieldValidators['required'])) {
+                $component->setIsRequired(true);
+            }
+
+            $rowOptions['component'] = $component;
         } elseif ($type == 'date') {
             $rowOptions['round'] = true;
         } elseif ($type == 'seconds') {
