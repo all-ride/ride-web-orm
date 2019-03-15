@@ -1,3 +1,7 @@
+# [1.5.5]
+## Updated
+- take over required validation for datettime field in scaffolding
+
 # [1.5.4]
 ## Updated
 - fixed success message after deleting an entry
