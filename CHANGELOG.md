@@ -1,3 +1,7 @@
+# [1.6.0]
+## Updated
+- updated for lib-html 1.1.0
+
 # [1.5.5]
 ## Updated
 - take over required validation for datettime field in scaffolding
