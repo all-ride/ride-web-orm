@@ -29,6 +29,12 @@ class DataDecorator extends LibraryDataDecorator {
      */
     private $formatter;
 
+    private $formatTitle;
+
+    private $formatTeaser;
+
+    private $formatImage;
+
     /**
      * Constructs a new data decorator
      * @param \ride\\libraryimage\ImageUrlGenerator $imageUrlGenerator URL generator for images
@@ -42,23 +48,24 @@ class DataDecorator extends LibraryDataDecorator {
     public function __construct(Model $model, ImageUrlGenerator $imageUrlGenerator = null, $action = null, $pkField = null, $defaultImage = null) {
         parent::__construct($model->getReflectionHelper(), $action, $imageUrlGenerator, $defaultImage);
 
-        if ($pkField) {
-            $this->propertyId = $pkField;
-        } else {
-            $this->propertyId = ModelTable::PRIMARY_KEY;
-        }
-
         $modelMeta = $model->getMeta();
-        $this->propertyTitle = $modelMeta->getFormat(EntryFormatter::FORMAT_TITLE);
-        $this->propertyTeaser = $modelMeta->getFormat(EntryFormatter::FORMAT_TEASER);
-        $this->propertyImage = $modelMeta->getFormat(EntryFormatter::FORMAT_IMAGE);
-
-        if (!$this->propertyImage) {
-            $this->imageUrlGenerator = null;
-        }
 
         $this->formatter = $model->getOrmManager()->getEntryFormatter();
         $this->model = $model;
+
+        if (!$pkField) {
+            $pkField = ModelTable::PRIMARY_KEY;
+        }
+
+        $this->mapProperty('id', $pkField);
+
+        $this->formatTitle = $modelMeta->getFormat(EntryFormatter::FORMAT_TITLE);
+        $this->formatTeaser = $modelMeta->getFormat(EntryFormatter::FORMAT_TEASER);
+        $this->formatImage = $modelMeta->getFormat(EntryFormatter::FORMAT_IMAGE);
+
+        if (!$this->formatImage) {
+            $this->imageUrlGenerator = null;
+        }
     }
 
     /**
@@ -67,7 +74,11 @@ class DataDecorator extends LibraryDataDecorator {
      * @return string|null
      */
     protected function getDataTitle($data) {
-        return $this->formatter->formatEntry($data, $this->propertyTitle);
+        if ($this->formatTitle) {
+            return $this->formatter->formatEntry($data, $this->formatTitle);
+        }
+
+        return parent::getDataTitle($data);
     }
 
     /**
@@ -76,11 +87,11 @@ class DataDecorator extends LibraryDataDecorator {
      * @return string|null
      */
     protected function getDataTeaser($data) {
-        if ($this->propertyTeaser) {
-            return $this->formatter->formatEntry($data, $this->propertyTeaser);
+        if ($this->formatTeaser) {
+            return $this->formatter->formatEntry($data, $this->formatTeaser);
         }
 
-        return null;
+        return parent::getDataTitle($data);
     }
 
     /**
@@ -89,11 +100,11 @@ class DataDecorator extends LibraryDataDecorator {
      * @return string|null Path to the image of the data
      */
     protected function getDataImage($data) {
-        if ($this->propertyImage) {
-            return $this->formatter->formatEntry($data, $this->propertyImage);
+        if ($this->formatImage) {
+            return $this->formatter->formatEntry($data, $this->formatImage);
         }
 
-        return null;
+        return parent::getDataImage($data);
     }
 
 }

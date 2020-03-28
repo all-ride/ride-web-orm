@@ -13,7 +13,7 @@
         "ride/app-import-excel": "^1.0.0",
         "ride/lib-common": "^1.0.0",
         "ride/lib-form": "^1.0.0",
-        "ride/lib-html": "^1.0.0",
+        "ride/lib-html": "^1.1.0",
         "ride/lib-http": "^1.0.0",
         "ride/lib-i18n": "^1.0.0",
         "ride/lib-image": "^1.0.0",
