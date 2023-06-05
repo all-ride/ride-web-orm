@@ -413,7 +413,7 @@ class ScaffoldController extends AbstractController {
     protected function getExportActions($locale, FormTable $table) {
         $exportQuery = array();
         if ($table->hasSearch()) {
-            $exportQuery['search'] = 'search=' . urlencode($table->getSearchQuery());
+            $exportQuery['search'] = 'search=' . ($table->getSearchQuery() ? urlencode($table->getSearchQuery()) : null);
         }
         if ($table->hasOrderMethods()) {
             $exportQuery['order'] = 'order=' . urlencode($table->getOrderMethod());
