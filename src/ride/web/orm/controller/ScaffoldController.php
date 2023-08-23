@@ -357,7 +357,6 @@ class ScaffoldController extends AbstractController {
         $addAction = $this->getAction(self::ACTION_ADD);
         if ($this->isWritable(null) && $addAction) {
             $translator = $this->getTranslator();
-
             $addAction .=  '?referer=' . urlencode($this->request->getUrl());
 
             $addTranslation = $this->translationAdd;
@@ -413,11 +412,19 @@ class ScaffoldController extends AbstractController {
     protected function getExportActions($locale, FormTable $table) {
         $exportQuery = array();
         if ($table->hasSearch()) {
-            $exportQuery['search'] = 'search=' . urlencode($table->getSearchQuery());
+            if ($table->getSearchQuery()) {
+                $exportQuery['search'] = 'search=' . urlencode($table->getSearchQuery());
+            }
         }
         if ($table->hasOrderMethods()) {
-            $exportQuery['order'] = 'order=' . urlencode($table->getOrderMethod());
-            $exportQuery['direction'] = 'direction=' . urlencode($table->getOrderDirection());
+            if ($table->getOrderMethod()) {
+                $exportQuery['order'] = 'order=' . urlencode($table->getOrderMethod());
+
+            }
+            if ($table->getOrderDirection()) {
+                $exportQuery['direction'] = 'direction=' . urlencode($table->getOrderDirection());
+
+            }
         }
 
         if ($exportQuery) {

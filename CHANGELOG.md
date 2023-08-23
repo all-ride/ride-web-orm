@@ -1,3 +1,7 @@
+#[1.7.0]
+## Updated
+- php 8.1 compatibility
+
 # [1.6.0]
 ## Updated
 - updated for lib-html 1.1.0
